@@ -5,3 +5,5 @@ Team Members:
 - Hussain Aljabri
 - Robyn Van Gool
 - Vadim Yastrebov
+
+![alt text](https://github.com/hussainaljabri/DendroicaApp/blob/master/AppImages/tempScreen.jpg)
