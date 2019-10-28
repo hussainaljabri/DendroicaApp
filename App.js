@@ -1,43 +1,53 @@
-import React from 'react';
-import { StyleSheet, Text, View, Image, ImageBackground} from 'react-native';
+import React, { Component } from "react";
+import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
+import BirdList from './src/UI/BirdList';
+import MyList from './src/UI/MyList';
+import Settings from './src/UI/Settings';
+import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
+import {Text} from 'react-native';
+import {createAppContainer } from "react-navigation";
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <ImageBackground source={require('./assets/bkgrnd.jpg')} style={styles.backgroundImage}>
-      <Image style={styles.image} source={require("./assets/bird.png")}/>
-      <Text style={styles.title}>Dendroica App</Text>
-      <Text style={styles.subtitle}>Coming Soon.....</Text>
-      </ImageBackground>
+export default class App extends Component {
 
-    </View>
-  );
+  render(){
+    return (<BottomContainer/>);
+
+  }
+
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    width: 250,
-    height: 250,
-  },
-  title: {
-    fontWeight: "700",
-    letterSpacing: 4,
-    fontSize: 20,
-  },
-  subtitle:{
-    marginTop: 40,
+const BottomNav = createMaterialBottomTabNavigator(
+    {
+      MyList: { screen: MyList,
+                navigationOptions:{
+                  tabBarLabel: <Text style={{fontWeight: '800',}}>My Birds</Text>,
+                  tabBarIcon: ({tintColor})=> <FontAwesome5 name="dove" size={20} color={tintColor} />,
+                  tabBarColor: '#cc99ff',
+                } },
+      Explore: { screen: BirdList,
+                navigationOptions:{
+                  tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
+                  tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
+                  tabBarColor: '#00cc99',
+                } },
+      Settings: { screen: Settings,
+                navigationOptions:{
+                  tabBarLabel: <Text style={{fontWeight: '800',}}>Settings</Text>,
+                  tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="settings-outline" size={20} color={tintColor} />,
+                  tabBarColor: '#3399ff',
 
-  },
-  backgroundImage:{
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%', 
-    height:'100%'
-  },
+                } },
 
-});
+    },
+    {
+      initialRouteName: 'MyList',
+      activeColor: 'white',
+      inactiveColor: '#d9d9d9',
+      barStyle: { backgroundColor: '#694fad', },
+      shifting: true,
+      keyboardHidesNavigationBar: true,
+      labeled: true,
+    }
+  );
+
+  const BottomContainer = createAppContainer(BottomNav);
