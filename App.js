@@ -7,7 +7,8 @@ import BirdList from './src/pages/BirdList';
 import MyList from './src/pages/MyList';
 import Settings from './src/pages/Settings';
 import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
-
+import QuizScreen from './src/pages/quiz/QuizScreen';
+import QuizMenu from './src/pages/quiz/QuizMenu';
 
 
 export default class App extends Component {
@@ -19,12 +20,16 @@ export default class App extends Component {
 
 }
 /**
-*	This is the main Stack Navigator, BirdList here is an imported component setting it as a screen.
+*	Quiz Navigator.
 */
-const AppNavigator = createStackNavigator({
-  BirdList:{ // parent used as Key to in Stack Navigator, to navigate() to.
-    screen: BirdList, // setting BirdList Component as screen to the parent
+const QuizNavigator = createStackNavigator({
+  QuizMenu:{ // parent used as Key in Stack Navigator, to navigate() to.
+    screen: QuizMenu, // setting QuizMenu Component as screen to the parent
+    navigationOptions: () => ({
+      title: `QuizMenu`
+    }), 
   },
+  Quiz: {screen: QuizScreen}
 
 });
 
@@ -52,10 +57,17 @@ const BottomNav = createMaterialBottomTabNavigator(
                   tabBarColor: '#3399ff',
 
                 } },
+      QuizNavigator: { screen: QuizNavigator,
+        navigationOptions:{
+          tabBarLabel: <Text style={{fontWeight: '800',}}>Quiz</Text>,
+          tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="help-circle-outline" size={20} color={tintColor} />,
+          tabBarColor: '#3399ff',
+
+        }},
 
     },
     {
-      initialRouteName: 'Explore',
+      initialRouteName: 'QuizNavigator',
       activeColor: 'white',
       inactiveColor: '#d9d9d9',
       barStyle: { backgroundColor: '#694fad', },
@@ -65,7 +77,7 @@ const BottomNav = createMaterialBottomTabNavigator(
     }
   );
 
-  const AppContainer = createAppContainer(AppNavigator);
+  // const AppContainer = createAppContainer(AppNavigator);
   const BottomContainer = createAppContainer(BottomNav);
 
 
