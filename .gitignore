@@ -55,3 +55,6 @@ $RECYCLE.BIN/
 #node modules and expo
 .expo
 node_modules
+
+package-lock.json
+.idea
