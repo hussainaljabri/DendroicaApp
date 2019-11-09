@@ -24,6 +24,12 @@ const Birds = [
 ]; // stored locally for testing purposes.
 
 export default class BirdList extends Component {
+    handlerLongClick=(id, name)=>{
+        Alert.alert("LongPress: \n" +id+": "+name);
+    }
+    handlerClick=(id, name)=>{
+        Alert.alert("Click:\n" +id+": "+name);
+    }
     getBirdCards = () =>{
         return Birds.map((bird) =>{
             return (
