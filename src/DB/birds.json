@@ -1,4 +1,4 @@
-[
+{"birds": [
   {
     "birdID": 67,
     "birdName": "Bald Eagle",
@@ -18,4 +18,4 @@
     "soundPaths": [""],
     "soundCredits": [""]
   }
-]
+] }

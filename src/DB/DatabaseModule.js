@@ -7,30 +7,71 @@ var insertRegion = function (name, callbacks) {
     _sqlQuery(query, [name], callbacks);
 };
 
-var insertBirdDataset = function (birdID, birdName, scientificName, rangeDescription, songDescription, regionNames, imagePaths, imageCredits, mapPaths, mapCredits, spectoPaths, soundPaths, soundCredits) {
+var insertBirdDataset = function (birdID, birdName, scientificName, rangeDescription, songDescription, regionNames, imagePaths, imageCredits, mapPaths, mapCredits, spectoPaths, soundPaths, soundCredits, onFinishedCallback) {
     //Insert Bird into Birds
     _insertBird(birdID, birdName, scientificName, rangeDescription, songDescription, {success: function(tx,res) {
-
+        console.log("inserting bird " + birdName);
+        var i;
+        var j;
+        var k;
+        var r;
         //Find corresponding regionIDs and for each insert regionID/birdID into BirdRegions
-        for (var r = 0; r < regionNames.length; r++) {
+        for (r = 0; r < regionNames.length; r++) {
             _getRegionIDByName(regionNames[r], {success: function(tx,res) {
                 var regionID = res.rows.item(0)._id;
                 //Insert into BirdRegions
-                _insertBirdRegion(regionID, birdID);
+                _insertBirdRegion(regionID, birdID, {success: function(tx,res) {
+                    if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length) {
+                        console.log("finished on bird region");
+                        console.log("r = " + r);
+                        console.log("i = " + i);
+                        console.log("j = " + j);
+                        console.log("k = " + k);
+                        onFinishedCallback();
+                    }
+                }});
                 //Don't need to worry about async as BirdRegions table does not affect other tables
             }}, null);
         }
 
-        for (var i = 0; i < imagePaths.length; i++) {
-            _insertBirdImage(birdID, imagePaths[i], imageCredits[i]);
+        for (i = 0; i < imagePaths.length; i++) {
+            _insertBirdImage(birdID, imagePaths[i], imageCredits[i], {success: function(tx,res) {
+                    if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length) {
+                        console.log("finished on birdimage");
+                        console.log("r = " + r);
+                        console.log("i = " + i);
+                        console.log("j = " + j);
+                        console.log("k = " + k);
+                        onFinishedCallback();
+                    }
+            }});
         }
 
-        for (var i = 0; i < mapPaths.length; i++) {
-            _insertMapImage(birdID, mapPaths[i], mapCredits[i]);
+        for (j = 0; j < mapPaths.length; j++) {
+            _insertMapImage(birdID, mapPaths[j], mapCredits[j], {success: function(tx,res) {
+                    if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length){
+                        console.log("finished on map image");
+                        console.log("r = " + r);
+                        console.log("i = " + i);
+                        console.log("j = " + j);
+                        console.log("k = " + k);
+                        onFinishedCallback();
+                    }
+            }});
         }
 
-        for (var i = 0; i < spectoPaths.length; i++) {
-            _insertVocalization(birdID, spectoPaths[i], soundPaths[i], soundCredits[i]);
+        for (k = 0; k < spectoPaths.length; k++) {
+            _insertVocalization(birdID, spectoPaths[k], soundPaths[k], soundCredits[k], {success: function(tx,res) {
+                    console.log("k = " + k);
+                    if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length){
+                        console.log("finished on vocalization");
+                        console.log("r = " + r);
+                        console.log("i = " + i);
+                        console.log("j = " + j);
+                        console.log("k = " + k);
+                        onFinishedCallback();
+                    }
+            }});
         }
     }});
 }
@@ -80,7 +121,7 @@ var _getRegionIDByName = function (name, callbacks) {
 var printBirds = function () {
     var query = `SELECT * FROM Birds`;
     _sqlQuery(query, [], {success:
-        function(tx, res) {
+        function(res) {
             console.log("Returned success from SQL Query");
             var rows = res.rows._array;
             console.log("Rows.length = " + rows.length);
@@ -113,11 +154,14 @@ var printBirds = function () {
 var _sqlQuery = function (query, params, callbacks, tx) {
     if (!callbacks) callbacks = {};
     var success = (!callbacks.success) ? function(tx,res) { return res; } : callbacks.success;
-    //var error = (!callbacks.error) ? function(err) { console.log("----Error With Query----\n" + query); return; } : callbacks.error;
-    var error = function(err) {
+    var error = (!callbacks.error) ? function(err) {
+        console.log("----Error With Query----\n" + query);
+        console.log("Params - ");
         for (var i = 0; i < params.length; i++)
             console.log(params[i]);
-    };
+        return;
+    } : callbacks.error;
+
     if (tx) {
         tx.executeSql(query, params, success, error);
         return;
@@ -133,12 +177,47 @@ var _sqlQuery = function (query, params, callbacks, tx) {
     });
 }
 
-var printDB = function() {
-    console.log(db);
+var printDatabase = function(tableName) {
+    console.log("Printing Database");
+    var birdsQuery =    `SELECT * from Birds`;
+    var regionsQuery =  `SELECT * from Regions`;
+    var birdsRegionsQuery = `SELECT * from BirdRegions`;
+    var vocalizationsQuery = `SELECT * from Vocalizations`;
+    var mapImagesQuery = `SELECT * from MapImages`;
+    var birdImagesQuery =`SELECT * from BirdImages`;
 
+     _printTable =(tableName, table)=>{
+        console.log(`----------------------------------------------------------------- ${tableName} START------------------------------------------------------------------------------`);
+        console.log(table);
+        console.log(`----------------------------------------------------------------- ${tableName} END---------------------------------------------------------------------------------`);
+     }
+
+    _sqlQuery(birdsQuery,[], {success: (tx, res)=> {
+        var birdsTable = res.rows;
+        _sqlQuery(regionsQuery,[], {success: (tx, res)=> {
+            var regionsTable = res.rows;
+            _sqlQuery(birdsRegionsQuery,[], {success: (tx, res)=> {
+                var birdsRegionsTable = res.rows;
+                _sqlQuery(vocalizationsQuery,[], {success: (tx, res)=> {
+                    var vocalizationsTable = res.rows;
+                    _sqlQuery(mapImagesQuery,[], {success: (tx, res)=> {
+                        var mapImagesQuery = res.rows;
+                        _sqlQuery(mapImagesQuery,[], {success: (tx, res)=> {
+                            var birdsImagesTable = res.rows;
+                            console.log("Printing Tables")
+                            _printTable("Birds", birdsTable);
+                            _printTable("Regions", regionsTable);
+                            _printTable("BirdRegions", birdsRegionsTable);
+                            _printTable("Vocalizations", vocalizationsTable);
+                            _printTable("MapImages", mapImagesQuery);
+                            _printTable("BirdImages", birdImagesQuery);
+                        }}, tx);
+                    }}, tx);
+                }}, tx);
+            }}, tx);
+        }}, tx);
+    }}, null);
 }
-
-
 //For testing
 var destroyDB = function(onFinishedCallback) {
     _sqlQuery(`DROP TABLE if exists BirdRegions`, [], { success: function(tx, res) {
@@ -193,7 +272,7 @@ var initDB = function(onFinishedCallback) {
                         _sqlQuery(query, [], {success: function(tx,res) {
                             console.log("--> Created MapImages Table");
                             //Vocalizations Table
-                            query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id REFERENCES Birds(_id), filename text not null unique, mp3_filename text not null unique, credits text)`;
+                            query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text)`;
                             _sqlQuery(query, [], {success: function(tx,res) {
                                 console.log("--> Created Vocalizations Table");
                                 //BirdRegions Table
@@ -222,6 +301,7 @@ const DatabaseModule = {
     initDB: initDB,
     destroyDB: destroyDB,
     insertRegion: insertRegion,
-    insertBirdDataset: insertBirdDataset
+    insertBirdDataset: insertBirdDataset,
+    printDatabase: printDatabase
 };
 export default DatabaseModule;
