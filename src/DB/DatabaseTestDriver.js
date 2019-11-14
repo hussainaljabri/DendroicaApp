@@ -62,6 +62,7 @@ const data =
 var init = function() {
     DatabaseModule.destroyDB(function() {
         DatabaseModule.initDB(function() {
+            DatabaseModule.printDatabase(); //Should have a callback. This is just for testing
             insertRegions(function() {
                 insertBirdDataJSON(function() {
                     DatabaseModule.printDatabase();
@@ -90,23 +91,27 @@ var insertRegions = function(onFinishedCallback) {
 //var insertBird = function (id, name, scientificName, rangeDescription, songDescription, callbacks) {
 var insertBirdDataJSON = function(onFinishedCallback) {
     for (var bird_id in data) {
-        console.log("calling insert BirdDataset " + bird_id);
         var d = data[bird_id];
+        var insertions = 0;
         DatabaseModule.insertBirdDataset(
-        d.birdID,
-        d.birdName,
-        d.scientificName,
-        d.rangeDescription,
-        d.songDescription,
-        d.regionNames,
-        d.imagePaths,
-        d.imageCredits,
-        d.mapPaths,
-        d.mapCredits,
-        d.spectoPaths,
-        d.soundPaths,
-        d.soundCredits,
-        onFinishedCallback,
+            d.birdID,
+            d.birdName,
+            d.scientificName,
+            d.rangeDescription,
+            d.songDescription,
+            d.regionNames,
+            d.imagePaths,
+            d.imageCredits,
+            d.mapPaths,
+            d.mapCredits,
+            d.spectoPaths,
+            d.soundPaths,
+            d.soundCredits,
+            function() {
+                insertions++;
+                if (insertions === data.length)
+                    onFinishedCallback();
+            },
         );
     }
 }
@@ -115,5 +120,4 @@ var insertBirdDataJSON = function(onFinishedCallback) {
 const DatabaseTestDriver = {
     init: init
 };
-
 export default DatabaseTestDriver;

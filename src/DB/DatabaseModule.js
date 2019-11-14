@@ -10,68 +10,49 @@ var insertRegion = function (name, callbacks) {
 var insertBirdDataset = function (birdID, birdName, scientificName, rangeDescription, songDescription, regionNames, imagePaths, imageCredits, mapPaths, mapCredits, spectoPaths, soundPaths, soundCredits, onFinishedCallback) {
     //Insert Bird into Birds
     _insertBird(birdID, birdName, scientificName, rangeDescription, songDescription, {success: function(tx,res) {
-        console.log("inserting bird " + birdName);
-        var i;
-        var j;
-        var k;
-        var r;
+        var i, j, k, r;
+        i = j = k = r = 0;
+
         //Find corresponding regionIDs and for each insert regionID/birdID into BirdRegions
-        for (r = 0; r < regionNames.length; r++) {
-            _getRegionIDByName(regionNames[r], {success: function(tx,res) {
+        for (let index = 0;index < regionNames.length; index++) {
+            _getRegionIDByName(regionNames[index], {success: function(tx,res) {
                 var regionID = res.rows.item(0)._id;
                 //Insert into BirdRegions
                 _insertBirdRegion(regionID, birdID, {success: function(tx,res) {
+                    r++;
                     if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length) {
-                        console.log("finished on bird region");
-                        console.log("r = " + r);
-                        console.log("i = " + i);
-                        console.log("j = " + j);
-                        console.log("k = " + k);
                         onFinishedCallback();
                     }
                 }});
                 //Don't need to worry about async as BirdRegions table does not affect other tables
-            }}, null);
+            }}, tx);
         }
 
-        for (i = 0; i < imagePaths.length; i++) {
-            _insertBirdImage(birdID, imagePaths[i], imageCredits[i], {success: function(tx,res) {
+        for (let index = 0; index < imagePaths.length; index++) {
+                _insertBirdImage(birdID, imagePaths[index], imageCredits[index], {success: function(tx,res) {
+                    i++;
                     if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length) {
-                        console.log("finished on birdimage");
-                        console.log("r = " + r);
-                        console.log("i = " + i);
-                        console.log("j = " + j);
-                        console.log("k = " + k);
                         onFinishedCallback();
                     }
-            }});
+                }}, tx);
         }
 
-        for (j = 0; j < mapPaths.length; j++) {
-            _insertMapImage(birdID, mapPaths[j], mapCredits[j], {success: function(tx,res) {
-                    if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length){
-                        console.log("finished on map image");
-                        console.log("r = " + r);
-                        console.log("i = " + i);
-                        console.log("j = " + j);
-                        console.log("k = " + k);
-                        onFinishedCallback();
-                    }
-            }});
+        for (let index = 0; index < mapPaths.length; index++) {
+            _insertMapImage(birdID, mapPaths[index], mapCredits[index], {success: function(tx,res) {
+                j++;
+                if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length){
+                    onFinishedCallback();
+                }
+            }}, tx);
         }
 
-        for (k = 0; k < spectoPaths.length; k++) {
-            _insertVocalization(birdID, spectoPaths[k], soundPaths[k], soundCredits[k], {success: function(tx,res) {
-                    console.log("k = " + k);
+        for (let index = 0; index < spectoPaths.length; index++) {
+            _insertVocalization(birdID, spectoPaths[index], soundPaths[index], soundCredits[index], {success: function(tx,res) {
+                    k++;
                     if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectoPaths.length){
-                        console.log("finished on vocalization");
-                        console.log("r = " + r);
-                        console.log("i = " + i);
-                        console.log("j = " + j);
-                        console.log("k = " + k);
                         onFinishedCallback();
                     }
-            }});
+            }}, tx);
         }
     }});
 }
@@ -117,34 +98,6 @@ var _getRegionIDByName = function (name, callbacks) {
     _sqlQuery(query, [name], callbacks);
 }
 
-//For Debugging
-var printBirds = function () {
-    var query = `SELECT * FROM Birds`;
-    _sqlQuery(query, [], {success:
-        function(res) {
-            console.log("Returned success from SQL Query");
-            var rows = res.rows._array;
-            console.log("Rows.length = " + rows.length);
-            //Empty Array
-            if (rows.length == 0) {
-                console.log("Table Empty");
-                return;
-            }
-            //2D Array
-            if (rows.length == 1) {
-                for (var row = 0; row < rows.length; row++)
-                    console.log(rows[row]);
-            }
-            //3D Array
-            for (var row = 0; row < rows.length; row++) {
-                for (var i = 0; i < rows[row].length; i++) {
-                    console.log(rows[row][i]);
-                }
-            }
-        }
-    });
-}
-
 //param query    --> sqlite query
 //param params   --> if values in query are represented as '?' they will be filled in in order by the params array.
 //                   this is the only way queries can be "built". If no params pass empty array.
@@ -178,7 +131,6 @@ var _sqlQuery = function (query, params, callbacks, tx) {
 }
 
 var printDatabase = function(tableName) {
-    console.log("Printing Database");
     var birdsQuery =    `SELECT * from Birds`;
     var regionsQuery =  `SELECT * from Regions`;
     var birdsRegionsQuery = `SELECT * from BirdRegions`;
@@ -193,23 +145,27 @@ var printDatabase = function(tableName) {
      }
 
     _sqlQuery(birdsQuery,[], {success: (tx, res)=> {
-        var birdsTable = res.rows;
+        var birdsTable = res.rows._array;
+        _printTable("Birds", birdsTable);
+
         _sqlQuery(regionsQuery,[], {success: (tx, res)=> {
-            var regionsTable = res.rows;
+            var regionsTable = res.rows._array;
+            _printTable("Regions", regionsTable);
+
             _sqlQuery(birdsRegionsQuery,[], {success: (tx, res)=> {
-                var birdsRegionsTable = res.rows;
+                var birdsRegionsTable = res.rows._array;
+                _printTable("BirdRegions", birdsRegionsTable);
+
                 _sqlQuery(vocalizationsQuery,[], {success: (tx, res)=> {
-                    var vocalizationsTable = res.rows;
+                    var vocalizationsTable = res.rows._array;
+                    _printTable("Vocalizations", vocalizationsTable);
+
                     _sqlQuery(mapImagesQuery,[], {success: (tx, res)=> {
-                        var mapImagesQuery = res.rows;
+                        var mapImagesQuery = res.rows._array;
+                        _printTable("MapImages", mapImagesQuery);
+
                         _sqlQuery(mapImagesQuery,[], {success: (tx, res)=> {
-                            var birdsImagesTable = res.rows;
-                            console.log("Printing Tables")
-                            _printTable("Birds", birdsTable);
-                            _printTable("Regions", regionsTable);
-                            _printTable("BirdRegions", birdsRegionsTable);
-                            _printTable("Vocalizations", vocalizationsTable);
-                            _printTable("MapImages", mapImagesQuery);
+                            var birdsImagesTable = res.rows._array;
                             _printTable("BirdImages", birdImagesQuery);
                         }}, tx);
                     }}, tx);
