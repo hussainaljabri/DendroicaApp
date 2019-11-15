@@ -22,26 +22,26 @@ const BottomNav = createMaterialBottomTabNavigator(
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>My Birds</Text>,
                   tabBarIcon: ({tintColor})=> <FontAwesome5 name="dove" size={20} color={tintColor} />,
-                  tabBarColor: '#cc99ff',
+                  tabBarColor: '#474747',
                 } },
       Explore: { screen: BirdList,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
                   tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
-                  tabBarColor: '#00cc99',
+                  tabBarColor: '#474747',
                 } },
       Settings: { screen: Settings,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Settings</Text>,
                   tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="settings-outline" size={20} color={tintColor} />,
-                  tabBarColor: '#3399ff',
+                  tabBarColor: '#474747',
 
                 } },
 
     },
     {
-      initialRouteName: 'MyList',
-      activeColor: 'white',
+      initialRouteName: 'Explore',
+      activeColor: '#ff8080',
       inactiveColor: '#d9d9d9',
       barStyle: { backgroundColor: '#694fad', },
       shifting: true,
