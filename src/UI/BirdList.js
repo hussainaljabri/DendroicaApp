@@ -1,8 +1,9 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, Picker} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, Picker, Animated} from "react-native";
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
+import BirdInfo from './BirdInfo';
 
 const Birds = [
     {id: 1, name: 'Golden Eagle', image: require('../../assets/Birdimages/GC-912-Aquila_chrysaetos.jpg'), sound:"../../assets/Birdsounds/JN-909-Aquila_chrysaetos.mp3"},
@@ -31,10 +32,17 @@ const Birds = [
 export default class BirdList extends Component {
     state ={
         regionInput: 'test',
-        language: '',
+        selected: '',
         searchInput: '',
         birds: [],
+        scrolltotop: false,
+        isTopBarHidden: false,
+        barclicked: false,
     }
+    static navigationOptions = {
+        header: null
+    }
+      
     /**
      * Region Handler---------------------------------------------------------------------------
      */
@@ -49,7 +57,7 @@ export default class BirdList extends Component {
                 regionInput: input,
                 
             });
-        }
+        };
     /**
      * ------------------------------------------------------------------------------------------
      */
@@ -62,19 +70,44 @@ export default class BirdList extends Component {
         this.setState({
             birds: Birds,
         });
-    }
+        
+    };
 
     updateSearch=(text)=>{
         this.setState({
             searchInput: text,
         });
-    }
+    };
     handlerLongClick=(id, name)=>{
         Alert.alert("LongPress: \n" +id+": "+name);
-    }
+    };
     handlerClick=(id, name)=>{
         Alert.alert("Click:\n" +id+": "+name);
+        this.props.navigation.navigate('BirdInfo',
+            //params
+            {
+                title: name,
+                id: id,
+            }
+        );
+    };
+    handlerScrolltotop=()=>{
+        if(this.state.scrolltotop){
+            this.setState({isTopBarHidden: false, barclicked: false});
+        }else{
+            this.setState({isTopBarHidden: true, barclicked: false});
+        }
+    };
+    handleScroll=()=>{
+        this.setState({isTopBarHidden: !this.state.isTopBarHidden});
+    };
+    topShow = () =>{
+        this.setState({isTopBarHidden: false});
     }
+    topHide = () =>{
+        this.setState({isTopBarHidden: true});
+    }
+
     getBirdCards = () =>{
         return Birds.map((bird) =>{
             return (
@@ -93,18 +126,19 @@ export default class BirdList extends Component {
      * ------------------------------------------------------------------------------------------
      */
     render(){
+        const topBarStyle = this.state.isTopBarHidden;
         return (
-            <ScrollView showsVerticalScrollIndicator={false} style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
-                <View style={styles.statusBar}/>
+            <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
+                <TouchableOpacity style={styles.statusBar} onPress={()=> alert('hey!')}></TouchableOpacity>
                 <View style={{flexDirection: "row",}}>
                     <Text style={styles.header}>Explore |</Text>
                     <View style={{justifyContent:"center", flexGrow:1}}>
                         <Picker
-                            selectedValue={this.state.language}
+                            selectedValue={this.state.selected}
                             style={styles.select}
                             itemStyle={{ backgroundColor: "grey", color: "blue", fontSize:17, fontWeight:"700" }}
                             onValueChange={(itemValue, itemIndex) =>
-                                this.setState({language: itemValue})
+                                this.setState({selected: itemValue})
                             }>
                             <Picker.Item label="Canada" value="CA" />
                             <Picker.Item label="U.S.A" value="USA" />
@@ -123,22 +157,34 @@ export default class BirdList extends Component {
                         </TouchableOpacity>
                     </View>
                 </View>
+                
+                {topBarStyle ? 
+                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"white",borderTopWidth:0.5,borderBottomWidth:0.5, borderTopColor:'#ff8080', borderBottomColor:'#ff8080'}}>
+                        <Icon type='material-community' name='arrow-down' color='#ff8080'/>
+                    </TouchableOpacity>
+                :
+                    (<View>
+                        <SearchBar
+                            placeholder="Search..."
+                            onChangeText={this.updateSearch}
+                            value={this.state.searchInput}
+                            placeholderTextColor="white"
+                            inputStyle={{fontSize: 14, color: 'white'}} // style the TextInput
+                            inputContainerStyle={{borderRadius:10, backgroundColor: '#474747'}}
+                            containerStyle={{backgroundColor: 'white', borderTopColor: '#ff8080', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                        />
 
-                <SearchBar
-                    placeholder="Search..."
-                    onChangeText={this.updateSearch}
-                    value={this.state.searchInput}
-                    placeholderTextColor="white"
-                    inputStyle={{fontSize: 14, color: 'white'}} // style the TextInput
-                    inputContainerStyle={{borderRadius:10, backgroundColor: '#474747'}}
-                    containerStyle={{backgroundColor: 'white', borderTopColor: 'orange', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
-                />
+                        <View>
+                            <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
+                        </View>
+                    </View>)
+                }
 
-                <View>
-                    <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
-                </View>
-                {this.getBirdCards()}
-            </ScrollView>
+                <ScrollView showsVerticalScrollIndicator={false} onMomentumScrollBegin={this.topHide} >
+                    {this.getBirdCards()}
+                </ScrollView>
+               
+            </View>
         );
     }
 
@@ -153,7 +199,12 @@ const styles = StyleSheet.create({
     statusBar:{
         height: Constants.statusBarHeight,
      },
-     btn:{padding:15, justifyContent: "center", alignItems: "center", backgroundColor:'orange'},
+     btn:{
+         padding:15, 
+         justifyContent: "center", 
+         alignItems: "center", 
+         backgroundColor:'orange'
+    },
      select: {
         width:"100%",
         color: "black",

@@ -3,9 +3,11 @@ import { createMaterialBottomTabNavigator } from 'react-navigation-material-bott
 import BirdList from './src/UI/BirdList';
 import MyList from './src/UI/MyList';
 import Settings from './src/UI/Settings';
+import BirdInfo from './src/UI/BirdInfo';
 import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
 import {Text} from 'react-native';
 import {createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 
 export default class App extends Component {
 
@@ -15,19 +17,53 @@ export default class App extends Component {
   }
 
 }
+/**
+ * @TODO: TAB BAR For BirdInfo
+ */
+
+
+
+/**
+ * Stack navigator for BirdCard onPress in either MyList.
+ * To move to BirdInfo after clicking BirdCard.
+ */
+const MyListToBirdInfoNavigator = createStackNavigator({
+  MyList: {
+    screen: MyList,
+  },
+  BirdInfo: {
+    screen: BirdInfo,
+  },
+  // Quiz: {
+  //   screen: 
+  // }
+},);
+/**
+ * Stack navigator for BirdCard onPress in either BirdList.
+ * To move to BirdInfo after clicking BirdCard.
+ */
+const BirdListToBirdInfoNavigator = createStackNavigator({
+  BirdList: {
+    screen: BirdList,
+  },
+  BirdInfo: {
+    screen: BirdInfo,
+  },
+});
+
 
 const BottomNav = createMaterialBottomTabNavigator(
     {
-      MyList: { screen: MyList,
+      Explore: { screen: BirdListToBirdInfoNavigator,
+        navigationOptions:{
+          tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
+          tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
+          tabBarColor: '#474747',
+                } },
+      MyList: { screen: MyListToBirdInfoNavigator,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>My Birds</Text>,
                   tabBarIcon: ({tintColor})=> <FontAwesome5 name="dove" size={20} color={tintColor} />,
-                  tabBarColor: '#474747',
-                } },
-      Explore: { screen: BirdList,
-                navigationOptions:{
-                  tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
-                  tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
                   tabBarColor: '#474747',
                 } },
       Settings: { screen: Settings,

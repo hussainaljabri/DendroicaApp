@@ -18,8 +18,11 @@ const Birds = [
 export default class MyList extends Component {
     state ={
         regionInput: 'test',
-        language: '',
+        selected: '',
         searchInput: '',
+    }
+    static navigationOptions = {
+        header: null
     }
     updateSearch=(text)=>{
         this.setState({
@@ -49,22 +52,22 @@ export default class MyList extends Component {
 
     render(){
         return (
-            <ScrollView showsVerticalScrollIndicator={false} style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
+            <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
                 <View style={styles.statusBar}/>
                 <View style={{flexDirection: "row",justifyContent: "space-between"}}>
                     <Text style={styles.header}>MyLists |</Text>
                     <View style={{justifyContent:"center", flexGrow:1}}>
                         <Picker
-                            selectedValue={this.state.language}
+                            selectedValue={this.state.selected}
                             style={styles.select}
                             itemStyle={{justifyContent:"center", backgroundColor: "grey", color: "blue", fontSize:17, fontWeight:"700" }}
                             onValueChange={(itemValue, itemIndex) =>
-                                this.setState({language: itemValue})
+                                this.setState({selected: itemValue})
                         }>
-                            <Picker.Item label="List1" value="CA" />
-                            <Picker.Item label="List2" value="USA" />
-                            <Picker.Item label="List3" value="MEX" />
-                            <Picker.Item label="List4" value="CAR" />
+                            <Picker.Item label="List1" value="lst1" />
+                            <Picker.Item label="List2" value="lst2" />
+                            <Picker.Item label="List3" value="lst3" />
+                            <Picker.Item label="List4" value="lst4" />
                         </Picker>
                     </View>
                     <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
@@ -92,9 +95,12 @@ export default class MyList extends Component {
                     </TouchableOpacity>
                     <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {Birds.length}</Text>
                 </View>
-                {this.getBirdCards()}
+                <ScrollView showsVerticalScrollIndicator={false} >
+                        {this.getBirdCards()}
+                </ScrollView>
+                
 
-            </ScrollView>
+            </View>
         );
     }
 
