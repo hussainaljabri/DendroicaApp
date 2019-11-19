@@ -15,7 +15,7 @@ var insertBirdDataset = function (birdID, birdName, scientificName, rangeDescrip
 
         //Find corresponding regionIDs and for each insert regionID/birdID into BirdRegions
         for (let index = 0;index < regionNames.length; index++) {
-            _getRegionIDByName(regionNames[index], {success: function(tx,res) {
+            getRegionIDByName(regionNames[index], {success: function(tx,res) {
                 var regionID = res.rows.item(0)._id;
                 //Insert into BirdRegions
                 _insertBirdRegion(regionID, birdID, {success: function(tx,res) {
@@ -93,9 +93,14 @@ var _insertBirdList = function (listID, birdID, callbacks) {
     _sqlQuery(query, [listID, birdID], callbacks)
 };
 
-var _getRegionIDByName = function (name, callbacks) {
+var getRegionIDByName = function (name, callbacks) {
     var query = `SELECT _id from Regions where (name = ?)`;
     _sqlQuery(query, [name], callbacks);
+}
+
+var getBirdByID = function (id, callbacks) {
+    var query = `SELECT * from Birds where (_id = ?)`;
+    _sqlQuery(query, [id], callbacks);
 }
 
 //param query    --> sqlite query
@@ -258,6 +263,8 @@ const DatabaseModule = {
     destroyDB: destroyDB,
     insertRegion: insertRegion,
     insertBirdDataset: insertBirdDataset,
-    printDatabase: printDatabase
+    printDatabase: printDatabase,
+    getRegionIDByName: getRegionIDByName,
+    getBirdByID: getBirdByID
 };
 export default DatabaseModule;
