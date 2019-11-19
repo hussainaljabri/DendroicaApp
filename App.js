@@ -77,7 +77,7 @@ const BottomNav = createMaterialBottomTabNavigator(
     },
     {
       initialRouteName: 'Explore',
-      activeColor: '#ff8080',
+      activeColor: 'orange',
       inactiveColor: '#d9d9d9',
       barStyle: { backgroundColor: '#694fad', },
       shifting: true,

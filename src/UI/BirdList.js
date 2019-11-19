@@ -6,25 +6,43 @@ import Constants from 'expo-constants';
 import BirdInfo from './BirdInfo';
 
 const Birds = [
-    {id: 1, name: 'Golden Eagle', image: require('../../assets/Birdimages/GC-912-Aquila_chrysaetos.jpg'), sound:"../../assets/Birdsounds/JN-909-Aquila_chrysaetos.mp3"},
-    {id: 2, name: 'American Golden-Plover', image:require('../../assets/Birdimages/MP-1669-Pluvialis_dominica.jpg'), sound:""},
-    {id: 3, name: 'Common Ringed Plover', image:require('../../assets/Birdimages/76165-Charadrius_hiaticula_AOU_7_52.jpg'), sound:""},
-    {id: 4, name: 'Semipalmated Plover', image:require('../../assets/Birdimages/MP-1697-Charadrius_semipalmatus_AOU_7_52.jpg'), sound:""},
-    {id: 5, name: 'Spotted Sandpiper', image:require('../../assets/Birdimages/72902-Actitis_macularius_AOU_7_52.jpg'), sound:""},
-    {id: 6, name: 'Surfbird', image:require('../../assets/Birdimages/RH-1442-Aphriza_virgata.jpg'), sound:""},
-    {id: 7, name: 'Black-throated Green Warbler', image:require('../../assets/Birdimages/CMF-9382-Dendroica_virens.jpg'), sound:""},
-    {id: 8, name: 'Gray-crowned Rosy-Finch', image:require('../../assets/Birdimages/LM-9260-Leucosticte_tephrocotis.jpg'), sound:""},
-    {id: 9, name: 'Merlin', image:require('../../assets/Birdimages/TB2-119938-Falco_columbarius_AOU_7_52.jpg'), sound:""},
-    {id: 10, name: 'Eurasian Collared-Dove', image:require('../../assets/Birdimages/87129-Streptopelia_decaocto_AOU_7_52.jpg'), sound:""},
-    {id: 11, name: 'Rufous Hummingbird', image:require('../../assets/Birdimages/TB2-14343-Selasphorus_rufus.jpg'), sound:""},
-    {id: 12, name: 'Western Tanager', image:require('../../assets/Birdimages/LM-9392-Piranga_ludoviciana.jpg'), sound:""},
+    {id: 1, name: 'Golden Eagle',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+     image: [require('../../assets/Birdimages/GC-912-Aquila_chrysaetos.jpg'), require('../../assets/Birdimages/MP-1669-Pluvialis_dominica.jpg')], sound:"../../assets/Birdsounds/JN-909-Aquila_chrysaetos.mp3"},
+    {id: 2, name: 'American Golden-Plover',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+     image:[require('../../assets/Birdimages/MP-1669-Pluvialis_dominica.jpg')], sound:""},
+    {id: 3, name: 'Common Ringed Plover',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+     image:[require('../../assets/Birdimages/76165-Charadrius_hiaticula_AOU_7_52.jpg')], sound:""},
+    {id: 4, name: 'Semipalmated Plover',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/MP-1697-Charadrius_semipalmatus_AOU_7_52.jpg')], sound:""},
+    {id: 5, name: 'Spotted Sandpiper',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/72902-Actitis_macularius_AOU_7_52.jpg')], sound:""},
+    {id: 6, name: 'Surfbird',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/RH-1442-Aphriza_virgata.jpg')], sound:""},
+    {id: 7, name: 'Black-throated Green Warbler', details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+     image:[require('../../assets/Birdimages/CMF-9382-Dendroica_virens.jpg')], sound:""},
+    {id: 8, name: 'Gray-crowned Rosy-Finch',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/LM-9260-Leucosticte_tephrocotis.jpg')], sound:""},
+    {id: 9, name: 'Merlin',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/TB2-119938-Falco_columbarius_AOU_7_52.jpg')], sound:""},
+    {id: 10, name: 'Eurasian Collared-Dove',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/87129-Streptopelia_decaocto_AOU_7_52.jpg')], sound:""},
+    {id: 11, name: 'Rufous Hummingbird',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/TB2-14343-Selasphorus_rufus.jpg')], sound:""},
+    {id: 12, name: 'Western Tanager',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+     image:[require('../../assets/Birdimages/LM-9392-Piranga_ludoviciana.jpg')], sound:""},
     //From USA LIST
-    {id: 13, name: 'Belted Kingfisher', image:require('../../assets/Birdimages/usa/76042-Megaceryle_alcyon_AOU_7_52.jpg'), sound:""},
-    {id: 14, name: 'King Rail', image:require('../../assets/Birdimages/usa/85699-Rallus_elegans_AOU_7_52.jpg'), sound:""},
-    {id: 15, name: 'Atlantic Puffin', image:require('../../assets/Birdimages/usa/JR-2122-Fratercula_arctica.jpg'), sound:""},
-    {id: 16, name: 'Acorn Woodpecker', image:require('../../assets/Birdimages/usa/KB3-120281-Melanerpes_formicivorus_AOU_7_52.jpg'), sound:""},
-    {id: 17, name: "Chuck-will's-widow", image:require('../../assets/Birdimages/usa/TB-7827-Caprimulgus_carolinensis.jpg'), sound:""},
-    {id: 18, name: 'Loggerhead Shrike', image:require('../../assets/Birdimages/usa/81029-Lanius_ludovicianus_AOU_7_52.jpg'), sound:""},
+    {id: 13, name: 'Belted Kingfisher',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/usa/76042-Megaceryle_alcyon_AOU_7_52.jpg')], sound:""},
+    {id: 14, name: 'King Rail',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/usa/85699-Rallus_elegans_AOU_7_52.jpg')], sound:""},
+    {id: 15, name: 'Atlantic Puffin',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/usa/JR-2122-Fratercula_arctica.jpg')], sound:""},
+    {id: 16, name: 'Acorn Woodpecker',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/usa/KB3-120281-Melanerpes_formicivorus_AOU_7_52.jpg')], sound:""},
+    {id: 17, name: "Chuck-will's-widow",details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/usa/TB-7827-Caprimulgus_carolinensis.jpg')], sound:""},
+    {id: 18, name: 'Loggerhead Shrike',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+    image:[require('../../assets/Birdimages/usa/81029-Lanius_ludovicianus_AOU_7_52.jpg')], sound:""},
 ]; // stored locally for testing purposes.
 
 
@@ -88,6 +106,7 @@ export default class BirdList extends Component {
             {
                 title: name,
                 id: id,
+                data: this.state.birds[id-1], // for debugging
             }
         );
     };
@@ -114,7 +133,7 @@ export default class BirdList extends Component {
                 <BirdCard 
                 key={bird.id} 
                 birdName={bird.name} 
-                imgUrl={bird.image} 
+                imgUrl={bird.image[0]} 
                 onPress={()=>{this.handlerClick(bird.id, bird.name)}} 
                 onLongPress={()=>{this.handlerLongClick(bird.id, bird.name)}}
                 style={{marginBottom: 3}}
@@ -128,7 +147,7 @@ export default class BirdList extends Component {
     render(){
         const topBarStyle = this.state.isTopBarHidden;
         return (
-            <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
+            <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,flex:1}}>
                 <TouchableOpacity style={styles.statusBar} onPress={()=> alert('hey!')}></TouchableOpacity>
                 <View style={{flexDirection: "row",}}>
                     <Text style={styles.header}>Explore |</Text>
@@ -152,15 +171,15 @@ export default class BirdList extends Component {
                         <TouchableOpacity>
                             <Icon 
                                 name='settings'
-                                color='#ff8080'
+                                color='orange'
                             />
                         </TouchableOpacity>
                     </View>
                 </View>
                 
                 {topBarStyle ? 
-                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"white",borderTopWidth:0.5,borderBottomWidth:0.5, borderTopColor:'#ff8080', borderBottomColor:'#ff8080'}}>
-                        <Icon type='material-community' name='arrow-down' color='#ff8080'/>
+                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"white",borderTopWidth:0.5,borderBottomWidth:0.5, borderTopColor:'orange', borderBottomColor:'orange'}}>
+                        <Icon type='material-community' name='arrow-down' color='orange'/>
                     </TouchableOpacity>
                 :
                     (<View>
@@ -171,7 +190,7 @@ export default class BirdList extends Component {
                             placeholderTextColor="white"
                             inputStyle={{fontSize: 14, color: 'white'}} // style the TextInput
                             inputContainerStyle={{borderRadius:10, backgroundColor: '#474747'}}
-                            containerStyle={{backgroundColor: 'white', borderTopColor: '#ff8080', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                            containerStyle={{backgroundColor: 'white', borderTopColor: 'orange', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
                         />
 
                         <View>
@@ -180,7 +199,7 @@ export default class BirdList extends Component {
                     </View>)
                 }
 
-                <ScrollView showsVerticalScrollIndicator={false} onMomentumScrollBegin={this.topHide} >
+                <ScrollView style={{flex:1}} showsVerticalScrollIndicator={false} onMomentumScrollBegin={this.topHide} >
                     {this.getBirdCards()}
                 </ScrollView>
                
@@ -216,7 +235,7 @@ const styles = StyleSheet.create({
          paddingLeft: 15, 
          paddingRight: 15,
          fontWeight: "700",
-         color: "#ff8080",
+         color: "orange",
          fontSize: 20,
          justifyContent: "center", 
          alignSelf:"center"

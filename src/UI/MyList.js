@@ -52,7 +52,7 @@ export default class MyList extends Component {
 
     render(){
         return (
-            <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
+            <View style={{flex: 1, backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
                 <View style={styles.statusBar}/>
                 <View style={{flexDirection: "row",justifyContent: "space-between"}}>
                     <Text style={styles.header}>MyLists |</Text>
@@ -95,7 +95,7 @@ export default class MyList extends Component {
                     </TouchableOpacity>
                     <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {Birds.length}</Text>
                 </View>
-                <ScrollView showsVerticalScrollIndicator={false} >
+                <ScrollView style={{flex:1}} showsVerticalScrollIndicator={false} >
                         {this.getBirdCards()}
                 </ScrollView>
                 

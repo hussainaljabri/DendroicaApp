@@ -51,9 +51,9 @@ export default class Settings extends Component {
                 </View>
 
                 <View style={{margin: 15}}>
-                    <Text style={{fontSize: 20, fontWeight:'700', opacity: 0.5, marginBottom:10}}>Custom Lists</Text>
+                    <Text style={{fontSize: 20, fontWeight:'700', opacity: 0.5, marginBottom:10}}>More Options</Text>
                     <View style={{flexDirection:'row', margin:15,}}>
-                        <Text style={{width:'60%', textAlignVertical: "center", fontSize: 15, fontWeight: '500'}}>Lists Available Offline</Text>
+                        <Text style={{width:'60%', textAlignVertical: "center", fontSize: 15, fontWeight: '500'}}>Downloaded Lists</Text>
                         <View style={{width: '40%'}}>
                             <Picker itemStyle={{width:'100%'}} >
                                 <Picker.Item label="Select" value="0" />
