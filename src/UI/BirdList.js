@@ -100,7 +100,7 @@ export default class BirdList extends Component {
         Alert.alert("LongPress: \n" +id+": "+name);
     };
     handlerClick=(id, name)=>{
-        Alert.alert("Click:\n" +id+": "+name);
+        // Alert.alert("Click:\n" +id+": "+name);
         this.props.navigation.navigate('BirdInfo',
             //params
             {

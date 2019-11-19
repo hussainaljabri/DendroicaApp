@@ -5,6 +5,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
+
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 function wp (percentage) {
     const value = (percentage * viewportWidth) / 100;
@@ -32,13 +33,16 @@ export default class BirdInfo extends Component {
         activeSlide: 0,
     }
     static navigationOptions = ({navigation})=> ({
-        headerTitle:()=> (<Text style={{
+        headerTitle:()=> (<View style={{flexDirection:'column', }}>
+            <Text style={{
                                 fontWeight: "700",
                                 color: "orange",
                                 fontSize: 20,
                                 justifyContent: "center", 
                                 alignSelf:"center"}}
-                          >{navigation.state.params.title}</Text>),
+                          >{navigation.state.params.title}</Text>
+            <Text style={{letterSpacing: 2, fontSize:10, justifyContent: "center", alignSelf: "center"}}>Latin Name</Text>
+        </View>),
         headerTintColor: "orange",
         
     })
@@ -46,12 +50,14 @@ export default class BirdInfo extends Component {
        this.setState({
            data: this.props.navigation.getParam('data', []),
            dataReady: true,
+           page: 0,
        });
 
    }
    //@TODO
    getVocalization=()=>{
         
+
    }
    //@TODO
    getLocations=()=>{
@@ -67,83 +73,125 @@ export default class BirdInfo extends Component {
           <View style={styles.imageContainer}>
             <Image style={styles.image} source={item} />
           </View>
-
-
-
-
-
       </TouchableOpacity>
     );}
+    
 
+
+    getInfoPage=()=>{
+        return (
+            <ScrollView >
+                <Carousel
+                    ref={(c) => { this._carousel = c; }}
+                    data={this.state.data.image}
+                    renderItem={this._renderItem}
+                    sliderWidth={sliderWidth}
+                    itemWidth={itemWidth}
+                    firstItem={this.state.activeSlide}
+                    hasParallaxImages={true}
+                    containerCustomStyle={styles.slider}
+                    contentContainerCustomStyle={styles.sliderContentContainer}
+                    onSnapToItem={(index) => this.setState({ activeSlide: index }) }
+                />
+                <Pagination 
+                    dotsLength={this.state.data.image.length}
+                    activeDotIndex={this.state.activeSlide}
+                    containerStyle={styles.paginationContainer}
+                    dotColor={'orange'}
+                    dotStyle={styles.paginationDot}
+                    inactiveDotColor={colors.black}
+                    inactiveDotOpacity={0.4}
+                    inactiveDotScale={0.6}
+                    carouselRef={this._slider1Ref}
+                    tappableDots={!!this._slider1Ref}
+                />
+                <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+                    <Icon 
+                        name='info-circle'
+                        type={'font-awesome'}
+                        color='orange'
+                    />
+                    <Text style={styles.title}> Information</Text>
+                </View>
+
+                <View style={styles.textContainer}>
+                    <Text style={styles.subtitle}>{this.state.data.details}</Text>
+                </View>
+            </ScrollView>
+        )
+    }
+    getVocalPage=()=>{
+        return (<ScrollView>
+                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+                    <Icon 
+                        name='music'
+                        type={'font-awesome'}
+                        color='orange'
+                    />
+                    <Text style={styles.title}> Vocalizations</Text>
+                </View>
+
+                    {this.getVocalization()}
+        </ScrollView>)
+    }
+
+    getMapPage=()=>{
+        return (<ScrollView>
+                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+                    <Icon 
+                        name='map'
+                        type={'font-awesome'}
+                        color='orange'
+                    />
+                    <Text style={styles.title}> Location</Text>
+                </View>
+                    {this.getLocations()}
+        </ScrollView>)
+    }
+    getLayout=()=>{
+        switch(this.state.page){
+            case 0:
+                return this.getInfoPage();
+            case 1:
+                return this.getVocalPage();
+            case 2:
+                return this.getMapPage();
+            default:
+                return this.getInfoPage();
+        }                  
+    }
+    infoBtnHandler=()=>{
+        this.setState({
+            page: 0,
+        });
+    }
+    vocalBtnHandler=()=>{
+        this.setState({
+            page: 1,
+        });
+    }
+    mapBtnHandler=()=>{
+        this.setState({
+            page: 2,
+        });
+    }
     render() {
         return (
             <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
-
+                <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
+                    <TouchableOpacity style={{marginBottom: 5, borderBottomStartRadius: 15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 0? 'orange':'#DCDCDC'}} onPress={()=> this.infoBtnHandler()}>
+                        <Text style={{opacity:this.state.page==0? 1:0.4,fontWeight:'700',color: this.state.page==0? 'white': 'black'}}>Information</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{marginBottom: 5, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 1? 'orange':'#DCDCDC'}} onPress={()=> this.vocalBtnHandler()}>
+                        <Text style={{opacity:this.state.page==1? 1:0.4,fontWeight:'700',color: this.state.page==1? 'white': 'black'}}>Vocalizations</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={{marginBottom: 5, borderBottomEndRadius:15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 2? 'orange':'#DCDCDC'}} onPress={()=> this.mapBtnHandler()}>
+                        <Text style={{opacity:this.state.page==2? 1:0.4, fontWeight:'700', color: this.state.page==2? 'white': 'black'}}>Location</Text>
+                    </TouchableOpacity>
+                </View>
+                
                 {this.state.dataReady? 
-                    (
-                        <ScrollView >
-                            <Carousel
-                                ref={(c) => { this._carousel = c; }}
-                                data={this.state.data.image}
-                                renderItem={this._renderItem}
-                                sliderWidth={sliderWidth}
-                                itemWidth={itemWidth}
-
-
-                                firstItem={this.state.activeSlide}
-                                hasParallaxImages={true}
-                                containerCustomStyle={styles.slider}
-                                contentContainerCustomStyle={styles.sliderContentContainer}
-                                onSnapToItem={(index) => this.setState({ activeSlide: index }) }
-                            />
-                            <Pagination 
-                                dotsLength={this.state.data.image.length}
-                                activeDotIndex={this.state.activeSlide}
-                                containerStyle={styles.paginationContainer}
-                                dotColor={'orange'}
-                                dotStyle={styles.paginationDot}
-                                inactiveDotColor={colors.black}
-                                inactiveDotOpacity={0.4}
-                                inactiveDotScale={0.6}
-                                carouselRef={this._slider1Ref}
-                                tappableDots={!!this._slider1Ref}
-                            />
-                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
-                                <Icon 
-                                    name='info-circle'
-                                    type={'font-awesome'}
-                                    color='orange'
-                                />
-                                <Text style={styles.title}> Information</Text>
-                            </View>
-
-                            <View style={styles.textContainer}>
-                                <Text style={styles.subtitle}>{this.state.data.details}</Text>
-                            </View>
-
-                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
-                                <Icon 
-                                    name='music'
-                                    type={'font-awesome'}
-                                    color='orange'
-                                />
-                                <Text style={styles.title}> Vocalizations</Text>
-                            </View>
-
-                                {this.getVocalization()}
-
-                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
-                                <Icon 
-                                    name='map'
-                                    type={'font-awesome'}
-                                    color='orange'
-                                />
-                                <Text style={styles.title}> Location</Text>
-                            </View>
-                                {this.getLocations()}
-
-                        </ScrollView>
-                    )
+                    (this.getLayout())
                     
                     : 
                     

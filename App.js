@@ -55,32 +55,37 @@ const BirdListToBirdInfoNavigator = createStackNavigator({
 const BottomNav = createMaterialBottomTabNavigator(
     {
       Explore: { screen: BirdListToBirdInfoNavigator,
-        navigationOptions:{
-          tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
-          tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
-          tabBarColor: '#474747',
+                navigationOptions:{
+                  tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
+                  tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
+                  tabBarColor: 'orange',
+                  activeColor: 'orange',
+                  // barStyle: { backgroundColor: 'yellow' },
                 } },
       MyList: { screen: MyListToBirdInfoNavigator,
                 navigationOptions:{
-                  tabBarLabel: <Text style={{fontWeight: '800',}}>My Birds</Text>,
+                  tabBarLabel: <Text style={{fontWeight: '800',}}>My Lists</Text>,
                   tabBarIcon: ({tintColor})=> <FontAwesome5 name="dove" size={20} color={tintColor} />,
-                  tabBarColor: '#474747',
+                  tabBarColor: 'red',
+                  activeColor: 'red',
+                  // barStyle: { backgroundColor: '#67baf6' },
                 } },
       Settings: { screen: Settings,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Settings</Text>,
                   tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="settings-outline" size={20} color={tintColor} />,
-                  tabBarColor: '#474747',
-
+                  tabBarColor: 'purple',
+                  activeColor: 'purple',
+                  // barStyle: { backgroundColor: 'blue' },
                 } },
 
     },
     {
       initialRouteName: 'Explore',
       activeColor: 'orange',
-      inactiveColor: '#d9d9d9',
-      barStyle: { backgroundColor: '#694fad', },
-      shifting: true,
+      inactiveColor: 'black',
+      barStyle: { backgroundColor: '#F5F5F5', },
+      shifting: false,
       keyboardHidesNavigationBar: true,
       labeled: true,
     }

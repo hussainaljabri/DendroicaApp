@@ -75,7 +75,7 @@ export default class MyList extends Component {
                             <Icon 
                                 name='playlist-edit'
                                 type='material-community'
-                                color='#ff8080'
+                                color='orange'
                             />
                         </TouchableOpacity>
                     </View>
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
          marginTop: 3,
          justifyContent: "center",
          textAlignVertical: "center",
-         backgroundColor: "#ff8080",
+         backgroundColor: "orange",
          borderRadius: 5,
      },
      select: {
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
          paddingLeft: 15, 
          paddingRight: 15,
          fontWeight: "700",
-         color: "#ff8080",
+         color: "orange",
          fontSize: 20,
          justifyContent: "center", 
          alignSelf:"center"

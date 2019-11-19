@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
         paddingLeft: 15, 
         paddingRight: 15,
         fontWeight: "700",
-        color: "#ff8080",
+        color: "orange",
         fontSize: 20,
         justifyContent: "center", 
         alignSelf:"center"
