@@ -5,7 +5,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 
-
+const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 function wp (percentage) {
     const value = (percentage * viewportWidth) / 100;
@@ -31,19 +31,20 @@ export default class BirdInfo extends Component {
         data: undefined,
         dataReady: false,
         activeSlide: 0,
+        activeMapSlide: 0,
     }
     static navigationOptions = ({navigation})=> ({
         headerTitle:()=> (<View style={{flexDirection:'column', }}>
             <Text style={{
                                 fontWeight: "700",
-                                color: "orange",
+                                color: "#34C759",
                                 fontSize: 20,
-                                justifyContent: "center", 
+                                justifyContent: "space-between", 
                                 alignSelf:"center"}}
                           >{navigation.state.params.title}</Text>
-            <Text style={{letterSpacing: 2, fontSize:10, justifyContent: "center", alignSelf: "center"}}>Latin Name</Text>
+    <Text style={{letterSpacing: 1.5, fontSize:10, justifyContent: "center", fontStyle:'italic'}}>{navigation.state.params.id == 1? navigation.state.params.data.latin:'Latin Name'}</Text>
         </View>),
-        headerTintColor: "orange",
+        headerTintColor: "#34C759",
         
     })
    componentDidMount(){
@@ -59,10 +60,7 @@ export default class BirdInfo extends Component {
         
 
    }
-   //@TODO
-   getLocations=()=>{
-
-   }
+ 
 
    _renderItem ({item, index}) {
     console.log(item);
@@ -75,7 +73,7 @@ export default class BirdInfo extends Component {
           </View>
       </TouchableOpacity>
     );}
-    
+
 
 
     getInfoPage=()=>{
@@ -97,7 +95,7 @@ export default class BirdInfo extends Component {
                     dotsLength={this.state.data.image.length}
                     activeDotIndex={this.state.activeSlide}
                     containerStyle={styles.paginationContainer}
-                    dotColor={'orange'}
+                    dotColor={'#34C759'}
                     dotStyle={styles.paginationDot}
                     inactiveDotColor={colors.black}
                     inactiveDotOpacity={0.4}
@@ -107,15 +105,25 @@ export default class BirdInfo extends Component {
                 />
                 <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
                     <Icon 
-                        name='info-circle'
+                        name='copyright'
                         type={'font-awesome'}
-                        color='orange'
+                        color='#34C759'
                     />
-                    <Text style={styles.title}> Information</Text>
+                    <Text style={styles.title}> Photo Information</Text>
                 </View>
 
                 <View style={styles.textContainer}>
+                    {this.state.data.id == 1? 
+                    <View>
+                        <Text>Photo Taker: {this.state.data.imageCredit[this.state.activeSlide].name}</Text>
+                        <Text>Source: {this.state.data.imageCredit[this.state.activeSlide].source}</Text>
+                        <Text>Date: {this.state.data.imageCredit[this.state.activeSlide].date}</Text>
+                        <Text>Region: {this.state.data.imageCredit[this.state.activeSlide].region}</Text>
+                        <Text>Bird Maturity: {this.state.data.imageCredit[this.state.activeSlide].maturity}</Text>
+                    </View>
+                    :
                     <Text style={styles.subtitle}>{this.state.data.details}</Text>
+                    }
                 </View>
             </ScrollView>
         )
@@ -126,7 +134,7 @@ export default class BirdInfo extends Component {
                     <Icon 
                         name='music'
                         type={'font-awesome'}
-                        color='orange'
+                        color='#34C759'
                     />
                     <Text style={styles.title}> Vocalizations</Text>
                 </View>
@@ -137,15 +145,80 @@ export default class BirdInfo extends Component {
 
     getMapPage=()=>{
         return (<ScrollView>
-                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+
+                {this.state.data.id == 1?
+                    (<View>
+                        <Carousel
+                        ref={(cb) => { this._carouselMap = cb; }}
+                        data={this.state.data.maps.image}
+                        renderItem={this._renderItem}
+                        sliderWidth={sliderWidth}
+                        itemWidth={itemWidth}
+                        firstItem={this.state.activeMapSlide}
+                        hasParallaxImages={true}
+                        containerCustomStyle={styles.slider}
+                        contentContainerCustomStyle={styles.sliderContentContainer}
+                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
+                    />
+                    <Pagination 
+                        dotsLength={this.state.data.maps.image.length}
+                        activeDotIndex={this.state.activeMapSlide}
+                        containerStyle={styles.paginationContainer}
+                        dotColor={'#34C759'}
+                        dotStyle={styles.paginationDot}
+                        inactiveDotColor={colors.black}
+                        inactiveDotOpacity={0.4}
+                        inactiveDotScale={0.6}
+                        carouselRef={this._slider2Ref}
+                        tappableDots={!!this._slider2Ref}
+                    />
+                    </View>)
+                :
+                (<View>
+                    <Carousel
+                        ref={(cb) => { this._carouselMap = cb; }}
+                        data={NotFoundImage}
+                        renderItem={this._renderItem}
+                        sliderWidth={sliderWidth}
+                        itemWidth={itemWidth}
+                        firstItem={this.state.activeMapSlide}
+                        hasParallaxImages={true}
+                        containerCustomStyle={styles.slider}
+                        contentContainerCustomStyle={styles.sliderContentContainer}
+                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
+                    />
+                    <Pagination 
+                        dotsLength={NotFoundImage.length}
+                        activeDotIndex={this.state.activeMapSlide}
+                        containerStyle={styles.paginationContainer}
+                        dotColor={'#34C759'}
+                        dotStyle={styles.paginationDot}
+                        inactiveDotColor={colors.black}
+                        inactiveDotOpacity={0.4}
+                        inactiveDotScale={0.6}
+                        carouselRef={this._slider2Ref}
+                        tappableDots={!!this._slider2Ref}
+                    />
+                </View>)
+                
+                }
+                <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
                     <Icon 
                         name='map'
                         type={'font-awesome'}
-                        color='orange'
+                        color='#34C759'
                     />
-                    <Text style={styles.title}> Location</Text>
+                    <Text style={styles.title}> Location: {this.state.data.id ==1? this.state.data.maps.region[this.state.activeMapSlide] : 'Not Found!'}</Text>
+
                 </View>
-                    {this.getLocations()}
+                    {this.state.data.id == 1?
+                        (<View style={styles.textContainer}>
+                            <Text style={styles.textContainer}>Range Description for {this.state.data.name}</Text>
+                            <Text style={styles.textContainer}>{this.state.data.maps.description}</Text>
+                        </View>)
+                    :
+                        <Text style={styles.textContainer}>Info not found for this Bird.</Text>
+                    }
         </ScrollView>)
     }
     getLayout=()=>{
@@ -179,22 +252,20 @@ export default class BirdInfo extends Component {
         return (
             <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
-                    <TouchableOpacity style={{marginBottom: 5, borderBottomStartRadius: 15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 0? 'orange':'#DCDCDC'}} onPress={()=> this.infoBtnHandler()}>
+                    <TouchableOpacity style={{marginBottom: 5, borderBottomStartRadius: 15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 0? '#34C759':'#DCDCDC'}} onPress={()=> this.infoBtnHandler()}>
                         <Text style={{opacity:this.state.page==0? 1:0.4,fontWeight:'700',color: this.state.page==0? 'white': 'black'}}>Information</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{marginBottom: 5, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 1? 'orange':'#DCDCDC'}} onPress={()=> this.vocalBtnHandler()}>
+                    <TouchableOpacity style={{marginBottom: 5, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 1? '#34C759':'#DCDCDC'}} onPress={()=> this.vocalBtnHandler()}>
                         <Text style={{opacity:this.state.page==1? 1:0.4,fontWeight:'700',color: this.state.page==1? 'white': 'black'}}>Vocalizations</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{marginBottom: 5, borderBottomEndRadius:15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 2? 'orange':'#DCDCDC'}} onPress={()=> this.mapBtnHandler()}>
+                    <TouchableOpacity style={{marginBottom: 5, borderBottomEndRadius:15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 2? '#34C759':'#DCDCDC'}} onPress={()=> this.mapBtnHandler()}>
                         <Text style={{opacity:this.state.page==2? 1:0.4, fontWeight:'700', color: this.state.page==2? 'white': 'black'}}>Location</Text>
                     </TouchableOpacity>
                 </View>
                 
                 {this.state.dataReady? 
                     (this.getLayout())
-                    
-                    : 
-                    
+                        : 
                     (<Text>Loading...</Text>)}
             </View>
         );
@@ -211,7 +282,7 @@ const styles = StyleSheet.create({
         paddingLeft: 15, 
         paddingRight: 15,
         fontWeight: "700",
-        color: "orange",
+        color: "#34C759",
         fontSize: 20,
         justifyContent: "center", 
         alignSelf:"center"

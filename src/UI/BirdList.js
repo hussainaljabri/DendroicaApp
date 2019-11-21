@@ -3,11 +3,57 @@ import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, But
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
-import BirdInfo from './BirdInfo';
+import ActionSheet from 'react-native-actionsheet';
 
 const Birds = [
-    {id: 1, name: 'Golden Eagle',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
-     image: [require('../../assets/Birdimages/GC-912-Aquila_chrysaetos.jpg'), require('../../assets/Birdimages/MP-1669-Pluvialis_dominica.jpg')], sound:"../../assets/Birdsounds/JN-909-Aquila_chrysaetos.mp3"},
+    {
+      id: 1,
+      name: 'Golden Eagle',
+      latin: 'Aquila chrysaetos',
+      details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
+      image: [
+                require('../../assets/Birdimages/GC-912-Aquila_chrysaetos.jpg'), 
+                require('../../assets/Birdimages/MG-9841-Aquila_chrysaetos_AOU_7_52.jpg'),
+                require('../../assets/Birdimages/GP-914-Aquila_chrysaetos.jpg')
+             ], 
+      imageCredit: [{
+              name: 'Gordon Court',
+              source: 'Not Found',
+              date: 'Not Found',
+              region: 'Not Found',
+              maturity: 'Adult',
+                          },
+                          {
+              name: 'Manuel Grosselet',
+              source: 'http://www.tierradeaves.com/',
+              date: '2008 Jun 15',
+              region: 'Mexico, Aguascalientes',
+              maturity: 'Adult',
+            },
+                          {
+              name: 'George Peck',
+              source: 'Not Found',
+              date: 'Not Found',
+              region: 'Not Found',
+              maturity: 'Adult',
+            },
+            ],
+      sound: [
+                '../../assets/Birdsounds/JN-909-Aquila_chrysaetos.mp3',
+                '../../assets/Birdsounds/KJC-910-Aquila_chrysaetos.mp3',
+            ],
+      maps:{
+
+            region: ['Americas', 'North', 'Central' ],
+            image: [
+                    require('../../assets/Birdimages/aqui_chry_13_whem.png'),
+                    require('../../assets/Birdimages/aqui_chry_13_north.png'),
+                    require('../../assets/Birdimages/aqui_chry_13_central.png'),
+                    ],
+            description: "Summary of the extent of the breeding, wintering, migration and year-round range of this species in the Western Hemisphere, including Canada, U.S.A. and Mexico:\n\n\nCanada - Resident year-round: 1,831,466 square km; Breeding only: 4,350,946 square km; Wintering only: 1,181,903 square km\n\nMexico - Resident year-round: 596,111 square km; Wintering only: 84,459 square km\n\nU.S.A. - Resident year-round: 3,668,357 square km; Breeding only: 1,177,580 square km; Wintering only: 2,700,775 square km",
+
+        },
+      },
     {id: 2, name: 'American Golden-Plover',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
      image:[require('../../assets/Birdimages/MP-1669-Pluvialis_dominica.jpg')], sound:""},
     {id: 3, name: 'Common Ringed Plover',details:'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque dictum laoreet dignissim. Aliquam luctus, risus rutrum pellentesque gravida, turpis nisi ullamcorper odio, et maximus ipsum justo id erat. Donec semper, nunc quis hendrerit sagittis, mi nisi porta metus, in varius justo odio nec arcu. Sed luctus erat nisl, ac consectetur orci mattis ac. Mauris blandit sit amet ipsum vitae lacinia. Aliquam quis magna imperdiet leo feugiat lacinia vitae vel dolor. Ut laoreet tellus vel nunc suscipit tempor.',
@@ -45,12 +91,20 @@ const Birds = [
     image:[require('../../assets/Birdimages/usa/81029-Lanius_ludovicianus_AOU_7_52.jpg')], sound:""},
 ]; // stored locally for testing purposes.
 
-
+const continents = [
+    'Cancel',
+    'Canada', 
+    'U.S.A', 
+    'Mexico',
+    'Caribbean', 
+    'Central America',
+    'South America',
+  ];
 
 export default class BirdList extends Component {
     state ={
         regionInput: 'test',
-        selected: '',
+        selected: 1,
         searchInput: '',
         birds: [],
         scrolltotop: false,
@@ -89,6 +143,10 @@ export default class BirdList extends Component {
             birds: Birds,
         });
         
+    };
+
+    showActionSheet = () => {
+        this.ActionSheet.show();
     };
 
     updateSearch=(text)=>{
@@ -131,12 +189,13 @@ export default class BirdList extends Component {
         return Birds.map((bird) =>{
             return (
                 <BirdCard 
-                key={bird.id} 
-                birdName={bird.name} 
-                imgUrl={bird.image[0]} 
-                onPress={()=>{this.handlerClick(bird.id, bird.name)}} 
-                onLongPress={()=>{this.handlerLongClick(bird.id, bird.name)}}
-                style={{marginBottom: 3}}
+                    key={bird.id} 
+                    birdName={bird.name} 
+                    latin={'Latin Name'}
+                    imgUrl={bird.image[0]} 
+                    onPress={()=>{this.handlerClick(bird.id, bird.name)}} 
+                    onLongPress={()=>{this.handlerLongClick(bird.id, bird.name)}}
+                    style={{marginBottom: 3}}
                 />
             );
         });
@@ -149,37 +208,36 @@ export default class BirdList extends Component {
         return (
             <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,flex:1}}>
                 <TouchableOpacity style={styles.statusBar} onPress={()=> alert('hey!')}></TouchableOpacity>
-                <View style={{flexDirection: "row",}}>
+                <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
                     <Text style={styles.header}>Explore |</Text>
-                    <View style={{justifyContent:"center", flexGrow:1}}>
-                        <Picker
-                            selectedValue={this.state.selected}
-                            style={styles.select}
-                            itemStyle={{ backgroundColor: "grey", color: "blue", fontSize:17, fontWeight:"700" }}
-                            onValueChange={(itemValue, itemIndex) =>
-                                this.setState({selected: itemValue})
-                            }>
-                            <Picker.Item label="Canada" value="CA" />
-                            <Picker.Item label="U.S.A" value="USA" />
-                            <Picker.Item label="Mexico" value="MEX" />
-                            <Picker.Item label="Caribbean" value="CAR" />
-                            <Picker.Item label="Central America" value="CTA" />
-                            <Picker.Item label="South America" value="STA" />
-                        </Picker>
+                    <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
+                        <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
+                        <ActionSheet
+                            ref={o => this.ActionSheet = o}
+                            title={<Text style={{fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
+                            cancelButtonIndex={0}
+                            destructiveButtonIndex={0}
+                            options={continents}
+                            onPress={(index) => { /* do something */ 
+                                console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
+                                index != 0? this.setState({selected: index}) : {};
+                            }}
+                        />
+
                     </View>
-                    <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
+                    {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
                         <TouchableOpacity>
                             <Icon 
                                 name='settings'
                                 color='orange'
                             />
                         </TouchableOpacity>
-                    </View>
+                    </View> */}
                 </View>
                 
                 {topBarStyle ? 
-                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"white",borderTopWidth:0.5,borderBottomWidth:0.5, borderTopColor:'orange', borderBottomColor:'orange'}}>
-                        <Icon type='material-community' name='arrow-down' color='orange'/>
+                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"#DCDCDC"}}>
+                        <Icon size={22} type='material-community' name='menu-down' color='black'/>
                     </TouchableOpacity>
                 :
                     (<View>
@@ -187,10 +245,10 @@ export default class BirdList extends Component {
                             placeholder="Search..."
                             onChangeText={this.updateSearch}
                             value={this.state.searchInput}
-                            placeholderTextColor="white"
-                            inputStyle={{fontSize: 14, color: 'white'}} // style the TextInput
-                            inputContainerStyle={{borderRadius:10, backgroundColor: '#474747'}}
-                            containerStyle={{backgroundColor: 'white', borderTopColor: 'orange', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                            placeholderTextColor="#474747"
+                            inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
+                            inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
+                            containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
                         />
 
                         <View>

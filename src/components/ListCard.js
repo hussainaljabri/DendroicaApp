@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-
-export default class BirdCard extends Component {
+import {Icon} from 'react-native-elements';
+export default class ListCard extends Component {
 
 
 
@@ -12,16 +12,10 @@ export default class BirdCard extends Component {
         return (
             <TouchableOpacity onPress={this.props.onPress} onLongPress={this.props.onLongPress} style={[styles.container, this.props.style]}>
                 <View style={styles.container}>
-                    
-                    <Image
-                    source={this.props.imgUrl}
-                    resizeMode="cover"
-                    style={styles.img}
-                />
                     <View style={{flexDirection:'column', justifyContent: "center"}}>
-                        <Text style={styles.birdName}>{this.props.birdName}</Text>
-                        <Text style={styles.latin}>{this.props.latin}</Text>
+                        <Text style={styles.listName}>{this.props.birdName}</Text>
                     </View>
+                    <Icon />
                 </View>
             </TouchableOpacity>
         );
