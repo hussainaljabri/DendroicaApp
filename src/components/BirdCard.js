@@ -11,7 +11,7 @@ export default class BirdCard extends Component {
     
         return (
             <TouchableOpacity onPress={this.props.onPress} onLongPress={this.props.onLongPress} style={[styles.container, this.props.style]}>
-                <View style={styles.container}>
+                
                     
                     <Image
                     source={this.props.imgUrl}
@@ -22,7 +22,7 @@ export default class BirdCard extends Component {
                         <Text style={styles.birdName}>{this.props.birdName}</Text>
                         <Text style={styles.latin}>{this.props.latin}</Text>
                     </View>
-                </View>
+                
             </TouchableOpacity>
         );
 
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 1,
         borderColor: 'black',
-        borderWidth: 0.1,
+        borderWidth: 0.3,
         backgroundColor: '#F8F8F8',
     },
     img: {

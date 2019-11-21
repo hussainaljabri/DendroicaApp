@@ -10,14 +10,18 @@ export default class ListCard extends Component {
 
     
         return (
-            <TouchableOpacity onPress={this.props.onPress} onLongPress={this.props.onLongPress} style={[styles.container, this.props.style]}>
-                <View style={styles.container}>
-                    <View style={{flexDirection:'column', justifyContent: "center"}}>
-                        <Text style={styles.listName}>{this.props.birdName}</Text>
-                    </View>
-                    <Icon />
+            
+            <View style={styles.container}>
+                <Text style={styles.listName}>{this.props.name}</Text>
+                <View style={{flexDirection:'row'}}>
+                    <Icon size={22} onPress={()=> alert('Remove: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#ff7f7f' name='minus-circle'/>
+                    <View style={styles.icon}/>
+                    <Icon size={22} onPress={()=> alert('Edit: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#808080' name='square-edit-outline'/>
+                    <View style={styles.icon}/>
+                    <Icon size={22} onPress={()=> alert('Download: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#34C759' name='arrow-down-box'/>
                 </View>
-            </TouchableOpacity>
+            </View>
+
         );
 
 
@@ -30,23 +34,23 @@ export default class ListCard extends Component {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        padding: 15,
         flexDirection: 'row',
-        borderRadius: 1,
+        justifyContent:'space-between',
+        // borderRadius: 0.5,
+        // borderColor: 'black',
+        // borderWidth: 0.2,
+        // borderBottomColor:'black',
+        // borderBottomWidth:0.3,
+        backgroundColor: '#F5F5F5',
+        // flexGrow:1,
+        borderRadius: 0.5,
         borderColor: 'black',
-        borderWidth: 0.1,
-        backgroundColor: '#F8F8F8',
+        borderWidth: 0.2,
     },
-    img: {
-        width: 120,
-        height: 100,
-        // borderRadius: 2,
-        // borderColor: "black",
-        // borderWidth: 1,
-    },
-    birdName:{
-        paddingHorizontal: 15,
-        textAlignVertical: 'center',
-        fontSize: 16,
+    icon: {
+        marginHorizontal: 5,
+
     },
     latin:{
         textAlignVertical: 'center',
