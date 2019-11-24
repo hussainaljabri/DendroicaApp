@@ -114,7 +114,7 @@ var insertAPIData = function(onFinishedCallback) {
     });
 }
 
-const DatabaseTestDriver = {
+const DatabaseManagementModule = {
     init: init
 };
-export default DatabaseTestDriver;
+export default DatabaseManagementModule;

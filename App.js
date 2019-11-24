@@ -6,8 +6,8 @@ import Settings from './src/UI/Settings';
 import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
 import {Text} from 'react-native';
 import {createAppContainer } from "react-navigation";
-import DatabaseTestDriver from "./src/DB/DatabaseTestDriver";
-DatabaseTestDriver.init();
+import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
+DatabaseManagementModule.init();
 
 export default class App extends Component {
 
