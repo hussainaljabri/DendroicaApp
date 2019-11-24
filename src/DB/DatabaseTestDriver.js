@@ -1,121 +1,118 @@
 import DatabaseModule from './DatabaseModule';
 
-const data =
-[
-	{
-		"birdID": 67,
-		"birdName": "Bald Eagle",
-		"scientificName": "Haliaeetus leucocephalus",
-		"rangeDescription": "Canada - Resident year-round: 228,651 square km; Breeding only: 5,724,840 square km; Wintering only: 64,369 square km\nMexico - Resident year-round: 782 square km; Wintering only: 516,127 square km\nU.S.A. - Resident year-round: 990,957 square km; Breeding only: 1,700,744 square km; Wintering only: 4,690,048 square km",
-		"songDescription": "Largely silent. Hollow whinny and a variety of chirps.",
-		"regionNames": ["Canada", "USA", "Mexico"],
-	    "imagePaths": ["67_0.jpg", "67_1.jpg", "67_2.jpg", "67_3.jpg"],
-		"imageCredits": ["Isaac Sanchez; 2012 Jan 7; USA, Florida; Naples; Adult;","Ann Cook; Adult;","Dave Govoni (Va bene!) (http://www.flickr.com/photos/dgovoni/6818957717/); USA; Adult;","Rick Leche; Adult;"],
-		"mapPaths": ["67_americas.png", "67_central.png", "67_north.png"],
-		"mapCredits": [
-			"Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp",
-			"Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp",
-			"Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp"
-			],
-		"spectoPaths": ["67_0.png", "67_1.png", "67_2.png"],
-		"soundPaths": ["67_0.mp3","67_1.mp3","67_2.mp3"],
-		"soundCredits": ["Lang  Elliott; 1988 May 19; USA, Kentucky; Adult; Primary Sound; Alarm call;"," Borror Laboratory of Bioacoustics; 1989 Jul 6; USA, Michigan; Adult; Primary Sound;","John  Neville; (Bird Songs of Canada's West Coast); Canada, British Columbia; Wallace; Flock/Group; Primary Sound;"]
-	},
-	{
-	    "birdID": 2248,
-	    "birdName": "Chilean Flamingo",
-	    "scientificName": "Phoenicopterus chilensis",
-	    "rangeDescription": "Summary of the extent of the breeding, wintering, migration and year-round range of this species in the Western Hemisphere, including Canada, U.S.A. and Mexico: South America - Resident year-round: 2,939,206 square km; Wintering only: 401,630 square km",
-        "songDescription": "No description available in english",
-        "regionNames": ["South America"],
-        "imagePaths": ["2248_0.jpg", "2248_1.jpg", "2248_2.jpg"],
-        "imageCredits": ["katewrightson (http://www.flickr.com/photos/katewrightson/5562353789/); USA; Adult;","Aztlek (http://www.flickr.com/photos/aztlek/5938199359/); Chile; Adult;","Cláudio Timm (http://www.flickr.com/photos/cdtimm/5705178799/); Adult;"],
-        "mapPaths": ["2248_americas.png", "2248_south.png"],
-        "mapCredits": [
-            "Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp",
-            "Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp",
-        ],
-        "spectoPaths": [],
-        "soundPaths": [],
-        "soundCredits": []
-	},
-    {
-        "birdID": 418,
-        "birdName": "Field Sparrow",
-        "scientificName": "Spizella pusilla",
-        "rangeDescription": "Canada - Resident year-round: Canada - Resident year-round: 12,412 square km; Breeding only: 149,708 square km\nMexico - Wintering only: 161,983 square km\nU.S.A. - Resident year-round: 2,425,107 square km; Breeding only: 1,406,775 square km; Wintering only: 586,303 square km",
-        "songDescription": "Song is a rising series of ever shorter whistles. Similar in rhythm to a ping pong ball dropped on a table.",
-        "regionNames": ["USA"],
-        "imagePaths": ["418_0.jpg", "418_1.jpg", "418_2.jpg", "418_3.jpg"],
-        "imageCredits": ["Isaac Sanchez; 2012 May 14; USA, Oklahoma; Edmond; Adult;","Chuck Carlson; 2005 May 18; USA, Montana; North McCone County; Adult;","John Reaume; Adult;", "John Reaume; Adult;"],
-        "mapPaths": ["418_americas.png", "418_central.png", "418_north.png"],
-        "mapCredits": [
-            "Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp",
-            "Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp",
-            "Range Map: Andrew Couturier Source: Ridgely et al, 2007. Digital Distribution Maps of the Birds of the Western Hemisphere,version 3.0. NatureServe, Arlington, Virginia, USA. www.natureserve.org/getData/birdMaps.jsp"
-        ],
-        "spectoPaths": ["418_0.png", "418_1.png", "418_2.png", "418_3.png"],
-        "soundPaths": ["418_0.mp3", "418_1.mp3", "418_2.mp3", "418_3.mp3"],
-        "soundCredits": ["Macaulay Library (Macaulay Library, Cornell); Adult; Primary Sound;","Monty Brigham (Bird Sounds of Canada); 1987 Jun 1; Canada, Ontario; Marlborough Forest - Richmond; Adult; Primary Sound;","Monty Brigham (Bird Sounds of Canada); 1991 May 19; Canada, Ontario; Bob's Lake - Tichborne; Adult; Primary Sound;","Monty Brigham (Nature Sounds of Ontario); 1987 Jul 1; Canada, Ontario; Richmond; Adult; Primary Sound;", ]
-  }
-]
 var init = function() {
-    DatabaseModule.destroyDB(function() {
-        DatabaseModule.initDB(function() {
-            DatabaseModule.printDatabase(); //Should have a callback. This is just for testing
-            insertRegions(function() {
-                insertBirdDataJSON(function() {
-                    DatabaseModule.printDatabase();
-                });
+    DatabaseModule.destroyDB(() => {
+        DatabaseModule.initDB(() => {
+            insertAPIData(() => {
+                DatabaseModule.printDatabase();
             });
         });
     });
 }
 
-var insertRegions = function(onFinishedCallback) {
-    DatabaseModule.insertRegion("Canada", {success: function(tx,res) {
-        DatabaseModule.insertRegion("USA", {success: function(tx,res) {
-            DatabaseModule.insertRegion("Mexico", {success: function(tx,res) {
-                DatabaseModule.insertRegion("Caribbean", {success: function(tx,res) {
-                    DatabaseModule.insertRegion("Central America", {success: function(tx,res) {
-                        DatabaseModule.insertRegion("South America", {success: function(tx,res) {
-                            onFinishedCallback();
-                        }},tx);
-                    }},tx);
-                }},tx);
-            }},tx);
-        }},tx);
-    }},null);
-}
+var insertAPIData = function(onFinishedCallback) {
+    var projectIds;
 
-//var insertBird = function (id, name, scientificName, rangeDescription, songDescription, callbacks) {
-var insertBirdDataJSON = function(onFinishedCallback) {
-    for (var bird_id in data) {
-        var d = data[bird_id];
-        var insertions = 0;
-        DatabaseModule.insertBirdDataset(
-            d.birdID,
-            d.birdName,
-            d.scientificName,
-            d.rangeDescription,
-            d.songDescription,
-            d.regionNames,
-            d.imagePaths,
-            d.imageCredits,
-            d.mapPaths,
-            d.mapCredits,
-            d.spectoPaths,
-            d.soundPaths,
-            d.soundCredits,
-            function() {
-                insertions++;
-                if (insertions === data.length)
-                    onFinishedCallback();
-            },
-        );
+    var fetchRegions = function(onFinishedCallback) {
+        fetch('https://www.natureinstruct.org/api/projects?token=tod2lCvzSh9sh6Q')
+            .then((response) => response.json())
+            .then((responseJson) => {
+                DatabaseModule.insertMultiple(responseJson, ["masterRegionId","id","name"], "Regions", onFinishedCallback);
+                projectIds = responseJson.id;
+            })
+            .catch((error) => {
+                console.error(error);
+            });
     }
-}
 
+    var fetchTableForEachProject = function(url, jsonNamesArray, tableName, duplicateIds, onFinishedCallback) {
+            var projectsAdded = 0;
+            var uniqueJson = {};
+            if (duplicateIds) {
+                for (var i = 0; i < jsonNamesArray.length; i++) {
+                    uniqueJson[jsonNamesArray[i]] = [];
+                }
+            }
+            for (var id in projectIds) {
+                fetch('https://www.natureinstruct.org/api/' + url + 'token=tod2lCvzSh9sh6Q&projectId=' + projectIds[id])
+                    .then((response) => response.json())
+                    .then((responseJson) => {
+                        var insertJson = responseJson;
+                        if (responseJson !== null) {
+                            if (duplicateIds) {
+                                for (var i = 0; i < responseJson.id.length; i++) {
+                                    if (uniqueJson.id.indexOf(responseJson.id[i]) == -1) {
+                                        for (var j = 0; j < jsonNamesArray.length; j++) {
+                                            uniqueJson[jsonNamesArray[j]].push(responseJson[jsonNamesArray[j]][i]);
+                                        }
+                                    }
+                                }
+                                projectsAdded ++;
+                                if (projectsAdded == projectIds.length) {
+                                    DatabaseModule.insertMultiple(uniqueJson, jsonNamesArray, tableName, onFinishedCallback);
+                                }
+                            }
+                            else {
+                                DatabaseModule.insertMultiple(responseJson, jsonNamesArray, tableName, () => {
+                                    projectsAdded ++;
+                                    if (projectsAdded == projectIds.length)
+                                        onFinishedCallback();
+                                });
+                            }
+                        }
+                        else {
+                            projectsAdded ++;
+                            if (projectsAdded == projectIds.length) {
+                                if (duplicateIds) {
+                                    DatabaseModule.insertMultiple(uniqueJson, jsonNamesArray, tableName, onFinishedCallback);
+                                }
+                                else
+                                    onFinishedCallback();
+                            }
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
+    }
+
+    fetchRegions(() => {
+        var i,j,k,l,m = false;
+        console.log("inserted all Regions");
+        fetchTableForEachProject('species?', ["id","commonName","scientificName","mapDescription","songDescription"], "Birds", true, () => {
+            console.log("inserted all Birds");
+            fetchTableForEachProject('customLists?', ["id","name"], "Lists", false, () => {
+                console.log("inserted all Lists");
+                fetchTableForEachProject('customListSpecies?', ["customListId","speciesId"], "BirdLists", false, () => {
+                    console.log("inserted all BirdLists");
+                    i = true;
+                    if (i && j && k && l && m) onFinishedCallback();
+                });
+                fetchTableForEachProject('speciesRegions?', ["regionId","speciesId","nonBreederInRegion","rareInRegion"], "BirdRegions", false, () => {
+                    console.log("inserted all BirdRegions");
+                    j = true;
+                    if (i && j && k && l && m) onFinishedCallback();
+                });
+                fetchTableForEachProject('speciesImages?', ["id","speciesId","url","source","displayOrder"], "BirdImages", true, () => {
+                    console.log("inserted all SpeciesImages");
+                    k = true;
+                    if (i && j && k && l && m) onFinishedCallback();
+                });
+                fetchTableForEachProject('speciesMaps?', ["id","speciesId","url","source"], "MapImages", true, () => {
+                    console.log("inserted all MapImages")
+                    l = true;
+                    if (i && j && k && l && m) onFinishedCallback();
+                });
+                fetchTableForEachProject('speciesSounds?', ["id","speciesId","spectrogramUrl","url","source"], "Vocalizations", true, () => {
+                    console.log("inserted all Vocalizations");
+                    m = true;
+                    if (i && j && k && l && m) onFinishedCallback();
+                });
+            });
+        });
+    });
+}
 
 const DatabaseTestDriver = {
     init: init
