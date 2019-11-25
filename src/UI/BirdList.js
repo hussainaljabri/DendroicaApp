@@ -203,6 +203,11 @@ export default class BirdList extends Component {
     /**
      * ------------------------------------------------------------------------------------------
      */
+    goToTop = () => {
+        if(this.scrollView != null){
+            this.scrollView.scrollTo({x: 0, y: 0, animated: true});
+        }
+     }
     render(){
         const topBarStyle = this.state.isTopBarHidden;
         return (
@@ -220,18 +225,10 @@ export default class BirdList extends Component {
                         <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
                         <Text style={styles.header}>Explore |</Text>
                         <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                            <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
-                            <ActionSheet
-                                ref={o => this.ActionSheet = o}
-                                title={<Text style={{fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
-                                cancelButtonIndex={0}
-                                destructiveButtonIndex={0}
-                                options={continents}
-                                onPress={(index) => { /* do something */ 
-                                    console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
-                                    index != 0? this.setState({selected: index}) : {};
-                                }}
-                            />
+
+                            <TouchableOpacity onPress={()=> this.props.navigation.navigate('Settings')}>
+                                <Text style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>Region</Text>
+                            </TouchableOpacity>
 
                         </View>
                         {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
@@ -259,8 +256,15 @@ export default class BirdList extends Component {
                     </View>)
                 }
 
-                <ScrollView style={{flex:1}} showsVerticalScrollIndicator={false} onMomentumScrollBegin={this.topHide} >
+                <ScrollView ref={(ref)=> this.scrollView = ref} style={{flex:1}} scrollsToTop={true} showsVerticalScrollIndicator={true} onMomentumScrollBegin={this.topHide} >
                     {this.getBirdCards()}
+
+
+                    
+                    <TouchableOpacity style={{backgroundColor:'orange', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
+                        <Text style={{fontWeight: '500',color:'black', textAlign:"center"}}>Go To Top</Text>
+                    </TouchableOpacity>
+                    
                 </ScrollView>
                
             </View>
@@ -300,4 +304,21 @@ const styles = StyleSheet.create({
          justifyContent: "center", 
          alignSelf:"center"
         },
+    FloatingButton:{
+
+        position: 'absolute',
+        width: 50,
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+        right: 30,
+        bottom: 30,
+    },
+    
+    FloatingButtonIcon: {
+    
+        resizeMode: 'contain',
+        width: 50,
+        height: 50,
+    }
 });

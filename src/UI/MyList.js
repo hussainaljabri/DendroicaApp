@@ -113,6 +113,7 @@ export default class MyList extends Component {
                 </View>
                 <ScrollView style={{flex:1}} showsVerticalScrollIndicator={false} >
                         {this.getBirdCards()}
+                        
                 </ScrollView>
                 
 

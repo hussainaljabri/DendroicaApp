@@ -37,11 +37,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'row',
-        borderRadius: 6,
+        borderRadius: 1,
         borderColor: 'black',
         borderWidth: 0.3,
-        backgroundColor: '#F4F4F5',
-        overflow: 'scroll',
+        backgroundColor: '#F8F8F8',
     },
     img: {
         width: 120,

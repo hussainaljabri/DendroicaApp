@@ -287,10 +287,10 @@ export default class BirdInfo extends Component {
                         type={'font-awesome'}
                         color='#34C759'
                     />
-                    <Text style={styles.title}> Location: {this.state.data.id ==1? this.state.data.maps.region[this.state.activeMapSlide] : 'Not Found!'}</Text>
+                    <Text style={styles.title}> Location: {this.state.data.id ==1? /**for debugging */ this.state.data.maps.region[this.state.activeMapSlide] : 'Not Found!'}</Text>
 
                 </View>
-                    {this.state.data.id == 1?
+                    {this.state.data.id == 1? // for debugging
                         (<View style={styles.textContainer}>
                             <Text style={styles.textContainer}>Range Description for {this.state.data.name}</Text>
                             <Text style={styles.textContainer}>{this.state.data.maps.description}</Text>
@@ -432,7 +432,7 @@ const styles = StyleSheet.create({
         height: slideHeight,
     },
     paginationContainer: {
-        paddingTop: 0,
+        paddingTop: 5,
         paddingBottom: 20,
     },
     paginationDot: {
