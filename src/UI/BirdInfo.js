@@ -433,13 +433,13 @@ const styles = StyleSheet.create({
     },
     paginationContainer: {
         paddingTop: 0,
-        paddingBottom: 8,
+        paddingBottom: 20,
     },
     paginationDot: {
-        width: 12,
-        height: 12,
+        width: 6,
+        height: 6,
         borderRadius: 7,
-        marginHorizontal: 8
+        marginHorizontal: 4
     },
        slideInnerContainer: {
         width: itemWidth,
