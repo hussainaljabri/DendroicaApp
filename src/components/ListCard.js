@@ -16,8 +16,8 @@ export default class ListCard extends Component {
                 <View style={{flexDirection:'row'}}>
                     <Icon size={22} onPress={()=> alert('Remove: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#ff7f7f' name='minus-circle'/>
                     <View style={styles.icon}/>
-                    <Icon size={22} onPress={()=> alert('Edit: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#808080' name='square-edit-outline'/>
-                    <View style={styles.icon}/>
+                    {/* <Icon size={22} onPress={()=> alert('Edit: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#808080' name='square-edit-outline'/>
+                    <View style={styles.icon}/> */}
                     <Icon size={22} onPress={()=> alert('Download: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#34C759' name='arrow-down-box'/>
                 </View>
             </View>

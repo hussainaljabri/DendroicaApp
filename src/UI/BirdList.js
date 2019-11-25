@@ -208,39 +208,41 @@ export default class BirdList extends Component {
         return (
             <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,flex:1}}>
                 <TouchableOpacity style={styles.statusBar} onPress={()=> alert('hey!')}></TouchableOpacity>
-                <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
-                    <Text style={styles.header}>Explore |</Text>
-                    <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                        <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
-                        <ActionSheet
-                            ref={o => this.ActionSheet = o}
-                            title={<Text style={{fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
-                            cancelButtonIndex={0}
-                            destructiveButtonIndex={0}
-                            options={continents}
-                            onPress={(index) => { /* do something */ 
-                                console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
-                                index != 0? this.setState({selected: index}) : {};
-                            }}
-                        />
-
-                    </View>
-                    {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
-                        <TouchableOpacity>
-                            <Icon 
-                                name='settings'
-                                color='orange'
-                            />
-                        </TouchableOpacity>
-                    </View> */}
-                </View>
                 
                 {topBarStyle ? 
                     <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"#DCDCDC"}}>
                         <Icon size={22} type='material-community' name='menu-down' color='black'/>
                     </TouchableOpacity>
                 :
-                    (<View>
+                    (
+                    
+                    <View>
+                        <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
+                        <Text style={styles.header}>Explore |</Text>
+                        <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
+                            <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
+                            <ActionSheet
+                                ref={o => this.ActionSheet = o}
+                                title={<Text style={{fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
+                                cancelButtonIndex={0}
+                                destructiveButtonIndex={0}
+                                options={continents}
+                                onPress={(index) => { /* do something */ 
+                                    console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
+                                    index != 0? this.setState({selected: index}) : {};
+                                }}
+                            />
+
+                        </View>
+                        {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
+                            <TouchableOpacity>
+                                <Icon 
+                                    name='settings'
+                                    color='orange'
+                                />
+                            </TouchableOpacity>
+                        </View> */}
+                    </View>
                         <SearchBar
                             placeholder="Search..."
                             onChangeText={this.updateSearch}

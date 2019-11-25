@@ -1,9 +1,11 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, ActivityIndicator} from "react-native";
+import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight} from "react-native";
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import ImageViewer from 'react-native-image-zoom-viewer';
+
 
 const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
@@ -32,7 +34,10 @@ export default class BirdInfo extends Component {
         dataReady: false,
         activeSlide: 0,
         activeMapSlide: 0,
+        scrollable: true,
+        isModelVisible: false,
     }
+
     static navigationOptions = ({navigation})=> ({
         headerTitle:()=> (<View style={{flexDirection:'column', }}>
             <Text style={{
@@ -42,7 +47,7 @@ export default class BirdInfo extends Component {
                                 justifyContent: "space-between", 
                                 alignSelf:"center"}}
                           >{navigation.state.params.title}</Text>
-    <Text style={{letterSpacing: 1.5, fontSize:10, justifyContent: "center", fontStyle:'italic'}}>{navigation.state.params.id == 1? navigation.state.params.data.latin:'Latin Name'}</Text>
+    <Text style={{letterSpacing: 1.5, fontSize:10, justifyContent: "center", fontStyle:'italic'}}>{navigation.state.params.id == 1? /*for debugging*/ navigation.state.params.data.latin:'Latin Name'}</Text>
         </View>),
         headerTintColor: "#34C759",
         
@@ -55,30 +60,103 @@ export default class BirdInfo extends Component {
        });
 
    }
-   //@TODO
-   getVocalization=()=>{
+   ShowModalFunction(visible) {
+    console.log('ShowModalFunction from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
+    this.setState({ isModelVisible: visible });
+    };
+    _handleModalButton=()=>{
+       console.log('ToggleModelVisible from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
+       this.setState({ isModelVisible: !this.state.isModelVisible});
+    }
+   getImageModal=(page)=>{
+        if(page==='info'){
+            const img = this.state.data.image.map((item, index)=>{
+                return ({props:{source: item}}); // {url: item} for http url or file url
+            });
+            return (
+                    <Modal
+                        style={{margin:0}}
+                        backdropColor='transparent'
+                        visible={this.state.isModelVisible}
+                        transparent={false}
+                        animationType={"slide"}
+                        onRequestClose={() => console.log('Modal has been closed')}>
+                        
+                        
+                        <ImageViewer saveToLocalByLongPress={true} index={this.state.activeSlide} imageUrls={img} />
+                        <View style={styles.modalContainer}>
+                            <TouchableHighlight
+                                style={{padding:15, backgroundColor: 'gray'}}
+                                onPress={() => this.ShowModalFunction(!this.state.isModelVisible)}
+                                >
+                                <Text style={{textAlign:"center", fontWeight:'500'}}>Go Back!</Text>
+                            </TouchableHighlight>
+                        </View>
+                    </Modal>
+    
+            );
+    
+        }else if(page==='map'){
+            const img = this.state.data.maps.image.map((item, index)=>{
+                return ({props:{source: item}}); // {url: item} for http url or file url
+            });
+            return (
+                    <Modal
+                        style={{margin:0}}
+                        backdropColor='transparent'
+                        visible={this.state.isModelVisible}
+                        transparent={false}
+                        animationType={"slide"}
+                        onRequestClose={() => console.log('Modal has been closed')}>
+    
+                        
+                        <ImageViewer saveToLocalByLongPress={true} index={this.state.activeMapSlide} imageUrls={img} />    
+                        <View style={styles.modalContainer}>
+                            <TouchableHighlight
+                                style={{padding:15, backgroundColor: 'gray'}}
+                                onPress={() => this.ShowModalFunction(!this.state.isModelVisible)}
+                                >
+                                <Text style={{textAlign:"center", fontWeight:'500'}}>Go Back!</Text>
+                            </TouchableHighlight>
+                        </View>
+                    </Modal>
+    
+            );
+    
+        }
         
-
    }
- 
 
-   _renderItem ({item, index}) {
-    console.log(item);
+   _renderItem =({item, index})=>{
+    // console.log(item);
     const even = (index + 1) % 2 === 0;
-    console.log(even);
+    // console.log(even);
     return (
-      <TouchableOpacity style={styles.slideInnerContainer} activeOpacity={1} onPress={()=> alert('attempt to enlarge image')}>
-          <View style={styles.imageContainer}>
-            <Image style={styles.image} source={item} />
-          </View>
-      </TouchableOpacity>
+           <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
+            <View key={'VW'+index} style={styles.imageContainer}>
+                <Image key={'IM'+index} style={styles.image} source={item} />
+            </View>
+            </TouchableOpacity>
+
+
     );}
 
+    _handlePageZoom({ type, scale }) {
+        if (scale !== 1) {
+          this.setState({ scrollable: false });
+        } else if (scale === 1) {
+          this.setState({ scrollable: true });
+        }
+      }
 
+      _handleDoubleClick() {
+        this.setState({ scrollable: !this.state.scrollable });
+      }
 
     getInfoPage=()=>{
         return (
             <ScrollView >
+                {this.getImageModal('info')}
                 <Carousel
                     ref={(c) => { this._carousel = c; }}
                     data={this.state.data.image}
@@ -89,6 +167,7 @@ export default class BirdInfo extends Component {
                     hasParallaxImages={true}
                     containerCustomStyle={styles.slider}
                     contentContainerCustomStyle={styles.sliderContentContainer}
+                    scrollEnabled={ this.state.scrollable }
                     onSnapToItem={(index) => this.setState({ activeSlide: index }) }
                 />
                 <Pagination 
@@ -113,7 +192,7 @@ export default class BirdInfo extends Component {
                 </View>
 
                 <View style={styles.textContainer}>
-                    {this.state.data.id == 1? 
+                    {this.state.data.id == 1?  // for debugging
                     <View>
                         <Text>Photo Taker: {this.state.data.imageCredit[this.state.activeSlide].name}</Text>
                         <Text>Source: {this.state.data.imageCredit[this.state.activeSlide].source}</Text>
@@ -139,14 +218,14 @@ export default class BirdInfo extends Component {
                     <Text style={styles.title}> Vocalizations</Text>
                 </View>
 
-                    {this.getVocalization()}
+                     {/* TODO: VOCALIZATIONS CODE GOES HERE */}
         </ScrollView>)
     }
 
     getMapPage=()=>{
         return (<ScrollView>
-
-                {this.state.data.id == 1?
+                {this.getImageModal('map')}
+                {this.state.data.maps.image.length != 0?
                     (<View>
                         <Carousel
                         ref={(cb) => { this._carouselMap = cb; }}
@@ -221,6 +300,13 @@ export default class BirdInfo extends Component {
                     }
         </ScrollView>)
     }
+
+
+    /**
+     * Gets the layout of the current page.
+     * done this way to separate the layout from styling and button handlers
+     * for future expansions.
+     */
     getLayout=()=>{
         switch(this.state.page){
             case 0:
@@ -233,6 +319,12 @@ export default class BirdInfo extends Component {
                 return this.getInfoPage();
         }                  
     }
+
+    /**
+     * Button Handlers, for 2 reasons:
+     * - getLayout knows which tab is current
+     * - button styles know which tab is current
+     */
     infoBtnHandler=()=>{
         this.setState({
             page: 0,
@@ -429,5 +521,11 @@ const styles = StyleSheet.create({
     },
     subtitleEven: {
         color: 'rgba(255, 255, 255, 0.7)'
-    }
+    },  
+    modalContainer: {
+
+        justifyContent: 'center',
+
+      },
+
 });
