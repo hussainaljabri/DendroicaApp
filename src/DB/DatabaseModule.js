@@ -99,6 +99,10 @@ var insertBirdDataset = function (birdID, birdName, scientificName, rangeDescrip
     }});
 }
 
+var getBirdById = function (id, callbacks) {
+    var query = `SELECT * from Birds where _id=id`;
+    _sqlQuery(query, [], callbacks);
+}
 //Define id explicitly for birds to correspond to Dendroica's IDs
 var _insertBird = function (id, name, scientificName, rangeDescription, songDescription, callbacks) {
     var query = `INSERT INTO Birds (_id, name, scientific_name, range_description, song_description) VALUES (?,?,?,?,?)`;
