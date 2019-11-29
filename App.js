@@ -7,7 +7,16 @@ import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
 import {Text} from 'react-native';
 import {createAppContainer } from "react-navigation";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
-DatabaseManagementModule.init();
+import Authentication from "./src/DB/Authentication";
+
+const username = "tmobile";
+const password = "appH@ppy";
+
+DatabaseManagementModule.init(() => {
+    Authentication.userLogin(username, password, () => {
+        DatabaseManagementModule.importAPIData(1, () => {} );
+    });
+});
 
 export default class App extends Component {
 
