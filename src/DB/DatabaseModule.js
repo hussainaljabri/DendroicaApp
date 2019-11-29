@@ -92,16 +92,21 @@ var insertBirdDataset = function (birdID, birdName, scientificName, rangeDescrip
             _insertVocalization(birdID, spectroPaths[index], soundPaths[index], soundCredits[index], {success: function(tx,res) {
                     k++;
                     if (r===regionNames.length && i===imagePaths.length && j===mapPaths.length && k===spectroPaths.length){
-                        onFinishedCallback();
                     }
             }}, tx);
         }
     }});
 }
 
+//DatabaseModule.getBirdById(1, {success: (bird) =>{
+//     console.log(bird);
+//}});
 var getBirdById = function (id, callbacks) {
-    var query = `SELECT * from Birds where _id=id`;
-    _sqlQuery(query, [], callbacks);
+    var query = `SELECT * from Birds where (_id=?)`;
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array[0];
+        callbacks.success(result);
+    }});
 }
 //Define id explicitly for birds to correspond to Dendroica's IDs
 var _insertBird = function (id, name, scientificName, rangeDescription, songDescription, callbacks) {
@@ -151,15 +156,14 @@ var _getRegionIDByName = function (name, callbacks) {
 //                   either callback may be passed optionally as well as their parameters. Function is async though so will usually need success
 //param tx       --> use if this invocation is a callback intended to use the same connection
 var _sqlQuery = function (query, params, callbacks, tx) {
-    if (!callbacks) callbacks = {};
-    var success = (!callbacks.success) ? function(tx,res) { return res; } : callbacks.success;
-    var error = (!callbacks.error) ? function(err) {
+    var success = (!callbacks || !callbacks.success) ? function(tx,res) { return res; } : callbacks.success;
+    var error = (!callbacks || !callbacks.error) ? function(err) {
         console.log("----Error With Query----\n" + query);
         console.log("Params - ");
         if (params.length !== 0) {
             for (var i = 0; i < params.length; i++)
                 console.log(params[i]);
-        }
+        } else console.log("None");
     } : callbacks.error;
 
     if (tx) {
@@ -316,6 +320,7 @@ var initDB = function(onFinishedCallback) {
 const DatabaseModule = {
     initDB: initDB,
     destroyDB: destroyDB,
+    getBirdById: getBirdById,
     insertMultiple: insertMultiple,
     insertBirdDataset: insertBirdDataset,
     printDatabase: printDatabase
