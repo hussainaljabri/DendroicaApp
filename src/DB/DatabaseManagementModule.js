@@ -1,5 +1,6 @@
 import Authentication from './Authentication';
 import DatabaseModule from './DatabaseModule';
+import {AsyncStorage} from 'react-native';
 
 var init = function(onFinishedCallback) {
     DatabaseModule.destroyDB(() => {
@@ -69,10 +70,21 @@ var importAPIData = function(projectId, onFinishedCallback) {
                         if (responseJson !== null) {
                             if (responseJson.errorMsg) console.err(responseJson.errorMsg);
                             if (duplicateIds) {
+                                //If there is a potential for duplicate IDs (such as across projects) create new array parsing out any duplicates
                                 for (var i = 0; i < responseJson.id.length; i++) {
                                     if (uniqueJson.id.indexOf(responseJson.id[i]) == -1) {
                                         for (var j = 0; j < jsonNamesArray.length; j++) {
-                                            uniqueJson[jsonNamesArray[j]].push(responseJson[jsonNamesArray[j]][i]);
+                                            //If statement for debugging mostly. If a field name gets changed in api errors will occur
+                                            if (!responseJson[jsonNamesArray[j]]) {
+                                                console.error("json name " + jsonNamesArray[j] + " does not exist in table " + tableName);
+                                                return;
+                                            }
+                                            if (!responseJson[jsonNamesArray[j]][i]) {
+                                                uniqueJson[jsonNamesArray[j]].push(null);
+                                            }
+                                            else {
+                                                uniqueJson[jsonNamesArray[j]].push(responseJson[jsonNamesArray[j]][i]);
+                                            }
                                         }
                                     }
                                 }
@@ -120,17 +132,17 @@ var importAPIData = function(projectId, onFinishedCallback) {
                         i = true;
                         if (i && j && k && l && m && n) onFinishedCallback();
                     });
-                    importTableForProject('speciesImages?', ["id","speciesId","url","source","displayOrder"], "BirdImages", true, () => {
+                    importTableForProject('speciesImages?', ["id","speciesID","url","source","displayOrder"], "BirdImages", true, () => {
                         console.log("inserted all SpeciesImages");
                         k = true;
                         if (i && j && k && l && m && n) onFinishedCallback();
                     });
-                    importTableForProject('speciesMaps?', ["id","speciesId","url","source"], "MapImages", true, () => {
+                    importTableForProject('speciesMaps?', ["id","speciesID","url","source"], "MapImages", true, () => {
                         console.log("inserted all MapImages")
                         l = true;
                         if (i && j && k && l && m && n) onFinishedCallback();
                     });
-                    importTableForProject('speciesSounds?', ["id","speciesId","spectrogramUrl","url","source"], "Vocalizations", true, () => {
+                    importTableForProject('speciesSounds?', ["id","speciesID","spectrogramUrl","url","source"], "Vocalizations", true, () => {
                         console.log("inserted all Vocalizations");
                         m = true;
                         if (i && j && k && l && m && n) onFinishedCallback();
