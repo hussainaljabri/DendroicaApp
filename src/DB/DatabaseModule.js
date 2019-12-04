@@ -50,13 +50,11 @@ var updateVersionData = function(versionDataToUpdate, onFinishedCallback) {
 
     _sqlQuery(countQuery, [], {success: (tx,res) => {
         if (res.rows._array[0]["COUNT(*)"] === 1) {
-            console.log("updating version data");
             _sqlQuery(updateQuery, updateParams, { success: (tx,res) => {
                 onFinishedCallback();
             }});
         }
         if (res.rows._array[0]["COUNT(*)"] === 0) {
-            console.log("inserting version data");
             var params = [1,versionDataToUpdate.apiVersion, versionDataToUpdate.dataVersion, versionDataToUpdate.serverTimeStamp];
             _sqlQuery(insertQuery, params, {success: (tx,res) => {
                 onFinishedCallback();
@@ -147,6 +145,30 @@ var getBirdById = function (id, callbacks) {
         callbacks.success(result);
     }});
 }
+
+var getBirdImagePreviewUri = function (bird_id, callbacks) {
+    var query = `SELECT bird_id,filename from BirdImages WHERE displayOrder=1 and bird_id=?`;
+    _sqlQuery(query, [bird_id], {success:(tx,res) => {
+        var result = res.rows._array[0];
+        if (res.rows.length === 0) {
+            callbacks.success(null);
+            return;
+        }
+        callbacks.success({id: result.bird_id, path: result.filename});
+    }});
+}
+
+var getAllBirdIdsInRegion = function (regionId, callbacks) {
+    var query = `SELECT bird_id from BirdRegions WHERE region_id=?`;
+    _sqlQuery(query, [regionId], {success:(tx,res) => {
+        var resultToArray = [];
+        var result = res.rows._array;
+        for (var i = 0; i < result.length; i++)
+            resultToArray.push(result[i].bird_id);
+        callbacks.success(resultToArray);
+    }});
+}
+
 //Define id explicitly for birds to correspond to Dendroica's IDs
 var _insertBird = function (id, name, scientificName, rangeDescription, songDescription, callbacks) {
     var query = `INSERT INTO Birds (_id, name, scientific_name, range_description, song_description) VALUES (?,?,?,?,?)`;
@@ -417,7 +439,10 @@ const DatabaseModule = {
     getCredentials: getCredentials,
     getVersionData: getVersionData,
     updateVersionData: updateVersionData,
+    _sqlQuery: _sqlQuery, //Temporary to make testing easier
     getBirdById: getBirdById,
+    getBirdImagePreviewUri: getBirdImagePreviewUri,
+    getAllBirdIdsInRegion: getAllBirdIdsInRegion,
     insertMultiple: insertMultiple,
     insertBirdRegionsAndBirdSubRegions: insertBirdRegionsAndBirdSubRegions,
     printDatabase: printDatabase
