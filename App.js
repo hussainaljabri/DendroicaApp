@@ -14,7 +14,7 @@ const password = "appH@ppy";
 
 DatabaseManagementModule.init(() => {
     Authentication.userLogin(username, password, () => {
-        DatabaseManagementModule.importAPIData(1, () => {} );
+        DatabaseManagementModule.importApiData(1, () => {} );
     });
 });
 
