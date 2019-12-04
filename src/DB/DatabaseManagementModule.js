@@ -5,7 +5,7 @@ var versionUpdateInfo;
 var versionData;
 
 var init = function(onFinishedCallback) {
-    //DatabaseModule.destroyDB(() => {
+    DatabaseModule.destroyDB(() => {
         fetchAndSaveVersionData(() => {
             //If data version is updated flush entireDB. Flag will be true if DB not initialized
             if (versionUpdateInfo.dataVersionUpdate) { //Flush data
@@ -18,7 +18,7 @@ var init = function(onFinishedCallback) {
             else onFinishedCallback();
         });
 
-    //});
+    });
 }
 
 var fetchAndSaveVersionData = function(onFinishedCallback) {
@@ -160,7 +160,7 @@ var importApiData = function(projectId, onFinishedCallback) {
     importRegions(() => {
         var i,j,k,l,m,n = false;
         console.log("inserted all Regions");
-        importSubRegions(() => {
+        importTableForProject('projectRegions?', ["id","parentRegionId","region","abbrev"], "SubRegions", false, () => {
             console.log("inserted all SubRegions");
             importTableForProject('species?', ["id","commonName","scientificName","mapDescription","songDescription"], "Birds", true, () => {
                 console.log("inserted all Birds");
