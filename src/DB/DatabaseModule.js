@@ -7,14 +7,14 @@ var updateUser = function (dendroicaId, username, password, email, firstName, la
     var countQuery  = `SELECT COUNT(*) from User`;
     var updateQuery = `UPDATE User
                        SET _id=?,email=?,first_name=?,last_name=?,exclude_non_breeding=?,exclude_rare=?,language=?,naming=?,sorting=?
-                       WHERE username=?`;
+                       WHERE _id = 1`;
     var insertQuery = `INSERT into User
-                       VALUES (?,?,?,?,?,?,?,?,?,?,?)`;
+                       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`;
 
     _sqlQuery(countQuery, [], { success: (tx,res) => {
         if (res.rows._array[0]["COUNT(*)"] === 0) { //Insert
             _sqlQuery(insertQuery,
-                [dendroicaId, username, password, email, firstName, lastName, excludeNonBreeding, excludeRare, language, naming, sorting],
+                [1,dendroicaId, username, password, email, firstName, lastName, excludeNonBreeding, excludeRare, language, naming, sorting],
                 callbacks);
         }
 
@@ -30,6 +30,38 @@ var getCredentials = function(onFinishedCallback) {
     var query = `SELECT username,password from User`;
     _sqlQuery(query, [], { success: (tx,res) => {
         onFinishedCallback(res.rows._array[0]);
+    }});
+}
+
+var getVersionData = function(onFinishedCallback) {
+    var query = `SELECT * from VersionData`;
+    _sqlQuery(query, [], { success: (tx,res) => {
+        onFinishedCallback(res.rows._array[0]);
+    }, error: (error) => {
+        onFinishedCallback(null); //This query might get called before DB initialization
+    }});
+}
+
+var updateVersionData = function(versionDataToUpdate, onFinishedCallback) {
+    var countQuery  = "SELECT COUNT(*) from VersionData";
+    var insertQuery = "INSERT INTO VersionData VALUES (?,?,?,?)";
+    var updateQuery = "UPDATE VersionData SET apiVersion=?, dataVersion=?, lastUpdateTimeStamp=? where _id=1";
+    var updateParams= [];
+
+    _sqlQuery(countQuery, [], {success: (tx,res) => {
+        if (res.rows._array[0]["COUNT(*)"] === 1) {
+            console.log("updating version data");
+            _sqlQuery(updateQuery, updateParams, { success: (tx,res) => {
+                onFinishedCallback();
+            }});
+        }
+        if (res.rows._array[0]["COUNT(*)"] === 0) {
+            console.log("inserting version data");
+            var params = [1,versionDataToUpdate.apiVersion, versionDataToUpdate.dataVersion, versionDataToUpdate.serverTimeStamp];
+            _sqlQuery(insertQuery, params, {success: (tx,res) => {
+                onFinishedCallback();
+            }});
+        }
     }});
 }
 
@@ -202,50 +234,55 @@ var printDatabase = function() {
     _sqlQuery('SELECT * from User', [], {success: (tx, res) => {
         _printTable("User", res.rows._array, count);
 
-        _sqlQuery('SELECT COUNT(*) from Birds', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-        _sqlQuery('SELECT * from Birds', [], {success: (tx, res) => {
-            _printTable("Birds", res.rows._array, count);
+         _sqlQuery('SELECT COUNT(*) from VersionData', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+         _sqlQuery('SELECT * from VersionData', [], {success: (tx, res) => {
+            _printTable("VersionData", res.rows._array, count);
 
-            _sqlQuery('SELECT COUNT(*) from Regions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-            _sqlQuery('SELECT * from Regions', [], {success: (tx, res) => {
-                _printTable("Regions", res.rows._array, count);
+            _sqlQuery('SELECT COUNT(*) from Birds', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+            _sqlQuery('SELECT * from Birds', [], {success: (tx, res) => {
+                _printTable("Birds", res.rows._array, count);
 
-                _sqlQuery('SELECT COUNT(*) from BirdRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                _sqlQuery('SELECT * from BirdRegions', [], {success: (tx, res) => {
-                    _printTable("BirdRegions", res.rows._array, count);
+                _sqlQuery('SELECT COUNT(*) from Regions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                _sqlQuery('SELECT * from Regions', [], {success: (tx, res) => {
+                    _printTable("Regions", res.rows._array, count);
 
-                    _sqlQuery('SELECT COUNT(*) from Vocalizations', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                    _sqlQuery('SELECT * from Vocalizations', [], {success: (tx, res) => {
-                        _printTable("Vocalizations", res.rows._array, count);
+                    _sqlQuery('SELECT COUNT(*) from BirdRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                    _sqlQuery('SELECT * from BirdRegions', [], {success: (tx, res) => {
+                        _printTable("BirdRegions", res.rows._array, count);
 
-                        _sqlQuery('SELECT COUNT(*) from MapImages', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                        _sqlQuery('SELECT * from MapImages', [], {success: (tx, res) => {
-                            _printTable("MapImages", res.rows._array, count);
+                        _sqlQuery('SELECT COUNT(*) from Vocalizations', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                        _sqlQuery('SELECT * from Vocalizations', [], {success: (tx, res) => {
+                            _printTable("Vocalizations", res.rows._array, count);
 
-                            _sqlQuery('SELECT COUNT(*) from BirdImages', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                            _sqlQuery('SELECT * from BirdImages', [], {success: (tx, res) => {
-                                _printTable("BirdImages", res.rows._array, count);
+                            _sqlQuery('SELECT COUNT(*) from MapImages', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                            _sqlQuery('SELECT * from MapImages', [], {success: (tx, res) => {
+                                _printTable("MapImages", res.rows._array, count);
 
-                                _sqlQuery('SELECT COUNT(*) from Lists', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                                _sqlQuery('SELECT * from Lists', [], {success: (tx, res) => {
-                                    _printTable("Lists", res.rows._array, count);
+                                _sqlQuery('SELECT COUNT(*) from BirdImages', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                                _sqlQuery('SELECT * from BirdImages', [], {success: (tx, res) => {
+                                    _printTable("BirdImages", res.rows._array, count);
 
-                                    _sqlQuery('SELECT COUNT(*) from BirdLists', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                                    _sqlQuery('SELECT * from BirdLists', [], {success: (tx, res) => {
-                                        _printTable("BirdLists", res.rows._array, count);
+                                    _sqlQuery('SELECT COUNT(*) from Lists', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                                    _sqlQuery('SELECT * from Lists', [], {success: (tx, res) => {
+                                        _printTable("Lists", res.rows._array, count);
 
-                                        _sqlQuery('SELECT COUNT(*) from SubRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                                        _sqlQuery('SELECT * from SubRegions', [], {success: (tx, res) => {
-                                            _printTable("SubRegions", res.rows._array, count);
+                                        _sqlQuery('SELECT COUNT(*) from BirdLists', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                                        _sqlQuery('SELECT * from BirdLists', [], {success: (tx, res) => {
+                                            _printTable("BirdLists", res.rows._array, count);
 
-                                            _sqlQuery('SELECT COUNT(*) from BirdSubRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                                            _sqlQuery('SELECT * from BirdSubRegions', [], {success: (tx, res) => {
-                                                _printTable("BirdSubRegions", res.rows._array, count);
+                                            _sqlQuery('SELECT COUNT(*) from SubRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                                            _sqlQuery('SELECT * from SubRegions', [], {success: (tx, res) => {
+                                                _printTable("SubRegions", res.rows._array, count);
 
-                                                _sqlQuery('SELECT COUNT(*) from FileSubRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
-                                                _sqlQuery('SELECT * from FileSubRegions', [], {success: (tx, res) => {
-                                                    _printTable("FileSubRegions", res.rows._array, count);
+                                                _sqlQuery('SELECT COUNT(*) from BirdSubRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                                                _sqlQuery('SELECT * from BirdSubRegions', [], {success: (tx, res) => {
+                                                    _printTable("BirdSubRegions", res.rows._array, count);
 
+                                                    _sqlQuery('SELECT COUNT(*) from FileSubRegions', [], { success: (tx,res) => { count = res.rows._array[0]["COUNT(*)"];
+                                                    _sqlQuery('SELECT * from FileSubRegions', [], {success: (tx, res) => {
+                                                        _printTable("FileSubRegions", res.rows._array, count);
+
+                                                    }},tx); }},tx);
                                                 }},tx); }},tx);
                                             }},tx); }},tx);
                                         }},tx); }},tx);
@@ -263,19 +300,21 @@ var printDatabase = function() {
 //Drops all tables in Database - For testing
 var destroyDB = function(onFinishedCallback) {
     _sqlQuery(`DROP TABLE if exists User`, [], { success: (tx,res) => {
-        _sqlQuery(`DROP TABLE if exists BirdRegions`, [], { success: (tx, res) => {
-            _sqlQuery(`DROP TABLE if exists BirdLists`, [], { success: (tx, res) => {
-                _sqlQuery(`DROP TABLE if exists Lists`, [], { success: (tx, res) => {
-                    _sqlQuery(`DROP TABLE if exists BirdImages`, [], { success: (tx, res) => {
-                        _sqlQuery(`DROP TABLE if exists MapImages`, [], { success: (tx, res) => {
-                            _sqlQuery(`DROP TABLE if exists Vocalizations`, [], { success: (tx, res) => {
-                                _sqlQuery(`DROP TABLE if exists FileSubRegions`, [], { success: (tx, res) => {
-                                    _sqlQuery(`DROP TABLE if exists BirdSubRegions`, [], { success: (tx, res) => {
-                                         _sqlQuery(`DROP TABLE if exists SubRegions`, [], { success: (tx, res) => {
-                                           _sqlQuery(`DROP TABLE if exists Regions`, [], { success: (tx, res) => {
-                                                _sqlQuery(`DROP TABLE if exists Birds`, [], { success: (tx, res) => {
-                                                    console.log("...Dropped all Database Tables...");
-                                                    onFinishedCallback(tx);
+        _sqlQuery(`DROP TABLE if exists VersionData`, [], {success: (tx,res) => {
+            _sqlQuery(`DROP TABLE if exists BirdRegions`, [], { success: (tx, res) => {
+                _sqlQuery(`DROP TABLE if exists BirdLists`, [], { success: (tx, res) => {
+                    _sqlQuery(`DROP TABLE if exists Lists`, [], { success: (tx, res) => {
+                        _sqlQuery(`DROP TABLE if exists BirdImages`, [], { success: (tx, res) => {
+                            _sqlQuery(`DROP TABLE if exists MapImages`, [], { success: (tx, res) => {
+                                _sqlQuery(`DROP TABLE if exists Vocalizations`, [], { success: (tx, res) => {
+                                    _sqlQuery(`DROP TABLE if exists FileSubRegions`, [], { success: (tx, res) => {
+                                        _sqlQuery(`DROP TABLE if exists BirdSubRegions`, [], { success: (tx, res) => {
+                                             _sqlQuery(`DROP TABLE if exists SubRegions`, [], { success: (tx, res) => {
+                                               _sqlQuery(`DROP TABLE if exists Regions`, [], { success: (tx, res) => {
+                                                    _sqlQuery(`DROP TABLE if exists Birds`, [], { success: (tx, res) => {
+                                                        console.log("...Dropped all Database Tables...");
+                                                        onFinishedCallback(tx);
+                                                    }}, tx);
                                                 }}, tx);
                                             }}, tx);
                                         }}, tx);
@@ -298,59 +337,64 @@ var initDB = function(onFinishedCallback) {
     var createTables = function() {
         var query;
         //User Table
-        query = `CREATE TABLE if not exists User (_id integer primary key unique, username text, password text, email text, first_name text, last_name text, exclude_non_breeding boolean,
+        query = `CREATE TABLE if not exists User (_id integer primary key not null unique, dendroica_id integer not null unique, username text, password text, email text, first_name text, last_name text, exclude_non_breeding boolean,
         exclude_rare boolean, language text, naming text, sorting text)`
         _sqlQuery(query, [], {success: (tx,res) => {
             console.log("--> Created User Table");
-            //Create Birds Table
-            query = `CREATE TABLE if not exists Birds (_id integer primary key not null unique, name text, scientific_name text, range_description text, song_description text)`;
+            //Create Version Data Table
+            query = `CREATE TABLE if not exists VersionData (_id integer primary key not null unique, apiVersion, dataVersion, lastUpdateTimeStamp integer)`;
             _sqlQuery(query, [], {success: (tx,res) => {
-                console.log("--> Created Birds Table");
-                //Create Regions Table
-                query = `CREATE TABLE if not exists Regions (_id integer primary key not null unique, project_id integer not null unique, name text)`;
+                console.log("--> Created VersionData Table");
+                //Create Birds Table
+                query = `CREATE TABLE if not exists Birds (_id integer primary key not null unique, name text, scientific_name text, range_description text, song_description text)`;
                 _sqlQuery(query, [], {success: (tx,res) => {
-                    console.log("--> Created Regions Table");
-                    //Create Lists Table
-                    query = `CREATE TABLE if not exists Lists (_id integer primary key not null unique, name text)`;
+                    console.log("--> Created Birds Table");
+                    //Create Regions Table
+                    query = `CREATE TABLE if not exists Regions (_id integer primary key not null unique, project_id integer not null unique, name text)`;
                     _sqlQuery(query, [], {success: (tx,res) => {
-                        console.log("--> Created Lists Table");
-                        //BirdImages Table
-                        query = `CREATE TABLE if not exists BirdImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)`;
+                        console.log("--> Created Regions Table");
+                        //Create Lists Table
+                        query = `CREATE TABLE if not exists Lists (_id integer primary key not null unique, name text)`;
                         _sqlQuery(query, [], {success: (tx,res) => {
-                            console.log("--> Created BirdImages Table");
-                            //MapImages Table
-                            query = `CREATE TABLE if not exists MapImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text)`;
+                            console.log("--> Created Lists Table");
+                            //BirdImages Table
+                            query = `CREATE TABLE if not exists BirdImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)`;
                             _sqlQuery(query, [], {success: (tx,res) => {
-                                console.log("--> Created MapImages Table");
-                                //Vocalizations Table
-                                query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text)`;
+                                console.log("--> Created BirdImages Table");
+                                //MapImages Table
+                                query = `CREATE TABLE if not exists MapImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text)`;
                                 _sqlQuery(query, [], {success: (tx,res) => {
-                                    console.log("--> Created Vocalizations Table");
-                                     //SubRegions Table
-                                    query = `CREATE TABLE if not exists SubRegions (_id integer primary key not null unique, region_id integer REFERENCES Regions(_id), name text, abbrev text)`;
+                                    console.log("--> Created MapImages Table");
+                                    //Vocalizations Table
+                                    query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text)`;
                                     _sqlQuery(query, [], {success: (tx,res) => {
-                                        console.log("--> Created SubRegions Table");
-                                        //FileSubRegions Table
-                                        query = `CREATE TABLE if not exists FileSubRegions (subregion_id integer REFERENCES SubRegions(_id), file_id integer not null, display_order integer not null,
-                                        CONSTRAINT files_subregions_pk primary key (subregion_id, file_id))`;
+                                        console.log("--> Created Vocalizations Table");
+                                         //SubRegions Table
+                                        query = `CREATE TABLE if not exists SubRegions (_id integer primary key not null unique, region_id integer REFERENCES Regions(_id), name text, abbrev text)`;
                                         _sqlQuery(query, [], {success: (tx,res) => {
-                                            console.log("--> Created FileSubRegions Table");
-                                            //BirdSubRegions Table
-                                            query = `CREATE TABLE if not exists BirdSubRegions (subregion_id integer REFERENCES SubRegions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
-                                            CONSTRAINT birds_subregions_pk primary key (subregion_id, bird_id))`;
+                                            console.log("--> Created SubRegions Table");
+                                            //FileSubRegions Table
+                                            query = `CREATE TABLE if not exists FileSubRegions (subregion_id integer REFERENCES SubRegions(_id), file_id integer not null, display_order integer not null,
+                                            CONSTRAINT files_subregions_pk primary key (subregion_id, file_id))`;
                                             _sqlQuery(query, [], {success: (tx,res) => {
-                                                console.log("--> Created BirdSubRegions Table");
-                                                //BirdRegions Table
-                                                query = `CREATE TABLE if not exists BirdRegions (region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
-                                                CONSTRAINT birds_regions_pk primary key (region_id, bird_id))`;
+                                                console.log("--> Created FileSubRegions Table");
+                                                //BirdSubRegions Table
+                                                query = `CREATE TABLE if not exists BirdSubRegions (subregion_id integer REFERENCES SubRegions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
+                                                CONSTRAINT birds_subregions_pk primary key (subregion_id, bird_id))`;
                                                 _sqlQuery(query, [], {success: (tx,res) => {
-                                                    console.log("--> Created BirdRegions Table");
-                                                    //BirdLists Table
-                                                    query = `CREATE TABLE if not exists BirdLists (list_id integer REFERENCES Lists(_id), bird_id integer REFERENCES Birds(_id),
-                                                    CONSTRAINT birds_lists_pk primary key (list_id, bird_id))`;
+                                                    console.log("--> Created BirdSubRegions Table");
+                                                    //BirdRegions Table
+                                                    query = `CREATE TABLE if not exists BirdRegions (region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
+                                                    CONSTRAINT birds_regions_pk primary key (region_id, bird_id))`;
                                                     _sqlQuery(query, [], {success: (tx,res) => {
-                                                        console.log("--> Created BirdsLists Table");
-                                                        onFinishedCallback(tx);
+                                                        console.log("--> Created BirdRegions Table");
+                                                        //BirdLists Table
+                                                        query = `CREATE TABLE if not exists BirdLists (list_id integer REFERENCES Lists(_id), bird_id integer REFERENCES Birds(_id),
+                                                        CONSTRAINT birds_lists_pk primary key (list_id, bird_id))`;
+                                                        _sqlQuery(query, [], {success: (tx,res) => {
+                                                            console.log("--> Created BirdsLists Table");
+                                                            onFinishedCallback(tx);
+                                                        }},tx);
                                                     }},tx);
                                                 }},tx);
                                             }},tx);
@@ -371,6 +415,8 @@ const DatabaseModule = {
     destroyDB: destroyDB,
     updateUser: updateUser,
     getCredentials: getCredentials,
+    getVersionData: getVersionData,
+    updateVersionData: updateVersionData,
     getBirdById: getBirdById,
     insertMultiple: insertMultiple,
     insertBirdRegionsAndBirdSubRegions: insertBirdRegionsAndBirdSubRegions,
