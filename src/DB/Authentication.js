@@ -19,8 +19,7 @@ var userLogin = function(username, password, onFinishedCallback) {
             userAuthToken = responseJson.token;
 
             var res = responseJson;
-            DatabaseModule.updateUser(res.userid, username, password, res.email, res.firstname, res.lastname, res.preferences.excludeNonBreeding,
-                res.preferences.excludeRare, res.preferences.lang, res.preferences.naming, res.preferences.sorting,
+            DatabaseModule.updateUser(res.userid, username, password, res.email, res.firstname, res.lastname, res.preferences.lang, res.preferences.speciesNaming, res.preferences.speciesSortBy,
                 {success: onFinishedCallback});
         })
         .catch((error) => {
