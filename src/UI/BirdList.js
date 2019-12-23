@@ -212,8 +212,7 @@ export default class BirdList extends Component {
         const topBarStyle = this.state.isTopBarHidden;
         return (
             <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,flex:1}}>
-                <TouchableOpacity style={styles.statusBar} onPress={()=> alert('hey!')}></TouchableOpacity>
-                
+                <View style={styles.statusBar}/>
                 {topBarStyle ? 
                     <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"#DCDCDC"}}>
                         <Icon size={22} type='material-community' name='menu-down' color='black'/>
@@ -261,8 +260,8 @@ export default class BirdList extends Component {
 
 
                     
-                    <TouchableOpacity style={{backgroundColor:'orange', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
-                        <Text style={{fontWeight: '500',color:'black', textAlign:"center"}}>Go To Top</Text>
+                    <TouchableOpacity style={{backgroundColor:'#E8E8E8', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
+                        <Text style={{fontWeight: '500',color:'orange', textAlign:"center"}}>Go To Top</Text>
                     </TouchableOpacity>
                     
                 </ScrollView>

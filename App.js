@@ -4,6 +4,7 @@ import BirdList from './src/UI/BirdList';
 import MyList from './src/UI/MyList';
 import Settings from './src/UI/Settings';
 import BirdInfo from './src/UI/BirdInfo';
+import Quiz from './src/UI/Quiz';
 import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
 import {Text} from 'react-native';
 import {createAppContainer } from "react-navigation";
@@ -17,10 +18,6 @@ export default class App extends Component {
   }
 
 }
-/**
- * @TODO: TAB BAR For BirdInfo
- */
-
 
 
 /**
@@ -34,9 +31,9 @@ const MyListToBirdInfoNavigator = createStackNavigator({
   BirdInfo: {
     screen: BirdInfo,
   },
-  // Quiz: {
-  //   screen: 
-  // }
+  Quiz: {
+    screen: Quiz,
+  }
 },);
 /**
  * Stack navigator for BirdCard onPress in either BirdList.
