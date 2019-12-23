@@ -3,9 +3,12 @@ import { createMaterialBottomTabNavigator } from 'react-navigation-material-bott
 import BirdList from './src/UI/BirdList';
 import MyList from './src/UI/MyList';
 import Settings from './src/UI/Settings';
+import BirdInfo from './src/UI/BirdInfo';
+import Quiz from './src/UI/Quiz';
 import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
 import {Text} from 'react-native';
 import {createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
 import Authentication from "./src/DB/Authentication";
 
@@ -17,7 +20,6 @@ DatabaseManagementModule.init(() => {
         DatabaseManagementModule.importApiData(1, () => {} );
     });
 });
-
 export default class App extends Component {
 
   render(){
@@ -27,35 +29,70 @@ export default class App extends Component {
 
 }
 
+
+/**
+ * Stack navigator for BirdCard onPress in either MyList.
+ * To move to BirdInfo after clicking BirdCard.
+ */
+const MyListToBirdInfoNavigator = createStackNavigator({
+  MyList: {
+    screen: MyList,
+  },
+  BirdInfo: {
+    screen: BirdInfo,
+  },
+  Quiz: {
+    screen: Quiz,
+  }
+},);
+/**
+ * Stack navigator for BirdCard onPress in either BirdList.
+ * To move to BirdInfo after clicking BirdCard.
+ */
+const BirdListToBirdInfoNavigator = createStackNavigator({
+  BirdList: {
+    screen: BirdList,
+  },
+  BirdInfo: {
+    screen: BirdInfo,
+  },
+});
+
+
 const BottomNav = createMaterialBottomTabNavigator(
     {
-      MyList: { screen: MyList,
-                navigationOptions:{
-                  tabBarLabel: <Text style={{fontWeight: '800',}}>My Birds</Text>,
-                  tabBarIcon: ({tintColor})=> <FontAwesome5 name="dove" size={20} color={tintColor} />,
-                  tabBarColor: '#cc99ff',
-                } },
-      Explore: { screen: BirdList,
+      Explore: { screen: BirdListToBirdInfoNavigator,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
                   tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
-                  tabBarColor: '#00cc99',
+                  tabBarColor: 'orange',
+                  activeColor: 'orange',
+                  // barStyle: { backgroundColor: 'yellow' },
+                } },
+      MyList: { screen: MyListToBirdInfoNavigator,
+                navigationOptions:{
+                  tabBarLabel: <Text style={{fontWeight: '800',}}>My Lists</Text>,
+                  tabBarIcon: ({tintColor})=> <FontAwesome5 name="dove" size={20} color={tintColor} />,
+                  tabBarColor: 'red',
+                  activeColor: 'red',
+                  // barStyle: { backgroundColor: '#67baf6' },
                 } },
       Settings: { screen: Settings,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Settings</Text>,
                   tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="settings-outline" size={20} color={tintColor} />,
-                  tabBarColor: '#3399ff',
-
+                  tabBarColor: 'purple',
+                  activeColor: 'purple',
+                  // barStyle: { backgroundColor: 'blue' },
                 } },
 
     },
     {
-      initialRouteName: 'MyList',
-      activeColor: 'white',
-      inactiveColor: '#d9d9d9',
-      barStyle: { backgroundColor: '#694fad', },
-      shifting: true,
+      initialRouteName: 'Explore',
+      activeColor: 'orange',
+      inactiveColor: 'black',
+      barStyle: { backgroundColor: '#F5F5F5', },
+      shifting: false,
       keyboardHidesNavigationBar: true,
       labeled: true,
     }
