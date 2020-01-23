@@ -3,6 +3,10 @@ import DatabaseModule from './DatabaseModule';
 
 var versionUpdateInfo;
 var versionData;
+var regionIds;
+
+var firstImport = true;
+
 
 var init = function(onFinishedCallback) {
     fetchAndSaveVersionData(() => {
@@ -53,17 +57,21 @@ var importApiData = function(projectId, onFinishedCallback) {
     var lastModified = versionUpdateInfo.dataVersionUpdate? null : versionUpdateInfo.lastUpdateTimeStamp;
     var lastModifiedApiParam = "";
     var updateInsertFunction = DatabaseModule.insertMultiple;
-    if (lastModified) {
+    if (lastModified || !firstImport) {
         lastModifiedApiParam = '&ifModifiedSince=' + lastModified;
         updateInsertFunction = DatabaseModule.upsertMultiple;
     }
 
+
     var projectIds;
-    var regionIds;
 
     if (projectId) projectIds = [projectId];
 
     var importRegions = function(onFinishedCallback) {
+        if (!firstImport) {
+            onFinishedCallback();
+            return;
+        }
         fetch('https://www.natureinstruct.org/api/projects?token=' + Authentication.getAuthToken() + lastModifiedApiParam)
             .then((response) => response.json())
             .then((responseJson) => {
@@ -82,7 +90,7 @@ var importApiData = function(projectId, onFinishedCallback) {
 
     var importBirdRegionsAndSubRegions = function(onFinishedCallback) {
         for (var id in projectIds) {
-            fetch('https://www.natureinstruct.org/api/speciesRegions?token=' + Authentication.getAuthToken() + '&projectId=1' + lastModifiedApiParam)
+            fetch('https://www.natureinstruct.org/api/speciesRegions?token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam)
                 .then((response) => response.json())
                 .then((responseJson) => {
                     if (Object.entries(responseJson).length === 0) {
@@ -118,7 +126,6 @@ var importApiData = function(projectId, onFinishedCallback) {
 
                         var insertJson = responseJson;
                         if (responseJson !== null) {
-                            if (responseJson.errorMsg) console.log("https://www.natureinstruct.org/api/" + url + 'token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam);
                             if (duplicateIds) {
                                 //If there is a potential for duplicate IDs (such as across projects) create new array parsing out any duplicates
                                 for (var i = 0; i < responseJson.id.length; i++) {
@@ -180,30 +187,35 @@ var importApiData = function(projectId, onFinishedCallback) {
                     importTableForProject('customListSpecies?', ["customListId","speciesId"], "BirdLists", false, () => {
                         i = true; console.log("inserted all BirdLists");
                         if (i && j && k && l && m && n) {
+                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
                     importTableForProject('speciesImages?', ["id","speciesId","url","source","displayOrder"], "BirdImages", true, () => {
                         k = true; console.log("inserted all SpeciesImages");
                         if (i && j && k && l && m && n) {
+                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
                     importTableForProject('speciesMaps?', ["id","speciesId","url","source"], "MapImages", true, () => {
                         l = true; console.log("inserted all MapImages");
                         if (i && j && k && l && m && n) {
+                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
                     importTableForProject('speciesSounds?', ["id","speciesId","spectrogramUrl","url","source"], "Vocalizations", true, () => {
                         m = true; console.log("inserted all Vocalizations");
                         if (i && j && k && l && m && n) {
+                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
                     importTableForProject('fileRegions?', ["regionId","fileId","displayOrder"], "FileSubRegions", false, () => {
                         n = true; console.log("inserted all FileSubRegions");
                         if (i && j && k && l && m && n) {
+                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
@@ -213,6 +225,7 @@ var importApiData = function(projectId, onFinishedCallback) {
                         console.log("inserted all BirdRegions");
                         console.log("inserted all BirdSubRegions");
                         if (i && j && k && l && m && n) {
+                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
