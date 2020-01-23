@@ -9,12 +9,12 @@ const FIELDS = {
     "Lists": ["_id","name"],
     "BirdImages": ["_id","bird_id","filename","credits","displayOrder"],
     "MapImages": ["_id","bird_id","filename","credits"],
-    "Vocalizations": ["_id","bird_id","filename","mp3Filename","credits"],
+    "Vocalizations": ["_id","bird_id","filename","mp3_filename","credits"],
     "SubRegions": ["_id","region_id","name","abbrev"],
     "FileSubRegions": ["subregion_id","file_id","displayOrder"],
     "BirdSubRegions": ["subregion_id","bird_id","non_breeder","rare"],
     "BirdRegions": ["region_id","bird_id","non_breeder","rare"],
-    "BirdLists": ["list_id","bird_id",""]
+    "BirdLists": ["list_id","bird_id"]
 }
 
 
@@ -116,7 +116,9 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
                 onFinishedCallback();
             });
         }
-        else onFinishedCallback();
+        else  {
+            onFinishedCallback();
+        }
     });
 }
 
@@ -124,6 +126,7 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     var countQuery = "SELECT COUNT(*) from " + tableName + " WHERE _id=";
     var insertQuery = "INSERT INTO " + tableName + " VALUES (";
     var updateQuery = "UPDATE " + tableName + " SET ";
+
 
     FIELDS[tableName].forEach(field => {
         insertQuery += "?,";
@@ -133,11 +136,14 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     updateQuery = updateQuery.slice(0,-1) + " WHERE _id=";
 
     var idArray = json[jsonArrayNames[0]];
+
     db.transaction((tx) => {
         var i,index,innerIndex;
+
         for (var i = 0, index = 0, innerIndex = 0; i < idArray.length; i++) {
             var params = [];
             var updateQueryWithId = updateQuery + idArray[i];
+
             _sqlQuery(countQuery + idArray[i], [], {success: (tx,res) => {
                 var isInsertQuery = false;
                 var query = "";
@@ -159,6 +165,16 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
                 }},tx);
 
                 index ++;
+            }, error: (err) => { //Seems to throw error if table is empty (for example if new project has custom lists) in this case insert
+                var params = [];
+
+                jsonArrayNames.forEach(arrayName => {
+                    params.push(json[arrayName][index]);
+                });
+                _sqlQuery(insertQuery, params, {success: (tx,res) => {
+                    if (++innerIndex === idArray.length) onFinishedCallback();
+                }})
+                index++;
             }}, tx);
         }
     });
@@ -525,7 +541,7 @@ var initDB = function(onFinishedCallback) {
                                                         query = `CREATE TABLE if not exists BirdLists (list_id integer REFERENCES Lists(_id), bird_id integer REFERENCES Birds(_id),
                                                         CONSTRAINT birds_lists_pk primary key (list_id, bird_id))`;
                                                         _sqlQuery(query, [], {success: (tx,res) => {
-                                                            console.log("--> Created BirdsLists Table");
+                                                            console.log("--> Created BirdLists Table");
                                                             onFinishedCallback(tx);
                                                         }},tx);
                                                     }},tx);
