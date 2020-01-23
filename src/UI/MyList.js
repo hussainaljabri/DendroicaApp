@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, Picker} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, Picker, StatusBar} from "react-native";
 import Constants from 'expo-constants';
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
@@ -79,8 +79,9 @@ export default class MyList extends Component {
     }
     render(){
         return (
-            <View style={{flex: 1, backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
+            <View style={{flex: 1, backgroundColor:"white"}}>
                 <View style={styles.statusBar}/>
+                <StatusBar barStyle="dark-content" />
                 <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
                     <Text style={styles.header}>MyLists |</Text>
                     <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
@@ -108,22 +109,24 @@ export default class MyList extends Component {
                         </TouchableOpacity>
                     </View> */}
                 </View>
-                <SearchBar
-                    placeholder="Search..."
-                    onChangeText={this.updateSearch}
-                    value={this.state.searchInput}
-                    placeholderTextColor="#474747"
-                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
-                />
-                <View style={{flexDirection:"row", justifyContent:"space-between"}}>
-                    <TouchableOpacity onPress={()=> this.quizBtnHandler()} style={styles.btn}>
-                        <Text style={{fontWeight:"600", color: "red"}}>Quiz</Text>
-                    </TouchableOpacity>
-                    <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {Birds.length}</Text>
+                <View style={{paddingHorizontal: 5}}>
+                    <SearchBar
+                        placeholder="Search..."
+                        onChangeText={this.updateSearch}
+                        value={this.state.searchInput}
+                        placeholderTextColor="#474747"
+                        inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
+                        inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
+                        containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    />
+                    <View style={{flexDirection:"row", justifyContent:"space-between"}}>
+                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} style={styles.btn}>
+                            <Text style={{fontWeight:"600", color: "red"}}>Quiz</Text>
+                        </TouchableOpacity>
+                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {Birds.length}</Text>
+                    </View>
                 </View>
-                <ScrollView ref={(ref)=> this.scrollView = ref} style={{flex:1}} showsVerticalScrollIndicator={false} >
+                <ScrollView ref={(ref)=> this.scrollView = ref} style={{flex:1, paddingHorizontal: 5}} showsVerticalScrollIndicator={false} >
                         {this.getBirdCards()}
                         
                     <TouchableOpacity style={{backgroundColor:'#E8E8E8', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
@@ -146,6 +149,8 @@ const styles = StyleSheet.create({
     },    
     statusBar:{
         height: Constants.statusBarHeight,
+        width: '100%',
+        // backgroundColor: 'black',
      },
      btn:{
          paddingLeft: 25,

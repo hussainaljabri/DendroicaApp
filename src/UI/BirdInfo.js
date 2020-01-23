@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight} from "react-native";
+import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar} from "react-native";
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
@@ -342,7 +342,8 @@ export default class BirdInfo extends Component {
     }
     render() {
         return (
-            <View style={{backgroundColor:"white", marginLeft: 5, marginRight: 5,}}>
+            <View style={{ paddingHorizontal: 5}}>
+                <StatusBar barStyle="dark-content" />
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
                     <TouchableOpacity style={{marginBottom: 5, borderBottomStartRadius: 15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 0? '#34C759':'#DCDCDC'}} onPress={()=> this.infoBtnHandler()}>
                         <Text style={{opacity:this.state.page==0? 1:0.4,fontWeight:'700',color: this.state.page==0? 'white': 'black'}}>Information</Text>
@@ -368,6 +369,8 @@ export default class BirdInfo extends Component {
 const styles = StyleSheet.create({
     statusBar:{
         height: Constants.statusBarHeight,
+        backgroundColor: 'black',
+        width: '100%',
      },
     header:{
          

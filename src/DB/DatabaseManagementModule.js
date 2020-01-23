@@ -6,7 +6,7 @@ var versionData;
 
 var init = function(onFinishedCallback) {
     fetchAndSaveVersionData(() => {
-//        versionUpdateInfo.dataVersionUpdate = true; //Uncomment me to force flush db
+        versionUpdateInfo.dataVersionUpdate = true; //Uncomment me to force flush db
         //If data version is updated flush entireDB. Flag will be true if DB not initialized
         if (versionUpdateInfo.dataVersionUpdate) { //Flush data
             console.log("data version update = " + versionUpdateInfo.dataVersionUpdate);
@@ -118,7 +118,7 @@ var importApiData = function(projectId, onFinishedCallback) {
 
                         var insertJson = responseJson;
                         if (responseJson !== null) {
-                            if (responseJson.errorMsg) console.err(responseJson.errorMsg);
+                            if (responseJson.errorMsg) console.log("https://www.natureinstruct.org/api/" + url + 'token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam);
                             if (duplicateIds) {
                                 //If there is a potential for duplicate IDs (such as across projects) create new array parsing out any duplicates
                                 for (var i = 0; i < responseJson.id.length; i++) {
