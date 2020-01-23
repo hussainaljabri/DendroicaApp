@@ -11,15 +11,17 @@ import {createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
 import Authentication from "./src/DB/Authentication";
-import TestingPage from './src/UI/TestingPage'
+import TestingPage from './src/UI/TestingPage';
 const username = "tmobile";
 const password = "appH@ppy";
 
 DatabaseManagementModule.init(() => {
     Authentication.userLogin(username, password, () => {
-        DatabaseManagementModule.importApiData(1, () => {} );
-        DatabaseManagementModule.importApiData(2, () => {} );
-
+        DatabaseManagementModule.importApiData(1, () => {
+            DatabaseManagementModule.importApiData(2, () => {
+                console.log("All Api data imported");
+            });
+        });
     });
 });
 export default class App extends Component {
