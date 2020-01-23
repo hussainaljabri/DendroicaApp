@@ -78,7 +78,7 @@ export default class BirdList extends Component {
                 }
             );
             DatabaseModule.getDisplayInfo(
-                2,
+                43,
                 {
                     success: (result)=>{
                         console.log('testing MEXICO: '+ result);
