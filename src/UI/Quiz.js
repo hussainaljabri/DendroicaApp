@@ -298,7 +298,7 @@ export default class Quiz extends Component{
                 {this.formQuiz()}
 
                 <TouchableOpacity disabled={!this.state.isPressed} style={[styles.nextBtn, {borderColor: this.state.isPressed? 'red': 'grey'}]} onPress={()=> this.nextHandler(this.state.total==this.state.quizNumber) }>
-        <Text style={{color: this.state.isPressed? 'red': 'grey', justifyContent:"center", textAlign: "center"}}>{this.state.total==this.state.quizNumber? "Finish :)": "Next Qustion"}</Text>
+        <Text style={{color: this.state.isPressed? 'red': 'grey', justifyContent:"center", textAlign: "center"}}>{this.state.total==this.state.quizNumber? "Finish": "Next Qustion"}</Text>
                 </TouchableOpacity>
 
             </View>
