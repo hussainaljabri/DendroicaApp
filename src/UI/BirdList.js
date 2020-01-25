@@ -20,7 +20,15 @@ const continents = [
     'Central America',  // project_id 5, index here is 5
     'Caribbean',        // project_id 6, index here is 6
   ];
-
+const regions = [
+    '',
+    1,
+    43,
+    49,
+    207,
+    209,
+    208,
+];
 
 export default class BirdList extends Component {
     state ={
@@ -66,31 +74,31 @@ export default class BirdList extends Component {
             DatabaseModule.getDisplayInfo(
                 this.state.selected,
                 {
-                    success: (result)=>{
-                        console.log('testing CANADA: '+ result);
-                    }
                     // success: (result)=>{
-                    //     this.setState({
-                    //         birds: result,
-                    //         dataReady: true,
-                    //     });
+                    //     console.log('testing CANADA: '+ result);
                     // }
+                    success: (result)=>{
+                        this.setState({
+                            birds: result,
+                            dataReady: true,
+                        });
+                    }
                 }
             );
-            DatabaseModule.getDisplayInfo(
-                43,
-                {
-                    success: (result)=>{
-                        console.log('testing MEXICO: '+ result);
-                    }
-                    // success: (result)=>{
-                    //     this.setState({
-                    //         birds: result,
-                    //         dataReady: true,
-                    //     });
-                    // }
-                }
-            );
+            // DatabaseModule.getDisplayInfo(
+            //     43,
+            //     {
+            //         success: (result)=>{
+            //             console.log('testing MEXICO: '+ result);
+            //         }
+            //         // success: (result)=>{
+            //         //     this.setState({
+            //         //         birds: result,
+            //         //         dataReady: true,
+            //         //     });
+            //         // }
+            //     }
+            // );
                 
         }
         /**
@@ -126,16 +134,18 @@ export default class BirdList extends Component {
     handlerLongClick=(id, name)=>{
         Alert.alert("LongPress: \n" +id+": "+name);
     };
-    handlerClick=(id, name)=>{
-        // Alert.alert("Click:\n" +id+": "+name);
+    handlerClick=(id, name, scientific_name)=>{
+        // I need id, name, scientific_name, filename, 
+        Alert.alert("Click:\n" +id+": "+name);
         this.props.navigation.navigate('BirdInfo',
             //params
             {
                 title: name,
+                latin: scientific_name,
                 id: id,
-                data: this.state.birds[id-1], // for debugging
             }
         );
+
     };
     handlerScrolltotop=()=>{
         if(this.state.scrolltotop){
@@ -164,14 +174,15 @@ export default class BirdList extends Component {
         // });
 
         return this.state.birds.map((bird) =>{
+            let temp = bird;
             return (
                 <BirdCard 
                     key={bird.bird_id} 
                     birdName={bird.name} 
                     latin={bird.scientific_name}
                     imgUrl={prefix+bird.filename} 
-                    onPress={()=>{this.handlerClick(bird.bird_id, bird.name)}} 
-                    onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name)}}
+                    onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
+                    onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
                     style={{marginBottom: 3}}
                 />
             );
@@ -186,10 +197,10 @@ export default class BirdList extends Component {
         }
      }
     selectedNewContinent=(index)=>{
-        this.setState({selected: index, dataReady: false});
+        this.setState({birds:[], selected: index, dataReady: false});
         // we should call out the new list.
         DatabaseModule.getDisplayInfo(
-            index,
+            regions[index],
             {
                 success: (result)=>{
                     this.setState({
@@ -269,8 +280,8 @@ export default class BirdList extends Component {
                             birdName={item.name} 
                             latin={item.scientific_name}
                             imgUrl={prefix+item.filename} 
-                            onPress={()=>{this.handlerClick(item.bird_id, item.name)}} 
-                            onLongPress={()=>{this.handlerLongClick(item.bird_id, item.name)}}
+                            onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
+                            onLongPress={()=>{this.handlerLongClick(item.bird_id, item.name, item.scientific_name)}}
                             style={{marginBottom: 3}}
                         />
                     )}
@@ -279,8 +290,8 @@ export default class BirdList extends Component {
             :
                 (
                     <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                        <ActivityIndicator size="large" color="orange"/>
                         <Text>Be patient, birds are coming your way</Text>
-                        <ActivityIndicator size="large" color="#0000ff"/>
                     </View>
                 )
             }
