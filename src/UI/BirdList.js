@@ -136,7 +136,7 @@ export default class BirdList extends Component {
     };
     handlerClick=(id, name, scientific_name)=>{
         // I need id, name, scientific_name, filename, 
-        Alert.alert("Click:\n" +id+": "+name);
+        // Alert.alert("Click:\n" +id+": "+name);
         this.props.navigation.navigate('BirdInfo',
             //params
             {
@@ -174,7 +174,6 @@ export default class BirdList extends Component {
         // });
 
         return this.state.birds.map((bird) =>{
-            let temp = bird;
             return (
                 <BirdCard 
                     key={bird.bird_id} 
