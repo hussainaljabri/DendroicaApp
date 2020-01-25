@@ -10,7 +10,7 @@ var firstImport = true;
 
 var init = function(onFinishedCallback) {
     fetchAndSaveVersionData(() => {
-        versionUpdateInfo.dataVersionUpdate = true; //Uncomment me to force flush db
+        // versionUpdateInfo.dataVersionUpdate = true; //Uncomment me to force flush db
         //If data version is updated flush entireDB. Flag will be true if DB not initialized
         if (versionUpdateInfo.dataVersionUpdate) { //Flush data
             console.log("data version update = " + versionUpdateInfo.dataVersionUpdate);
