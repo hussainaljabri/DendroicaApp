@@ -252,8 +252,13 @@ var getBirdById = function (id, callbacks) {
     }});
 }
 //(_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)
-var getPhotoUrlByBirdId = function (id, callbacks){
-    var query = `SELECT * from BirdImages where (bird_id=?)`;
+var getImagesUrlByBirdId = function (id, callbacks){
+    // var query = `SELECT filename, credits from BirdImages where (bird_id=?) order by displayOrder`;
+    var query = "SELECT BirdImages.bird_id as bird_id, BirdImages.filename as image_filename, BirdImages.credits as image_credits, displayOrder from Birds ";
+    query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
+    query += "where BirdImages.bird_id=? ORDER BY displayOrder";
+    // query += "INNER JOIN MapImages on BirdImages.bird_id = MapImages.bird_id ";
+    // query += "INNER JOIN Vocalizations on MapImages.bird_id = Vocalizations.bird_id ";
     _sqlQuery(query, [id], {success:(tx,res) => {
         var result = res.rows._array;
         callbacks.success(result);
@@ -573,7 +578,7 @@ const DatabaseModule = {
     printDatabase: printDatabase,
     printTable: printTable,
 
-    getPhotoUrlByBirdId: getPhotoUrlByBirdId,
+    getImagesUrlByBirdId: getImagesUrlByBirdId,
     getThumbnailUrlByBirdId:getThumbnailUrlByBirdId,
     getBirdsIdByRegionId: getBirdsIdByRegionId,
     getRegionsIdAndNames: getRegionsIdAndNames,
