@@ -316,6 +316,32 @@ var getDisplayInfo = function(id, callbacks){ // id is region_id
     }});
 }
 
+var getLists = function(callbacks){
+    var query =`SELECT * from Lists`;
+    _sqlQuery(query, [], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+var getBirdListFromListId = function(id, callbacks){
+    var query =`SELECT BirdLists.List_id, BirdLists.bird_id from Lists `;
+    query += `INNER JOIN BirdLists on Lists._id = BirdLists.List_id `
+    query += `where List_id =? `
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+var getListDisplayInfo = function(id, callbacks){ 
+    var query = "SELECT BirdImages.bird_id as bird_id, name, scientific_name, filename, MIN(displayOrder), displayOrder from Birds ";
+    query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
+    query += "INNER JOIN BirdLists on BirdImages.bird_id = BirdLists.bird_id ";
+    query += "where displayOrder=1 and BirdLists.List_id=? GROUP BY BirdLists.bird_id ORDER BY name";
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
 
 var _getRegionIDByName = function (name, callbacks) {
     var query = `SELECT _id from Regions where (name = ?)`;
@@ -583,5 +609,9 @@ const DatabaseModule = {
     getBirdsIdByRegionId: getBirdsIdByRegionId,
     getRegionsIdAndNames: getRegionsIdAndNames,
     getDisplayInfo: getDisplayInfo,
+    
+    getLists: getLists,
+    getBirdListFromListId: getBirdListFromListId,
+    getListDisplayInfo: getListDisplayInfo,
 };
 export default DatabaseModule;
