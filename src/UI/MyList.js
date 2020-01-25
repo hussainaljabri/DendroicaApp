@@ -1,29 +1,60 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, Picker, StatusBar} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar} from "react-native";
 import Constants from 'expo-constants';
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
+import DatabaseModule from '../DB/DatabaseModule';
+const prefix='https://natureinstruct.org';
 
-
-
-const lists =[
-    'Cancel',
-    'List1',
-    'List2',
-    'List3',
-    'List4',
-    'List5',
-];
+// const lists =[
+//     'Cancel',
+//     'List1',
+//     'List2',
+//     'List3',
+//     'List4',
+//     'List5',
+// ];
 export default class MyList extends Component {
     state ={
-        selected: 1,
+        selected: -1,
+        selectedReady: false,
         searchInput: '',
         birds: Birds,
+        birdsReady: false,
+        lists: ['Cancel'],
+        listsReady: false,
+        options: ['Cancel'],
+
     }
     static navigationOptions = {
         header: null
     }
+
+    componentDidMount(){
+        DatabaseModule.getLists({
+            success: (result)=>{
+                // console.log('Lists: '+JSON.stringify(result));
+                let temp = this.state.lists;
+                temp.push(result);
+                let opt_temp = this.state.options;
+                result.map((item, index)=>{
+                    opt_temp.push(item.name);
+                });
+                this.setState({
+                    lists: temp,
+                    options: opt_temp,
+                })
+            }
+        });
+
+        // DatabaseModule.getListDisplayInfo(25088, {
+        //     success: (result)=>{
+        //         console.log('BirdList for 25088: '+JSON.stringify(result));
+        //     }
+        // });
+    }
+
 
     showActionSheet = () => {
         this.ActionSheet.show();
@@ -36,28 +67,31 @@ export default class MyList extends Component {
     handlerLongClick=(id, name)=>{
         Alert.alert("LongPress: \n" +id+": "+name);
     }
-    handlerClick=(id, name)=>{
+    handlerClick=(id, name, scientific_name)=>{
+        // I need id, name, scientific_name, filename, 
         // Alert.alert("Click:\n" +id+": "+name);
         this.props.navigation.navigate('BirdInfo',
             //params
             {
                 title: name,
+                latin: scientific_name,
                 id: id,
-                data: this.state.birds[id-1], // for debugging
             }
         );
+
     };
+
     getBirdCards = () =>{
-        return Birds.map((bird) =>{
+        return this.state.birds.map((bird) =>{
             return (
                 <BirdCard 
-                key={bird.id} 
-                birdName={bird.name} 
-                latin={'Latin Name'}
-                imgUrl={bird.image[0]} 
-                onPress={()=>{this.handlerClick(bird.id, bird.name)}} 
-                onLongPress={()=>{this.handlerLongClick(bird.id, bird.name)}}
-                style={{marginBottom: 3}}
+                    key={bird.bird_id} 
+                    birdName={bird.name} 
+                    latin={bird.scientific_name}
+                    imgUrl={prefix+bird.filename} 
+                    onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
+                    // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
+                    style={{marginBottom: 3}}
                 />
             );
         });
@@ -77,6 +111,25 @@ export default class MyList extends Component {
         }
     );
     }
+    selectedNewList=(index)=>{
+        this.setState({birds:[], selected: index, dataReady: false, selectedReady: true});
+        // we should call out the new list.
+        DatabaseModule.getListDisplayInfo(
+            this.state.lists[index][0]._id,
+            {
+                success: (result)=>{
+                    this.setState({
+                        birds: result,
+                        birdsReady: true,
+                    });
+                }
+            }
+        );
+        
+    }
+
+
+
     render(){
         return (
             <View style={{flex: 1, backgroundColor:"white"}}>
@@ -85,16 +138,16 @@ export default class MyList extends Component {
                 <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
                     <Text style={styles.header}>MyLists |</Text>
                     <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                        <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{lists[this.state.selected]}</Text>
+                        <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{this.state.selectedReady? (this.state.options[this.state.selected]):("Select a List")}</Text>
                         <ActionSheet
                             ref={o => this.ActionSheet = o}
                             title={<Text style={{fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select a List</Text>}
                             cancelButtonIndex={0}
                             destructiveButtonIndex={0}
-                            options={lists}
+                            options={this.state.options}
                             onPress={(index) => { /* do something */ 
-                                console.log('actionsheet: '+index+ ' corresponds to :'+ lists[index]);
-                                index != 0? this.setState({selected: index}) : {};
+                                console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
+                                index != 0? (this.state.selected != index? this.selectedNewList(index): {}) : {};
                             }}
                         />
 
@@ -126,13 +179,32 @@ export default class MyList extends Component {
                         <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {Birds.length}</Text>
                     </View>
                 </View>
-                <ScrollView ref={(ref)=> this.scrollView = ref} style={{flex:1, paddingHorizontal: 5}} showsVerticalScrollIndicator={false} >
+
+
+                {this.state.selectedReady?
+
+                    this.state.birdsReady?
+                    (
+                        <ScrollView ref={(ref)=> this.scrollView = ref} style={{flex:1, paddingHorizontal: 5}} showsVerticalScrollIndicator={false} >
                         {this.getBirdCards()}
-                        
-                    <TouchableOpacity style={{backgroundColor:'#E8E8E8', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
-                        <Text style={{fontWeight: '500',color:'red', textAlign:"center"}}>Go To Top</Text>
-                    </TouchableOpacity>
-                </ScrollView>
+                                
+                            <TouchableOpacity style={{backgroundColor:'#E8E8E8', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
+                                <Text style={{fontWeight: '500',color:'red', textAlign:"center"}}>Go To Top</Text>
+                            </TouchableOpacity>
+                        </ScrollView>
+                    )
+                    :
+                    (
+                    <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                        <ActivityIndicator size="large" color="orange"/>
+                        <Text>Be patient, birds are coming your way</Text>
+                    </View>
+                    )
+            :
+                    (<Text>
+                        Please, Select a List.
+                    </Text>)
+                }
                 
 
             </View>
