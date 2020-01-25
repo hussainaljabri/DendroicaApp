@@ -181,7 +181,7 @@ export default class BirdList extends Component {
                     latin={bird.scientific_name}
                     imgUrl={prefix+bird.filename} 
                     onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
-                    onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
+                    // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
                     style={{marginBottom: 3}}
                 />
             );
