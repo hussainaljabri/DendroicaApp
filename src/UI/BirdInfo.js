@@ -1,12 +1,13 @@
 import React, { Component } from "react";
-import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar} from "react-native";
+import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar, ActivityIndicator} from "react-native";
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import DatabaseModule from '../DB/DatabaseModule';
 
-
+const prefix='https://natureinstruct.org';
 const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 function wp (percentage) {
@@ -30,12 +31,15 @@ export default class BirdInfo extends Component {
     state={
         id: null,
         name: '',
-        data: undefined,
-        dataReady: false,
+        info: undefined,
+        infoReady: false,
         activeSlide: 0,
         activeMapSlide: 0,
         scrollable: true,
         isModelVisible: false,
+        images: [],
+        imageCredit: [],
+        imageReady: false,
     }
 
     static navigationOptions = ({navigation})=> ({
@@ -47,19 +51,64 @@ export default class BirdInfo extends Component {
                                 justifyContent: "space-between", 
                                 alignSelf:"center"}}
                           >{navigation.state.params.title}</Text>
-    <Text style={{letterSpacing: 1.5, fontSize:10, justifyContent: "center", fontStyle:'italic'}}>{navigation.state.params.id == 1? /*for debugging*/ navigation.state.params.data.latin:'Latin Name'}</Text>
+    <Text style={{letterSpacing: 1.5, fontSize:10, justifyContent: "center", fontStyle:'italic'}}>{navigation.state.params.latin}</Text>
         </View>),
         headerTintColor: "#34C759",
         
     })
    componentDidMount(){
-       this.setState({
-           data: this.props.navigation.getParam('data', []),
-           dataReady: true,
-           page: 0,
-       });
+    let id = this.props.navigation.state.params.id
+    console.log('birdinfo: id :'+ id);
 
+    DatabaseModule.getImagesUrlByBirdId(
+        id,
+        { //{"_id":78886,"bird_id":257,"filename":"/files/avian_images/78886-Empidonax_virescens_AOU_7_52.jpg","credits":"Kelly Colgan Azar","displayOrder":1}
+            success: (result)=>{
+                // console.log(JSON.stringify(result));
+                let images = [];
+                let imageCredit = [];
+                result.map((item, index)=>{
+                    //images
+                    images.push(prefix+item.image_filename);
+                    //image credit
+                    imageCredit.push(item.image_credits);
+
+
+                });
+                console.log(JSON.stringify(imageCredit));
+                this.setState({
+                    page: 0,
+                    images: images,
+                    imageCredit: imageCredit,
+                    imageReady: true,
+                });
+                // call for info
+                DatabaseModule.getBirdById(id,{
+                    success: (result)=>{
+                        //{"_id":257,"name":"Acadian Flycatcher","scientific_name":"Empidonax virescens","range_description":"CANADA - Breeding only: 9,784 square km\nCARIBBEAN - Migration only: 119,391 square km\nCENTRAL AMERICA - Wintering only: 104,297 square km; Migration only: 405,573 square km\nMEXICO - Migration only: 433,743 square km\nSOUTH AMERICA - Wintering only: 555,165 square km\nUSA - Breeding only: 2,451,982 square km; Migration only: 168,294 square km","song_description":"Song is an emphatic \"peet-seet\", \"peet-suh\", with
+                        //  accent on second syllable. Call is a sharp \"peet\"."}
+                        console.log(JSON.stringify(result));
+                        this.setState({
+                            info: result,
+                            infoReady: true,
+                        });
+                    }
+                });
+
+            }
+        }
+    );
+    // this.setState({
+    //     data: this.props.navigation.getParam('data', []),
+    //     dataReady: true,
+    //     page: 0,
+    // });
    }
+   testing =()=>{
+       return (<Text>We got something!</Text>);
+   }
+
+
    ShowModalFunction(visible) {
     console.log('ShowModalFunction from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
     this.setState({ isModelVisible: visible });
@@ -70,7 +119,7 @@ export default class BirdInfo extends Component {
     }
    getImageModal=(page)=>{
         if(page==='info'){
-            const img = this.state.data.image.map((item, index)=>{
+            const img = this.state.images.map((item, index)=>{
                 return ({props:{source: item}}); // {url: item} for http url or file url
             });
             return (
@@ -134,7 +183,7 @@ export default class BirdInfo extends Component {
     return (
            <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
             <View key={'VW'+index} style={styles.imageContainer}>
-                <Image key={'IM'+index} style={styles.image} source={item} />
+                <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
             </View>
             </TouchableOpacity>
 
@@ -159,7 +208,7 @@ export default class BirdInfo extends Component {
                 {this.getImageModal('info')}
                 <Carousel
                     ref={(c) => { this._carousel = c; }}
-                    data={this.state.data.image}
+                    data={this.state.images}
                     renderItem={this._renderItem}
                     sliderWidth={sliderWidth}
                     itemWidth={itemWidth}
@@ -171,7 +220,7 @@ export default class BirdInfo extends Component {
                     onSnapToItem={(index) => this.setState({ activeSlide: index }) }
                 />
                 <Pagination 
-                    dotsLength={this.state.data.image.length}
+                    dotsLength={this.state.images.length}
                     activeDotIndex={this.state.activeSlide}
                     containerStyle={styles.paginationContainer}
                     dotColor={'#34C759'}
@@ -192,17 +241,15 @@ export default class BirdInfo extends Component {
                 </View>
 
                 <View style={styles.textContainer}>
-                    {this.state.data.id == 1?  // for debugging
+
                     <View>
-                        <Text>Photo Taker: {this.state.data.imageCredit[this.state.activeSlide].name}</Text>
-                        <Text>Source: {this.state.data.imageCredit[this.state.activeSlide].source}</Text>
-                        <Text>Date: {this.state.data.imageCredit[this.state.activeSlide].date}</Text>
-                        <Text>Region: {this.state.data.imageCredit[this.state.activeSlide].region}</Text>
-                        <Text>Bird Maturity: {this.state.data.imageCredit[this.state.activeSlide].maturity}</Text>
+                        <Text>Photo Credit: {this.state.imageCredit[this.state.activeSlide]}</Text>
+                        {/* <Text>Source: {this.state.imageCredit[this.state.activeSlide].source}</Text>
+                        <Text>Date: {this.state.imageCredit[this.state.activeSlide].date}</Text>
+                        <Text>Region: {this.state.imageCredit[this.state.activeSlide].region}</Text>
+                        <Text>Bird Maturity: {this.state.imageCredit[this.state.activeSlide].maturity}</Text> */}
                     </View>
-                    :
-                    <Text style={styles.subtitle}>{this.state.data.details}</Text>
-                    }
+
                 </View>
             </ScrollView>
         )
@@ -343,7 +390,7 @@ export default class BirdInfo extends Component {
     render() {
         return (
             <View style={{ paddingHorizontal: 5}}>
-                <StatusBar barStyle="dark-content" />
+                <StatusBar barStyle="dark-content" backgroundColor="black" />
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
                     <TouchableOpacity style={{marginBottom: 5, borderBottomStartRadius: 15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 0? '#34C759':'#DCDCDC'}} onPress={()=> this.infoBtnHandler()}>
                         <Text style={{opacity:this.state.page==0? 1:0.4,fontWeight:'700',color: this.state.page==0? 'white': 'black'}}>Information</Text>
@@ -356,10 +403,16 @@ export default class BirdInfo extends Component {
                     </TouchableOpacity>
                 </View>
                 
-                {this.state.dataReady? 
+                {this.state.imageReady && this.state.infoReady? 
                     (this.getLayout())
+                    // (console.log(this.state.data.name))
+                   
                         : 
-                    (<Text>Loading...</Text>)}
+                    (<View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                    <ActivityIndicator size="large" color="#34C759"/>
+                    <Text>Loading bird information...</Text>
+                    
+                </View>)}
             </View>
         );
     }
@@ -437,12 +490,14 @@ const styles = StyleSheet.create({
     paginationContainer: {
         paddingTop: 5,
         paddingBottom: 20,
+        marginHorizontal: 10,
+        
     },
     paginationDot: {
         width: 6,
         height: 6,
         borderRadius: 7,
-        marginHorizontal: 4
+        // marginHorizontal: 4
     },
        slideInnerContainer: {
         width: itemWidth,
