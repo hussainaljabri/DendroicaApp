@@ -264,6 +264,16 @@ var getImagesUrlByBirdId = function (id, callbacks){
         callbacks.success(result);
     }});
 }
+var getMapsUrlByBirdId = function (id, callbacks){
+    var query = "SELECT MapImages.bird_id as bird_id, MapImages.filename as map_filename, MapImages.credits as map_credits from Birds ";
+    query += "INNER JOIN MapImages on Birds._id = MapImages.bird_id ";
+    query += "where MapImages.bird_id=?";
+
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
 
 var getThumbnailUrlByBirdId = function (id, callbacks){
     var query = `SELECT filename from BirdImages where (bird_id=?) and (displayOrder=1)`;
@@ -609,9 +619,10 @@ const DatabaseModule = {
     getBirdsIdByRegionId: getBirdsIdByRegionId,
     getRegionsIdAndNames: getRegionsIdAndNames,
     getDisplayInfo: getDisplayInfo,
-    
+
     getLists: getLists,
-    getBirdListFromListId: getBirdListFromListId,
+    getBirdListFromListId: getBirdListFromListId, // i dont need this anymore.
     getListDisplayInfo: getListDisplayInfo,
+    getMapsUrlByBirdId: getMapsUrlByBirdId,
 };
 export default DatabaseModule;
