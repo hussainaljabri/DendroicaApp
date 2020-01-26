@@ -11,7 +11,7 @@ import {createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
 import Authentication from "./src/DB/Authentication";
-import TestingPage from './src/UI/TestingPage';
+// import TestingPage from './src/UI/TestingPage';
 const username = "tmobile";
 const password = "appH@ppy";
 
@@ -70,16 +70,16 @@ const BirdListToBirdInfoNavigator = createStackNavigator({
 // });
 const BottomNav = createMaterialBottomTabNavigator(
     {
-      TestingPage: {
-          screen: TestingPage,
-          navigationOptions:{
-            tabBarLabel: <Text style={{fontWeight: '800',}}>TestingPage</Text>,
-            tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
-            tabBarColor: 'orange',
-            activeColor: 'orange',
-            // barStyle: { backgroundColor: 'yellow' },
-          }
-      },
+      // TestingPage: {
+      //     screen: TestingPage,
+      //     navigationOptions:{
+      //       tabBarLabel: <Text style={{fontWeight: '800',}}>TestingPage</Text>,
+      //       tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
+      //       tabBarColor: 'orange',
+      //       activeColor: 'orange',
+      //       // barStyle: { backgroundColor: 'yellow' },
+      //     }
+      // },
       Explore: { screen: BirdListToBirdInfoNavigator,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,
@@ -107,7 +107,7 @@ const BottomNav = createMaterialBottomTabNavigator(
 
     },
     {
-      initialRouteName: 'TestingPage',
+      initialRouteName: 'Explore',
       activeColor: 'orange',
       inactiveColor: 'black',
       barStyle: { backgroundColor: '#F5F5F5', },
