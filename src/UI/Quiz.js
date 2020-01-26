@@ -230,7 +230,7 @@ export default class Quiz extends Component{
                     data: tempData,
                     seenBirds: seenBird,
                     isPressed: false,
-                    score: this.state.answerIndex == this.state.selectedIndex? this.state.score+1: this.state.score-1,
+                    score: this.state.answerIndex == this.state.selectedIndex? this.state.score+1: (this.state.score == 0? 0:this.state.score-1),
                     quizNumber: this.state.quizNumber+1,
                 });
             }else{
