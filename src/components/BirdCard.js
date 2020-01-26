@@ -43,8 +43,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8F8F8',
     },
     img: {
-        width: 120,
-        height: 100,
+        width: 130,
+        height: 110,
         // borderRadius: 2,
         // borderColor: "black",
         // borderWidth: 1,
