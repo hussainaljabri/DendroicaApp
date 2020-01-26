@@ -120,7 +120,9 @@ export default class BirdInfo extends Component {
    getImageModal=(page)=>{
         if(page==='info'){
             const img = this.state.images.map((item, index)=>{
-                return ({props:{source: item}}); // {url: item} for http url or file url
+                return ({
+                    url: item
+                });
             });
             return (
                     <Modal
@@ -132,7 +134,7 @@ export default class BirdInfo extends Component {
                         onRequestClose={() => console.log('Modal has been closed')}>
                         
                         
-                        <ImageViewer saveToLocalByLongPress={true} index={this.state.activeSlide} imageUrls={img} />
+                        <ImageViewer saveToLocalByLongPress={false} index={this.state.activeSlide} imageUrls={img} />
                         <View style={styles.modalContainer}>
                             <TouchableHighlight
                                 style={{padding:15, backgroundColor: 'gray'}}
