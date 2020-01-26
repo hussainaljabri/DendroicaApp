@@ -3,7 +3,10 @@ import { Platform, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, 
 import Constants from 'expo-constants';
 import {Icon} from 'react-native-elements';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import DatabaseModule from '../DB/DatabaseModule';
 
+
+const prefix='https://natureinstruct.org';
 
 
 
@@ -41,6 +44,8 @@ export default class Quiz extends Component{
         optionsReady: false,
         answerIndex: null,
         isAnswered: false,
+        answerImages: [],
+        answerImagesReady: false,
         isPressed: false,
         selectedIndex: undefined,
         total: undefined,
@@ -51,12 +56,15 @@ export default class Quiz extends Component{
 
     componentDidMount(){
         let tempData = this.props.navigation.getParam('data', []);
+        // console.log(tempData);
+        let t = this._genRandom(tempData.length,0);
+        // console.log('test: num:'+t + " , data[num]:"+JSON.stringify(tempData[t]));
         this.setState({
             data: tempData,
             dataReady: true,
             total: tempData.length,
         });
-        console.log('data: '+ tempData[1].name + ' imageUrl:'+ tempData[1].image[0]);
+        // console.log('data: '+ tempData[1].name + ' imageUrl:'+ tempData[1].image[0]);
 
         this._generateOptions(tempData);
     }
@@ -71,15 +79,33 @@ export default class Quiz extends Component{
         }
         return array;
     }
+
     _generateOptions=(data)=>{
         //first loop is to get a Unique answer.
         let RandomAnswerIndex;
         let temp =[];
         for(let i=0;;i++){
             RandomAnswerIndex = this._genRandom(data.length,0);
-            let result = this.state.seenBirds.find(item =>{return (item.id === data[RandomAnswerIndex].id)})
+            let result = this.state.seenBirds.find(item =>{return (item.bird_id === data[RandomAnswerIndex].bird_id)})
             if(result == undefined){
                 temp.push(data[RandomAnswerIndex]);
+                // call for its images.
+                DatabaseModule.getImagesUrlByBirdId(data[RandomAnswerIndex].bird_id,{
+                    success:(result)=>{
+                        let images = [];
+                        result.map((item, index)=>{
+                            //images
+
+                            images.push(prefix+item.image_filename);
+                            // console.log("images pushed:"+prefix+item.image_filename);
+                        });
+
+                        this.setState({
+                            answerImages: result,
+                            answerImagesReady: true,
+                        });
+                    }
+                });
                 break;
             }
         }
@@ -89,7 +115,7 @@ export default class Quiz extends Component{
         for(let j=0;;j++){
             let rand = this._genRandom(data.length, 0);
             let alreadyChosenResult = temp.find(item=>{return (item === data[rand])});
-            let isAnswerResult = (data[RandomAnswerIndex].id === data[rand].id);
+            let isAnswerResult = (data[RandomAnswerIndex].bird_id === data[rand].bird_id);
 
             if(!isAnswerResult && alreadyChosenResult == undefined){
                 temp.push(data[rand]);
@@ -138,7 +164,7 @@ export default class Quiz extends Component{
         return (
                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
                 <View key={'VW'+index} style={styles.imageContainer}>
-                    <Image key={'IM'+index} style={styles.image} source={item} />
+                    <Image key={'IM'+index} style={styles.image} source={{uri: prefix+item.image_filename}} />
                 </View>
                 </TouchableOpacity>
     
@@ -146,14 +172,14 @@ export default class Quiz extends Component{
             );
     }
     getCarousel=()=>{
-        if(this.state.dataReady){
-            var chosenBird = this.state.optionslist[this.state.answerIndex];
-            console.log('chosen bird: ' + chosenBird.name);
+        if(this.state.dataReady && this.state.answerImagesReady){
+            var chosenBird = this.state.answerImages; // if we got vocalization working then here make them {images: , voice: }
+            
             return (
                 <View>
                     <Carousel
                         ref={(c) => { this._carousel = c; }}
-                        data={chosenBird.image}
+                        data={chosenBird}
                         renderItem={this._renderItem}
                         sliderWidth={sliderWidth}
                         itemWidth={itemWidth}
@@ -165,7 +191,7 @@ export default class Quiz extends Component{
                         onSnapToItem={(index) => this.setState({ activeSlide: index }) }
                     />
                     <Pagination 
-                        dotsLength={chosenBird.image.length}
+                        dotsLength={chosenBird.length}
                         activeDotIndex={this.state.activeSlide}
                         containerStyle={styles.paginationContainer}
                         dotColor={'black'}

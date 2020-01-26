@@ -161,10 +161,10 @@ export default class MyList extends Component {
                         containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
                     />
                     <View style={{flexDirection:"row", justifyContent:"space-between"}}>
-                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} style={styles.btn}>
-                            <Text style={{fontWeight:"600", color: "red"}}>Quiz</Text>
+                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} disabled={!this.state.selectedReady} style={this.state.selectedReady? styles.btn: styles.disabledBtn}>
+                            <Text style={this.state.selectedReady? {fontWeight:"600", color: "red"}: {fontWeight:"600", color: "grey"}}>Quiz</Text>
                         </TouchableOpacity>
-                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {Birds.length}</Text>
+                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
                     </View>
                 </View>
 
@@ -189,7 +189,7 @@ export default class MyList extends Component {
                     </View>
                     )
             :
-                    (<Text>
+                    (<Text style={{fontWeight:'500', top:50, textAlign: "center"}}>
                         Please, Select a List.
                     </Text>)
                 }
@@ -225,6 +225,19 @@ const styles = StyleSheet.create({
          borderWidth: 0.5,
          borderColor: 'red',
 
+     },
+     disabledBtn:{
+        paddingLeft: 25,
+        paddingRight: 25,
+        paddingTop: 2,
+        paddingBottom: 2,
+        marginBottom: 3,
+        marginTop: 3,
+        justifyContent: "center",
+        textAlignVertical: "center",
+        borderRadius: 5,
+        borderWidth: 0.5,
+        borderColor: 'grey',
      },
      select: {
         width: "100%",
