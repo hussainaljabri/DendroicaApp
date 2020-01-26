@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Platform, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Alert} from 'react-native';
+import { Platform, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Alert, ActivityIndicator} from 'react-native';
 import Constants from 'expo-constants';
 import {Icon} from 'react-native-elements';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
@@ -225,6 +225,7 @@ export default class Quiz extends Component{
                 // re-generate options
                 this._generateOptions(tempData); 
                 this.setState({
+                    answerImagesReady: false,
                     data: tempData,
                     seenBirds: seenBird,
                     isPressed: false,
@@ -247,7 +248,15 @@ export default class Quiz extends Component{
             if(this.state.topBtnStatus[0] && !this.state.topBtnStatus[1]){
                 return(
                     <View>
-                        {this.getCarousel()}
+                        {this.state.answerImagesReady?
+                        (this.getCarousel())
+                        :
+                        (
+                        <View style={[{justifyContent: 'center', alignItems: "center"}, styles.sliderContentContainer]}>
+                            <ActivityIndicator size="large" color="red"/>
+                            <Text>Loading</Text>
+                        </View>
+                        )}
                         <Text style={{fontWeight:'600', paddingHorizontal: 5,}}>What is the name of this bird?</Text>
                         
                         <ScrollView style={styles.optionsScroll}>
