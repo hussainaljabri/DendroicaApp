@@ -40,6 +40,10 @@ export default class BirdInfo extends Component {
         images: [],
         imageCredit: [],
         imageReady: false,
+        mapImages: [],
+        mapCredit: [],
+        mapImagesReady: false,
+
     }
 
     static navigationOptions = ({navigation})=> ({
@@ -87,10 +91,29 @@ export default class BirdInfo extends Component {
                     success: (result)=>{
                         //{"_id":257,"name":"Acadian Flycatcher","scientific_name":"Empidonax virescens","range_description":"CANADA - Breeding only: 9,784 square km\nCARIBBEAN - Migration only: 119,391 square km\nCENTRAL AMERICA - Wintering only: 104,297 square km; Migration only: 405,573 square km\nMEXICO - Migration only: 433,743 square km\nSOUTH AMERICA - Wintering only: 555,165 square km\nUSA - Breeding only: 2,451,982 square km; Migration only: 168,294 square km","song_description":"Song is an emphatic \"peet-seet\", \"peet-suh\", with
                         //  accent on second syllable. Call is a sharp \"peet\"."}
-                        console.log(JSON.stringify(result));
+                        // console.log(JSON.stringify(result));
                         this.setState({
                             info: result,
                             infoReady: true,
+                        });
+                        DatabaseModule.getMapsUrlByBirdId(id, {
+                            success: (result)=>{
+                                let mapImages = [];
+                                let mapCredit = [];
+                                result.map((item, index)=>{
+                                    //images
+                                    mapImages.push(prefix+item.map_filename);
+                                    //image credit
+                                    mapCredit.push(item.map_credits);
+                
+                
+                                });
+                                this.setState({
+                                    mapImages: mapImages,
+                                    mapCredit: mapCredit,
+                                    mapImagesReady: true,
+                                });
+                            }
                         });
                     }
                 });
@@ -98,11 +121,8 @@ export default class BirdInfo extends Component {
             }
         }
     );
-    // this.setState({
-    //     data: this.props.navigation.getParam('data', []),
-    //     dataReady: true,
-    //     page: 0,
-    // });
+
+    
    }
    testing =()=>{
        return (<Text>We got something!</Text>);
@@ -148,8 +168,8 @@ export default class BirdInfo extends Component {
             );
     
         }else if(page==='map'){
-            const img = this.state.data.maps.image.map((item, index)=>{
-                return ({props:{source: item}}); // {url: item} for http url or file url
+            const img = this.state.mapImages.map((item, index)=>{
+                return ({url: item}); 
             });
             return (
                     <Modal
@@ -161,7 +181,7 @@ export default class BirdInfo extends Component {
                         onRequestClose={() => console.log('Modal has been closed')}>
     
                         
-                        <ImageViewer saveToLocalByLongPress={true} index={this.state.activeMapSlide} imageUrls={img} />    
+                        <ImageViewer saveToLocalByLongPress={false} index={this.state.activeMapSlide} imageUrls={img} />    
                         <View style={styles.modalContainer}>
                             <TouchableHighlight
                                 style={{padding:15, backgroundColor: 'gray'}}
@@ -187,7 +207,7 @@ export default class BirdInfo extends Component {
             <View key={'VW'+index} style={styles.imageContainer}>
                 <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
             </View>
-            </TouchableOpacity>
+        </TouchableOpacity>
 
 
     );}
@@ -245,7 +265,7 @@ export default class BirdInfo extends Component {
                 <View style={styles.textContainer}>
 
                     <View>
-                        <Text>Photo Credit: {this.state.imageCredit[this.state.activeSlide]}</Text>
+                        <Text>Photo Credit: {this.state.imageReady? (this.state.imageCredit[this.state.activeSlide]?this.state.imageCredit[this.state.activeSlide]:'Not Found'):'Loading..'}</Text>
                         {/* <Text>Source: {this.state.imageCredit[this.state.activeSlide].source}</Text>
                         <Text>Date: {this.state.imageCredit[this.state.activeSlide].date}</Text>
                         <Text>Region: {this.state.imageCredit[this.state.activeSlide].region}</Text>
@@ -258,27 +278,61 @@ export default class BirdInfo extends Component {
     }
     getVocalPage=()=>{
         return (<ScrollView>
-                            <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+                            
+
+                     {/* TODO: VOCALIZATIONS CODE GOES HERE */}
+                     <View>
+                    <Carousel
+                        ref={(cb) => { this._carouselMap = cb; }}
+                        data={NotFoundImage}
+                        renderItem={({item,index})=>{
+                            return (
+                                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
+                                 <View key={'VW'+index} style={styles.imageContainer}>
+                                     <Image key={'IM'+index} style={styles.image} source={item} />
+                                 </View>
+                                 </TouchableOpacity>)
+                        }}
+                        sliderWidth={sliderWidth}
+                        itemWidth={itemWidth}
+                        firstItem={this.state.activeMapSlide}
+                        hasParallaxImages={true}
+                        containerCustomStyle={styles.slider}
+                        contentContainerCustomStyle={styles.sliderContentContainer}
+                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
+                    />
+                    <Pagination 
+                        dotsLength={NotFoundImage.length}
+                        activeDotIndex={this.state.activeMapSlide}
+                        containerStyle={styles.paginationContainer}
+                        dotColor={'#34C759'}
+                        dotStyle={styles.paginationDot}
+                        inactiveDotColor={colors.black}
+                        inactiveDotOpacity={0.4}
+                        inactiveDotScale={0.6}
+                        carouselRef={this._slider2Ref}
+                        tappableDots={!!this._slider2Ref}
+                    />
+                </View>
+                <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
                     <Icon 
                         name='music'
                         type={'font-awesome'}
                         color='#34C759'
                     />
                     <Text style={styles.title}> Vocalizations</Text>
-                </View>
-
-                     {/* TODO: VOCALIZATIONS CODE GOES HERE */}
+                </View> 
         </ScrollView>)
     }
 
     getMapPage=()=>{
         return (<ScrollView>
                 {this.getImageModal('map')}
-                {this.state.data.maps.image.length != 0?
+                {this.state.mapImages.length != 0?
                     (<View>
                         <Carousel
                         ref={(cb) => { this._carouselMap = cb; }}
-                        data={this.state.data.maps.image}
+                        data={this.state.mapImages}
                         renderItem={this._renderItem}
                         sliderWidth={sliderWidth}
                         itemWidth={itemWidth}
@@ -289,7 +343,7 @@ export default class BirdInfo extends Component {
                         onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
                     />
                     <Pagination 
-                        dotsLength={this.state.data.maps.image.length}
+                        dotsLength={this.state.mapImages.length}
                         activeDotIndex={this.state.activeMapSlide}
                         containerStyle={styles.paginationContainer}
                         dotColor={'#34C759'}
@@ -306,7 +360,14 @@ export default class BirdInfo extends Component {
                     <Carousel
                         ref={(cb) => { this._carouselMap = cb; }}
                         data={NotFoundImage}
-                        renderItem={this._renderItem}
+                        renderItem={({item,index})=>{
+                            return (
+                                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
+                                 <View key={'VW'+index} style={styles.imageContainer}>
+                                     <Image key={'IM'+index} style={styles.image} source={item} />
+                                 </View>
+                                 </TouchableOpacity>)
+                        }}
                         sliderWidth={sliderWidth}
                         itemWidth={itemWidth}
                         firstItem={this.state.activeMapSlide}
@@ -336,13 +397,14 @@ export default class BirdInfo extends Component {
                         type={'font-awesome'}
                         color='#34C759'
                     />
-                    <Text style={styles.title}> Location: {this.state.data.id ==1? /**for debugging */ this.state.data.maps.region[this.state.activeMapSlide] : 'Not Found!'}</Text>
+                    <Text style={styles.title}> Location</Text>
 
                 </View>
-                    {this.state.data.id == 1? // for debugging
+                    {this.state.info? // for debugging
                         (<View style={styles.textContainer}>
-                            <Text style={styles.textContainer}>Range Description for {this.state.data.name}</Text>
-                            <Text style={styles.textContainer}>{this.state.data.maps.description}</Text>
+                            <Text>Map photo credit: {this.state.mapImagesReady? this.state.mapCredit[this.state.activeMapSlide]:'Not Found'}</Text>
+                            <Text style={styles.textContainer}>Range Description for {this.state.info.name}</Text>
+                            <Text style={styles.textContainer}>{this.state.info.range_description}</Text>
                         </View>)
                     :
                         <Text style={styles.textContainer}>Info not found for this Bird.</Text>
@@ -357,15 +419,27 @@ export default class BirdInfo extends Component {
      * for future expansions.
      */
     getLayout=()=>{
+        let activity = (<View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                    <ActivityIndicator size="large" color="#34C759"/>
+                    <Text>Loading ....</Text>
+                </View>);
         switch(this.state.page){
             case 0:
-                return this.getInfoPage();
+                if(this.state.infoReady){
+                    return this.getInfoPage();
+                }else{
+                    return activity;
+                }
             case 1:
                 return this.getVocalPage();
             case 2:
-                return this.getMapPage();
+                if(this.state.mapImagesReady){
+                    return this.getMapPage();
+                }else{
+                    return activity;
+                }
             default:
-                return this.getInfoPage();
+                return activity;
         }                  
     }
 
