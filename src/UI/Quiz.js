@@ -226,6 +226,7 @@ export default class Quiz extends Component{
                 this._generateOptions(tempData); 
                 this.setState({
                     answerImagesReady: false,
+                    activeSlide: 0,
                     data: tempData,
                     seenBirds: seenBird,
                     isPressed: false,
