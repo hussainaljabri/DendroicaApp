@@ -1,10 +1,10 @@
-import React, { Component } from "react";
+import React, { PureComponent } from "react";
 import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-export default class BirdCard extends Component {
+export default class BirdCard extends React.PureComponent {
 
-
+    
 
     render() {
 
@@ -14,7 +14,7 @@ export default class BirdCard extends Component {
                 
                     
                     <Image
-                    source={this.props.imgUrl}
+                    source={{uri: this.props.imgUrl}}
                     resizeMode="cover"
                     style={styles.img}
                 />
@@ -43,15 +43,16 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8F8F8',
     },
     img: {
-        width: 120,
-        height: 100,
+        width: 130,
+        height: 110,
         // borderRadius: 2,
         // borderColor: "black",
         // borderWidth: 1,
     },
     birdName:{
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         textAlignVertical: 'center',
+        
         fontSize: 16,
     },
     latin:{

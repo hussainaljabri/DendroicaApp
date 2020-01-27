@@ -11,13 +11,17 @@ import {createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
 import Authentication from "./src/DB/Authentication";
-
+// import TestingPage from './src/UI/TestingPage';
 const username = "tmobile";
 const password = "appH@ppy";
 
 DatabaseManagementModule.init(() => {
     Authentication.userLogin(username, password, () => {
-        DatabaseManagementModule.importApiData(1, () => {} );
+        DatabaseManagementModule.importApiData(1, () => {
+            DatabaseManagementModule.importApiData(2, () => {
+                console.log("All Api data imported");
+            });
+        });
     });
 });
 export default class App extends Component {
@@ -58,9 +62,24 @@ const BirdListToBirdInfoNavigator = createStackNavigator({
   },
 });
 
-
+/**
+ * Stack Navigator for Welcome page.
+ */
+// const WelcomePageNavigator = createStackNavigator({
+  
+// });
 const BottomNav = createMaterialBottomTabNavigator(
     {
+      // TestingPage: {
+      //     screen: TestingPage,
+      //     navigationOptions:{
+      //       tabBarLabel: <Text style={{fontWeight: '800',}}>TestingPage</Text>,
+      //       tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="telescope" size={20} color={tintColor} />,
+      //       tabBarColor: 'orange',
+      //       activeColor: 'orange',
+      //       // barStyle: { backgroundColor: 'yellow' },
+      //     }
+      // },
       Explore: { screen: BirdListToBirdInfoNavigator,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Explore</Text>,

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Platform, TextInput, Switch} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar} from "react-native";
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import {Icon} from 'react-native-elements';
@@ -35,8 +35,9 @@ export default class Settings extends Component {
     };
     render(){
         return (
-            <ScrollView style={{flex: 1,backgroundColor:"white", marginLeft: 5, marginRight: 5, paddingTop: 10, paddingBottom:10}}>
+            <ScrollView style={{flex: 1,backgroundColor:"white", paddingBottom:10}}>
                 <View style={styles.statusBar}/>
+                <StatusBar barStyle="dark-content" />
                 <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10,}}>
                     <Text style={styles.header}>Settings |</Text>
                     <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
@@ -148,6 +149,8 @@ export default class Settings extends Component {
 const styles = StyleSheet.create({
     statusBar:{
         height: Constants.statusBarHeight,
+        // backgroundColor: 'black',
+        width:'100%',
      },
      btn:{
          alignSelf:"center",

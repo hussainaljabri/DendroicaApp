@@ -1,4 +1,4 @@
-import { SQLite } from 'expo-sqlite';
+import * as SQLite from 'expo-sqlite';
 const db = SQLite.openDatabase('Dendroica.db');
 
 const FIELDS = {
@@ -9,12 +9,12 @@ const FIELDS = {
     "Lists": ["_id","name"],
     "BirdImages": ["_id","bird_id","filename","credits","displayOrder"],
     "MapImages": ["_id","bird_id","filename","credits"],
-    "Vocalizations": ["_id","bird_id","filename","mp3Filename","credits"],
+    "Vocalizations": ["_id","bird_id","filename","mp3_filename","credits"],
     "SubRegions": ["_id","region_id","name","abbrev"],
     "FileSubRegions": ["subregion_id","file_id","displayOrder"],
     "BirdSubRegions": ["subregion_id","bird_id","non_breeder","rare"],
     "BirdRegions": ["region_id","bird_id","non_breeder","rare"],
-    "BirdLists": ["list_id","bird_id",""]
+    "BirdLists": ["list_id","bird_id"]
 }
 
 
@@ -116,7 +116,9 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
                 onFinishedCallback();
             });
         }
-        else onFinishedCallback();
+        else  {
+            onFinishedCallback();
+        }
     });
 }
 
@@ -124,6 +126,7 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     var countQuery = "SELECT COUNT(*) from " + tableName + " WHERE _id=";
     var insertQuery = "INSERT INTO " + tableName + " VALUES (";
     var updateQuery = "UPDATE " + tableName + " SET ";
+
 
     FIELDS[tableName].forEach(field => {
         insertQuery += "?,";
@@ -133,11 +136,14 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     updateQuery = updateQuery.slice(0,-1) + " WHERE _id=";
 
     var idArray = json[jsonArrayNames[0]];
+
     db.transaction((tx) => {
         var i,index,innerIndex;
+
         for (var i = 0, index = 0, innerIndex = 0; i < idArray.length; i++) {
             var params = [];
             var updateQueryWithId = updateQuery + idArray[i];
+
             _sqlQuery(countQuery + idArray[i], [], {success: (tx,res) => {
                 var isInsertQuery = false;
                 var query = "";
@@ -159,6 +165,16 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
                 }},tx);
 
                 index ++;
+            }, error: (err) => { //Seems to throw error if table is empty (for example if new project has custom lists) in this case insert
+                var params = [];
+
+                jsonArrayNames.forEach(arrayName => {
+                    params.push(json[arrayName][index]);
+                });
+                _sqlQuery(insertQuery, params, {success: (tx,res) => {
+                    if (++innerIndex === idArray.length) onFinishedCallback();
+                }})
+                index++;
             }}, tx);
         }
     });
@@ -171,27 +187,49 @@ var updateInsertBirdRegionsAndBirdSubRegions = function (json, regionIds, onFini
     var numDatasets = json.regionId.length;
     var numUpdated = 0;
     var tableName = "";
-    db.transaction(function(tx) {
-        for (var i = 0; i < numDatasets; i++) {
-            if (regionIds.indexOf(json.regionId[i]) == -1) tableName = "BirdSubRegions";
-            else tableName = "BirdRegions";
 
-            _sqlQuery("SELECT COUNT(*) from " + tableName, [], {success: (tx,res) => {
+
+    var birdRegionsInserts = 0;
+    var birdSubRegionsInserts = 0;
+    var updates = 0;
+    var inserts = 0;
+
+    db.transaction(function(tx) {
+        var index = 0;
+        for (var i = 0; i < numDatasets; i++) {
+            var tableIdName;
+
+            if (!regionIds.includes(json.regionId[i])) {
+                tableName = "BirdSubRegions";
+                tableIdName = "subregion_id";
+            }
+            else {
+                tableName = "BirdRegions";
+                tableIdName = "region_id";
+            }
+
+            _sqlQuery("SELECT COUNT(*) from " + tableName + " where " + tableIdName + " = " + json.regionId[i] + " and bird_id=" + json.speciesId[i] , [], {success: (tx,res) => {
+                var callbackTableName = regionIds.includes(json.regionId[index]) ? "BirdRegions" : "BirdSubRegions";
                 if (res.rows._array[0]["COUNT(*)"] === 0) {
-                    _sqlQuery("INSERT INTO " + tableName + " VALUES (?,?,?,?)",
-                        [json.regionId[i], json.speciesId[i], json.nonBreederInRegion[i], json.rareInRegion[i]], {success: (tx,res) => {
-                            if (++numUpdated == numDatasets) onFinishedCallback();
+                    _sqlQuery("INSERT INTO " + callbackTableName + " VALUES (?,?,?,?)",
+                        [json.regionId[index], json.speciesId[index], json.nonBreederInRegion[index], json.rareInRegion[index]], {success: (tx,res) => {
+                            if (++numUpdated == numDatasets) {
+                            onFinishedCallback();
+                            }
                     }},tx);
+                    index++;
                 }
 
                 else {
+                    updates++;
                     var idName = ""
                     if (tableName === "BirdSubRegions") idName = "subregion_id";
                     else idName = "region_id";
-                    _sqlQuery("UPDATE " + tableName + " SET non_breeder=?,rare=? WHERE " + idName + "=?, bird_id=?",
-                        [json.nonBreederInRegion[i], json.rareInRegion[i], json.regionId[i], json.speciesId[i]], {success: (tx,res) => {
+                    _sqlQuery("UPDATE " + callbackTableName + " SET non_breeder=?,rare=? WHERE " + idName + "=?, bird_id=?",
+                        [json.nonBreederInRegion[index], json.rareInRegion[index], json.regionId[index], json.speciesId[index]], {success: (tx,res) => {
                             if (++numUpdated == numDatasets) onFinishedCallback();
                     }}, tx);
+                    index++;
                 }
             }},tx);
         }
@@ -210,6 +248,107 @@ var getBirdById = function (id, callbacks) {
     var query = `SELECT * from Birds where (_id=?)`;
     _sqlQuery(query, [id], {success:(tx,res) => {
         var result = res.rows._array[0];
+        callbacks.success(result);
+    }});
+}
+//(_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)
+var getImagesUrlByBirdId = function (id, callbacks){
+    // var query = `SELECT filename, credits from BirdImages where (bird_id=?) order by displayOrder`;
+    var query = "SELECT BirdImages.bird_id as bird_id, BirdImages.filename as image_filename, BirdImages.credits as image_credits, displayOrder from Birds ";
+    query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
+    query += "where BirdImages.bird_id=? ORDER BY displayOrder";
+    // query += "INNER JOIN MapImages on BirdImages.bird_id = MapImages.bird_id ";
+    // query += "INNER JOIN Vocalizations on MapImages.bird_id = Vocalizations.bird_id ";
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+var getMapsUrlByBirdId = function (id, callbacks){
+    var query = "SELECT MapImages.bird_id as bird_id, MapImages.filename as map_filename, MapImages.credits as map_credits from Birds ";
+    query += "INNER JOIN MapImages on Birds._id = MapImages.bird_id ";
+    query += "where MapImages.bird_id=?";
+
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+
+var getThumbnailUrlByBirdId = function (id, callbacks){
+    var query = `SELECT filename from BirdImages where (bird_id=?) and (displayOrder=1)`;
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array[0]; 
+        if(!result){
+            console.log('RobynTest: '+ id); 
+        }
+        callbacks.success(result);
+    }});
+}
+
+/**
+ * BirdRegions (region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
+                                                    CONSTRAINT birds_regions_pk primary key (region_id, bird_id))
+ */
+var getBirdsIdByRegionId = function (id, callbacks){
+    var query = `SELECT bird_id from BirdRegions where (region_id=?)`;
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+
+/**
+ * Regions (_id integer primary key not null unique, project_id integer not null unique, name text)`
+ */
+
+var getRegionsIdAndNames = function (callbacks){
+    var query = `SELECT * from Regions`;
+    _sqlQuery(query, [], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+
+var getDisplayInfo = function(id, callbacks){ // id is region_id
+    // var query = `SELECT Birds._id as bird_id, name, scientific_name, filename  from Birds INNER JOIN BirdImages on Birds._id = BirdImages.bird_id where BirdImages.displayOrder=1 INNER JOIN BirdRegions on BirdImages.bird_id = BirdRegions.bird_id`;
+    // var query = "SELECT BirdImages.bird_id as bird_id, name, scientific_name, filename from Birds ";
+    // query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
+    // query += "INNER JOIN BirdRegions on BirdImages.bird_id = BirdRegions.bird_id ";
+    // query += "where displayOrder=1 and BirdRegions.region_id=?";
+    var query = "SELECT BirdImages.bird_id as bird_id, name, scientific_name, filename, MIN(displayOrder), displayOrder from Birds ";
+    query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
+    query += "INNER JOIN BirdRegions on BirdImages.bird_id = BirdRegions.bird_id ";
+    query += "where displayOrder=1 and BirdRegions.region_id=? GROUP BY BirdRegions.bird_id ORDER BY name";
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+
+var getLists = function(callbacks){
+    var query =`SELECT * from Lists`;
+    _sqlQuery(query, [], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+var getBirdListFromListId = function(id, callbacks){
+    var query =`SELECT BirdLists.List_id, BirdLists.bird_id from Lists `;
+    query += `INNER JOIN BirdLists on Lists._id = BirdLists.List_id `
+    query += `where List_id =? `
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+}
+var getListDisplayInfo = function(id, callbacks){ 
+    var query = "SELECT BirdImages.bird_id as bird_id, name, scientific_name, filename, MIN(displayOrder), displayOrder from Birds ";
+    query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
+    query += "INNER JOIN BirdLists on BirdImages.bird_id = BirdLists.bird_id ";
+    query += "where displayOrder=1 and BirdLists.List_id=? GROUP BY BirdLists.bird_id ORDER BY name";
+    _sqlQuery(query, [id], {success:(tx,res) => {
+        var result = res.rows._array;
         callbacks.success(result);
     }});
 }
@@ -443,7 +582,7 @@ var initDB = function(onFinishedCallback) {
                                                         query = `CREATE TABLE if not exists BirdLists (list_id integer REFERENCES Lists(_id), bird_id integer REFERENCES Birds(_id),
                                                         CONSTRAINT birds_lists_pk primary key (list_id, bird_id))`;
                                                         _sqlQuery(query, [], {success: (tx,res) => {
-                                                            console.log("--> Created BirdsLists Table");
+                                                            console.log("--> Created BirdLists Table");
                                                             onFinishedCallback(tx);
                                                         }},tx);
                                                     }},tx);
@@ -473,6 +612,17 @@ const DatabaseModule = {
     upsertMultiple: upsertMultiple,
     updateInsertBirdRegionsAndBirdSubRegions: updateInsertBirdRegionsAndBirdSubRegions,
     printDatabase: printDatabase,
-    printTable: printTable
+    printTable: printTable,
+
+    getImagesUrlByBirdId: getImagesUrlByBirdId,
+    getThumbnailUrlByBirdId:getThumbnailUrlByBirdId,
+    getBirdsIdByRegionId: getBirdsIdByRegionId,
+    getRegionsIdAndNames: getRegionsIdAndNames,
+    getDisplayInfo: getDisplayInfo,
+
+    getLists: getLists,
+    getBirdListFromListId: getBirdListFromListId, // i dont need this anymore.
+    getListDisplayInfo: getListDisplayInfo,
+    getMapsUrlByBirdId: getMapsUrlByBirdId,
 };
 export default DatabaseModule;
