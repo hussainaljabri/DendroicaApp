@@ -50,8 +50,9 @@ const styles = StyleSheet.create({
         // borderWidth: 1,
     },
     birdName:{
-        paddingHorizontal: 15,
+        paddingHorizontal: 10,
         textAlignVertical: 'center',
+        
         fontSize: 16,
     },
     latin:{

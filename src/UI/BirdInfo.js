@@ -79,7 +79,7 @@ export default class BirdInfo extends Component {
 
 
                 });
-                console.log(JSON.stringify(imageCredit));
+                // console.log(JSON.stringify(imageCredit));
                 this.setState({
                     page: 0,
                     images: images,

@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
     },
     nextBtn:{
         marginHorizontal: wp(30),
-        marginVertical: 10,
+        marginVertical: 5,
         paddingVertical:5,
         paddingHorizontal: 10,
         alignContent: "center",

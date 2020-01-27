@@ -289,8 +289,9 @@ export default class BirdList extends Component {
             :
                 (
                     <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                        {/* <Image source={require("../../assets/loading.gif")} style={{width:300,height:150, resizeMode:'center'}} /> */}
                         <ActivityIndicator size="large" color="orange"/>
-                        <Text>Be patient, birds are coming your way</Text>
+                        <Text>Birds are coming your way</Text>
                     </View>
                 )
             }

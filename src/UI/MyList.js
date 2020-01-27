@@ -185,7 +185,7 @@ export default class MyList extends Component {
                     (
                     <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
                         <ActivityIndicator size="large" color="orange"/>
-                        <Text>Be patient, birds are coming your way</Text>
+                        <Text>Birds are coming your way</Text>
                     </View>
                     )
             :
