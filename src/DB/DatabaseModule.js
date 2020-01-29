@@ -278,13 +278,75 @@ var getMapsUrlByBirdId = function (id, callbacks){
 var getThumbnailUrlByBirdId = function (id, callbacks){
     var query = `SELECT filename from BirdImages where (bird_id=?) and (displayOrder=1)`;
     _sqlQuery(query, [id], {success:(tx,res) => {
-        var result = res.rows._array[0]; 
-        if(!result){
-            console.log('RobynTest: '+ id); 
-        }
+        var result = res.rows._array[0];
         callbacks.success(result);
     }});
 }
+
+/**
+ * Creates a custom list
+ * @param listName  -> Name of custom list
+ * @return          -> ID of new list
+ */
+var createCustomList = function (listName, callbacks) {
+    var query = 'INSERT INTO Lists (name) VALUES (?)';
+    var params = [listName];
+    _sqlQuery(query, [listName], {success: (tx,res) => {
+        callbacks.success(res.insertId);
+    }});
+}
+
+/**
+ * Deletes a custom list
+ * @param listId    -> Id of list to be deleted
+ */
+var deleteCustomList = function (listId, callbacks) {
+    //First Remove all references from BirdLists
+    var query = 'DELETE FROM BirdLists where list_id=?';
+    _sqlQuery(query, [listId], {success: (tx,res) => {
+        var query = 'DELETE FROM Lists where _id = ?';
+        _sqlQuery(query, [listId], {success: (tx, res) => {
+            callbacks.success();
+        }});
+    }});
+}
+
+/**
+ * Adds Birds to a Custom List
+ * @param listId    -> ID of list
+ * @param birdsIds  -> Array of birdIds
+ */
+var addBirdsToCustomList = function (listId, birdIds, callbacks) {
+    var query = 'INSERT INTO BirdLists VALUES (?,?)';
+
+    var index = 0;
+    for (var i = 0; i < birdIds.length; i++) {
+        _sqlQuery(query, [listId, birdIds[i]], {success: (tx,res) => {
+            if (++index == birdIds.length) callbacks.success();
+        }, error: (tx) => {
+            console.log("Error - Inserting Bird into Custom List (already exists in list)");
+            if (++index == birdIds.length) callbacks.success();
+        }})
+    }
+}
+
+/**
+ * Removes Birds from Custom List
+ * @param listId    -> ID of list
+ * @param birdIds   -> Array of birdIds OR single bird ID
+ */
+var removeBirdsFromCustomList = function (listId, birdIds, callbacks) {
+    if (!Array.isArray(birdIds)) birdIds = [birdIds];
+    var query = "DELETE FROM BirdLists where list_id=? and bird_id=?";
+
+    var index = 0;
+    for (var i = 0; i < birdIds.length; i++) {
+        _sqlQuery(query, [listId, birdIds[i]], {success: (tx,res) => {
+            if (++index == birdIds.length) callbacks.success();
+        }});
+    }
+}
+
 
 /**
  * BirdRegions (region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
@@ -390,6 +452,8 @@ var _sqlQuery = function (query, params, callbacks, tx) {
     });
 }
 
+
+//FIXME Can't use ID constraint if table has composite keys
 var printTable = function(tableName, numRowsOrId, isIdConstraint, onFinishedCallback) {
     var constraint = "";
 
@@ -624,5 +688,10 @@ const DatabaseModule = {
     getBirdListFromListId: getBirdListFromListId, // i dont need this anymore.
     getListDisplayInfo: getListDisplayInfo,
     getMapsUrlByBirdId: getMapsUrlByBirdId,
+
+    createCustomList: createCustomList,
+    deleteCustomList: deleteCustomList,
+    addBirdsToCustomList: addBirdsToCustomList,
+    removeBirdsFromCustomList: removeBirdsFromCustomList
 };
 export default DatabaseModule;
