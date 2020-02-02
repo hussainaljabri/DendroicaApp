@@ -1,11 +1,11 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Picker, StatusBar, ActivityIndicator} from "react-native";
+import {Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Picker, StatusBar, ActivityIndicator} from "react-native";
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
-
+import SaveAlert from '../components/SaveAlert';
 
 
 const prefix='https://natureinstruct.org';
@@ -42,10 +42,11 @@ export default class BirdList extends Component {
         barclicked: false,
 
         selectionMode: false,
-        birdSelected: (new Map(): Map<string, boolean>),
+        birdSelected: new Map(),
         selectionCount: 0,
-        
 
+        displayAlert: false, // saveTo alert
+        saveAlertLoading: false, // to show activity indicator when saving birds
     }
 
 
@@ -141,8 +142,7 @@ export default class BirdList extends Component {
         });
     };
 
-    handlerClick=(id, name, scientific_name)=>{
-        // I need id, name, scientific_name, filename, 
+    handlerClick=(id, name, scientific_name)=>{ 
         // Alert.alert("Click:\n" +id+": "+name);
         if(!this.state.selectionMode){
             this.props.navigation.navigate('BirdInfo',
@@ -164,7 +164,7 @@ export default class BirdList extends Component {
                 // console.log(selected);
                 return {birdSelected: selected, selectionCount: state.selectionCount+count};
             });
-            console.log("count: "+this.state.selectionCount+" ,selection: "+this.state.birdSelected);
+            console.log(this.state.birdSelected);
 
         }
 
@@ -215,8 +215,9 @@ export default class BirdList extends Component {
         
         this.setState({
             selectionMode: !this.state.selectionMode,
-            birdSelected: (new Map(): Map<string, boolean>),
+            birdSelected: new Map(),
             selectionCount: 0,
+            displayAlert: false
         });
     };
     getFlatList=()=>{
@@ -255,13 +256,13 @@ export default class BirdList extends Component {
                     containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
                     />
                     <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: "space-between"}}>
-                        <TouchableOpacity style={styles.btn}>
+                        <TouchableOpacity disabled={this.state.selectionCount>0? false:true} style={this.state.selectionCount>0? styles.btn:styles.disabledBtn} onPress={() => {this.setState({displayAlert: true})}}>
                             <Text>
                                 Save To
                             </Text>
                         </TouchableOpacity>
                             <Text style={{fontSize: 18,fontWeight: '500', alignSelf: "center"}}>{this.state.selectionCount}</Text>
-                        <TouchableOpacity style={styles.btn}>
+                        <TouchableOpacity style={styles.btn} onPress={()=> this.handlerLongClick()}>
                             <Text>
                                 Cancel
                             </Text>
@@ -293,10 +294,29 @@ export default class BirdList extends Component {
             );
         }
     }
+    saveToCallback=(listid)=>{
+           // we have list id now, lets add birds to it.
+           let temp = [];
+           this.state.birdSelected.forEach((value, key)=>{
+                temp.push(key);
+           });
+           DatabaseModule.addBirdsToCustomList(listid, temp, {success: () => {
+                this.handlerLongClick();
+                console.log('Added:'+temp);
+           }});
+    }
     render(){
         const topBarStyle = this.state.isTopBarHidden;
         return (
             <View style={{backgroundColor:"white",flex:1}}>
+                {/* SaveTo alert */}
+                <SaveAlert 
+                    displayAlert={this.state.displayAlert} 
+                    confirm={(res)=> this.saveToCallback(res)}
+                    cancel={()=> this.setState({displayAlert: !this.state.displayAlert})}
+                    loading={!!this.state.saveAlertLoading}
+                />
+
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />
                 {topBarStyle ? 
@@ -380,6 +400,12 @@ const styles = StyleSheet.create({
          justifyContent: "center", 
          alignItems: "center", 
          backgroundColor:'orange'
+    },
+    disabledBtn:{
+        padding:15, 
+        justifyContent: "center", 
+        alignItems: "center", 
+        backgroundColor:'#b0b0b0'
     },
      select: {
         width:"100%",
