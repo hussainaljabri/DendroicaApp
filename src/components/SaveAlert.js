@@ -70,7 +70,7 @@ export default class SaveAlert extends Component{
                     animationType="fade"
                     onSelect = {this.onSelect.bind(this)}
                     defaultText  = {this.state.value}
-                    style = {{borderWidth : 1, borderColor : "green",}}
+                    style = {styles.select}
                     textStyle = {{}}
                     transparent={true}
                     backdropStyle  = {{backgroundColor : "#00000088"}}
@@ -130,12 +130,14 @@ export default class SaveAlert extends Component{
                                 </View>)
                             :
                             /* OR Get New List Name TextInput */
-                                (<View style={{paddingHorizontal: '20%', paddingVertical: 15,}}>
+                                (<View style={{paddingHorizontal: '20%', paddingVertical: 15}}>
                                     <TextInput
                                         placeholder="Enter new list name.."
                                         style={styles.textInput}
-                                        onChangeText={text => this.state.textInputValue.length<allowedLength? this.setState({textInputValue: text}): {}}
+                                        onChangeText={text => this.setState({textInputValue: text})}
                                         value={this.state.textInputValue}
+                                        editable
+                                        maxLength={allowedLength}
                                     />    
                                 </View>)
                             }
@@ -166,12 +168,22 @@ export default class SaveAlert extends Component{
 
 const styles = StyleSheet.create({
     textInput:{
+        marginTop:15,
         height: 40, 
         paddingHorizontal: 5,
         borderColor: 'gray', 
         borderWidth: 1, 
         justifyContent: "center",
     },
+    select:{
+        marginTop:15,
+        height: 40,
+        width: '100%', 
+        justifyContent: "center",
+        paddingHorizontal: 5,
+        borderWidth : 1,
+        borderColor : "green",
+    }, 
     tabButton:{
         paddingVertical: 10,
         paddingHorizontal: 25,
@@ -183,7 +195,7 @@ const styles = StyleSheet.create({
     },
     alertMessageButtonStyle: {
         paddingHorizontal: 6,
-        marginVertical: 4,
+        marginVertical: 15,
         borderRadius: 10,
         backgroundColor: '#80BFFF',
         justifyContent: 'center',
@@ -207,7 +219,7 @@ const styles = StyleSheet.create({
     },
     mainContainer:{
         flexDirection: 'column',
-        height: '30%',
+        height: '45%',
         width: '80%',
         justifyContent: 'center',
         alignItems: 'center',
