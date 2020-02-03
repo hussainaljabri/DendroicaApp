@@ -310,12 +310,13 @@ export default class BirdList extends Component {
         return (
             <View style={{backgroundColor:"white",flex:1}}>
                 {/* SaveTo alert */}
-                <SaveAlert 
+                {this.state.displayAlert && (<SaveAlert 
                     displayAlert={this.state.displayAlert} 
                     confirm={(res)=> this.saveToCallback(res)}
                     cancel={()=> this.setState({displayAlert: !this.state.displayAlert})}
                     loading={!!this.state.saveAlertLoading}
-                />
+                />)}
+                
 
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />
