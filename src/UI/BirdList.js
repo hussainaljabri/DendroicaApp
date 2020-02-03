@@ -1,14 +1,15 @@
 import React, { Component } from "react";
-import {Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Picker, StatusBar, ActivityIndicator} from "react-native";
+import {KeyboardAvoidingView, Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Platform, StatusBar, ActivityIndicator} from "react-native";
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 import SaveAlert from '../components/SaveAlert';
-
+ 
 
 const prefix='https://natureinstruct.org';
+
 
 
 const continents = [

@@ -1,7 +1,10 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Image, Modal, TextInput, ActivityIndicator} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Platform, Modal, TextInput, ActivityIndicator, Dimensions} from 'react-native';
 import {Select, Option} from "react-native-chooser";
 import DatabaseModule from "../DB/DatabaseModule";
+import {KeyboardAvoidingView} from 'react-native';
+
+var {height, width} = Dimensions.get('window');
 
 const allowedLength = 20;
 export default class SaveAlert extends Component{
@@ -92,6 +95,8 @@ export default class SaveAlert extends Component{
     }
     render(){
         return (
+        
+          <KeyboardAvoidingView behavior={Platform.select({android: undefined, ios: 'padding'})} keyboardVerticalOffset={Platform.select({android: 500, ios: 0})}>
             <Modal 
 
             visible={this.props.displayAlert} 
@@ -151,17 +156,20 @@ export default class SaveAlert extends Component{
                         </View>
 
                         <View style={styles.bottomPart}>
-                            <TouchableOpacity onPress={() => this.passData()} style={styles.alertMessageButtonStyle}>
-                                <Text style={styles.alertMessageTextStyle}> Confirm </Text>
-                            </TouchableOpacity>
 
-                            <TouchableOpacity onPress={this.props.cancel} style={styles.alertMessageButtonStyle}>
-                                <Text style={styles.alertMessageTextStyle}> Cancel </Text>
-                            </TouchableOpacity>
+                                <TouchableOpacity onPress={() => this.passData()} style={styles.alertMessageButtonStyle}>
+                                    <Text style={styles.alertMessageTextStyle}> Confirm </Text>
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={this.props.cancel} style={styles.alertMessageButtonStyle}>
+                                    <Text style={styles.alertMessageTextStyle}> Cancel </Text>
+                                </TouchableOpacity>
+                            
                         </View>
                     </View>
                 </View>
             </Modal>
+</KeyboardAvoidingView>
         );
     }
 }
@@ -201,7 +209,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     mainOuterComponent: {
-        flex: 1,
+        height: height,
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: '#00000088',
@@ -219,7 +227,7 @@ const styles = StyleSheet.create({
     },
     mainContainer:{
         flexDirection: 'column',
-        height: '45%',
+        height: '35%',
         width: '80%',
         justifyContent: 'center',
         alignItems: 'center',
