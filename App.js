@@ -10,6 +10,7 @@ import {Text} from 'react-native';
 import {createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
+import DatabaseModule from "./src/DB/DatabaseModule";
 import Authentication from "./src/DB/Authentication";
 // import TestingPage from './src/UI/TestingPage';
 const username = "tmobile";
@@ -20,6 +21,22 @@ DatabaseManagementModule.init(() => {
         DatabaseManagementModule.importApiData(1, () => {
             DatabaseManagementModule.importApiData(2, () => {
                 console.log("All Api data imported");
+
+                //Test Code - Needs to be removed
+                DatabaseModule.createCustomList("Robyn Test", {success: (id) => {
+                    console.log("created new list with id = " + id);
+                    DatabaseModule.addBirdsToCustomList(id, [257,691,63], {success: () => {
+                        console.log("added bird to custom list")
+                        DatabaseModule.removeBirdsFromCustomList(id, [257], {success: () => {
+                            console.log("removed bird from custom list");
+                            DatabaseModule.deleteCustomList(id, {success: ()=> {
+                                console.log("deleted list");
+                            }});
+                        }});
+                    }});
+                }});
+                //
+
             });
         });
     });

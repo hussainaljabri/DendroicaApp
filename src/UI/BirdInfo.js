@@ -151,7 +151,9 @@ export default class BirdInfo extends Component {
                         visible={this.state.isModelVisible}
                         transparent={false}
                         animationType={"slide"}
-                        onRequestClose={() => console.log('Modal has been closed')}>
+                        onRequestClose={() => this._handleModalButton()}
+                        swipeToClose={true} 
+                        backdropPressToClose={true}>
                         
                         
                         <ImageViewer saveToLocalByLongPress={false} index={this.state.activeSlide} imageUrls={img} />

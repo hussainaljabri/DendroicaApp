@@ -1,6 +1,7 @@
 import React, { PureComponent } from "react";
 import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default class BirdCard extends React.PureComponent {
 
@@ -11,7 +12,20 @@ export default class BirdCard extends React.PureComponent {
     
         return (
             <TouchableOpacity onPress={this.props.onPress} onLongPress={this.props.onLongPress} style={[styles.container, this.props.style]}>
-                
+                {this.props.selected?
+                (<LinearGradient
+                    colors={['rgba(0,155,0,0.5)', 'transparent']}
+                    style={{
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        height: 300,
+                    }}
+                    />)
+                :
+                null
+                }
                     
                     <Image
                     source={{uri: this.props.imgUrl}}
