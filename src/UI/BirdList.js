@@ -56,28 +56,14 @@ export default class BirdList extends Component {
         header: null
     }
       
-    /**
-     * Region Handler---------------------------------------------------------------------------
-     */
+    selectHandler = (input) =>{
+        this.setState({
+            regionInput: input,
+            
+        });
+    };
 
-     // 1) get Regions List from Settings config/db.
 
-     // 2) map the Regions and return a Selection view.
-
-     // 3) Selection state handler, to update the state which corresponds to user input.
-        selectHandler = (input) =>{
-            this.setState({
-                regionInput: input,
-                
-            });
-        };
-    /**
-     * ------------------------------------------------------------------------------------------
-     */
-
-    /**
-     * Bird Card List---------------------------------------------------------------------------
-     */
 
     componentDidMount(){
         if(this.state.selected != 0){
@@ -211,9 +197,8 @@ export default class BirdList extends Component {
         );
 
     }
-    handlerLongClick=(id, name)=>{
+    handlerLongClick=()=>{
         console.log("Toggle Selection Mode");
-        
         this.setState({
             selectionMode: !this.state.selectionMode,
             birdSelected: new Map(),
@@ -235,7 +220,7 @@ export default class BirdList extends Component {
                     imgUrl={prefix+item.filename} 
                     selected={!!this.state.birdSelected.get(item.key)}
                     onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
-                    onLongPress={()=>{this.handlerLongClick(item.bird_id, item.name, item.scientific_name)}}
+                    onLongPress={()=>{this.handlerLongClick()}}
                     style={{marginBottom: 3}}
                     selected={!!this.state.birdSelected.get(item.bird_id)}
                 />
@@ -243,7 +228,7 @@ export default class BirdList extends Component {
             extraData={this.state}
         />);
     }
-    getSearchOrSelection=()=>{
+    getSpeciesOrSelection=()=>{
         if(this.state.selectionMode){
             return (
                 <View>
@@ -348,7 +333,7 @@ export default class BirdList extends Component {
                                 </View>
                         </View>
                         
-                        {this.getSearchOrSelection()}
+                        {this.getSpeciesOrSelection()}
                             
                     </View>)
                     

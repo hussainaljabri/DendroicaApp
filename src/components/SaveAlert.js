@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Platform, Modal, TextInput, ActivityIndicator, Dimensions} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Platform, TextInput, ActivityIndicator, Dimensions, StatusBar, Modal} from 'react-native';
 import {Select, Option} from "react-native-chooser";
 import DatabaseModule from "../DB/DatabaseModule";
-import {KeyboardAvoidingView} from 'react-native';
 
 var {height, width} = Dimensions.get('window');
 
@@ -10,42 +9,30 @@ const allowedLength = 20;
 export default class SaveAlert extends Component{
     state ={
         tab: 1, /* tab 1-> existing lists, tab 2-> new list */
-        textInputValue: '',
+        textInputValue: '', // holds the text input in 'Create New List'
         value: "Select a List",  // this is for chooser (Select/Option)
-        customLists: [],
-        customListsReady: false,
-        selectedListId: null,
-        shouldUpdate: true,
+        customLists: [], // holds current lists from DB.
+        customListsReady: false, // controls rendering of the choser(Select/Option)
+        selectedListId: null, // holds the selected list from the choser.
     }
-
-    // shouldComponentUpdate(nextProps, nextState){
-    //     if(this.state.selectedListId !== nextState.selectedListId){
-    //         return true;
-    //     }else{
-    //         return false;
-    //     }
-    // }
     componentDidMount(){
         DatabaseModule.getLists({
             success: (result)=>{
                 this.setState({
                     customLists: result,
                     customListsReady: true,
-                    shouldUpdate: true
                 })
                 
             }
         });
-
     }
-
 
     onSelect(value, label) {
         console.log(' selected: '+ value._id);
         this.setState({value : value.name, selectedListId: value._id});
       }
     passData = () =>{
-        /* Validate data before passing */
+        /* @TODO: Validate data before passing */
         if(this.state.tab == 1){
             this.props.confirm(this.state.selectedListId);
         }else{
@@ -64,10 +51,6 @@ export default class SaveAlert extends Component{
 
     getListsOptions=()=>{
         if(this.state.customListsReady){
-            // this.state.customLists.map((item, index)=>{
-            //     console.log("item name: "+ item.name + " list_id: "+ item._id);
-            // });
-            // console.log("tjrba: " + JSON.stringify(this.state.customLists));
                 return (
                     <Select
                     animationType="fade"
@@ -95,16 +78,12 @@ export default class SaveAlert extends Component{
     }
     render(){
         return (
-        
-          <KeyboardAvoidingView behavior={Platform.select({android: undefined, ios: 'padding'})} keyboardVerticalOffset={Platform.select({android: 500, ios: 0})}>
             <Modal 
-
             visible={this.props.displayAlert} 
-
+            onRequestClose={this.props.cancel}
             transparent={true} 
-
-            animationType={"fade"} >
-                <View style={styles.mainOuterComponent} > 
+            animationType={"fade"} >  
+                <View style={styles.mainOuterComponent}>
                     <View style={styles.mainContainer}>
                         <View style={styles.topPart}>
                             <Text style={styles.alertTitleTextStyle}>
@@ -115,13 +94,13 @@ export default class SaveAlert extends Component{
                         <View style={styles.middlePart}>
                             <View style={{flexDirection:'row', justifyContent: "center"}}>
                                 {/* Existing List*/}
-                                <TouchableOpacity style={[{borderBottomStartRadius: 10,backgroundColor: this.state.tab==1? 'green': '#b0b0b0'}, styles.tabButton]} onPress={()=> this.setState({tab: 1})}>
+                                <TouchableOpacity style={[styles.existing, styles.tabButton]} onPress={()=> this.setState({tab: 1})}>
                                     <Text style={styles.alertMessageTextStyle}>
                                         Existing List
                                     </Text>
                                 </TouchableOpacity>
                                 {/* New List */}
-                                <TouchableOpacity style={[{borderBottomEndRadius: 10,backgroundColor: this.state.tab==2? 'green': '#b0b0b0'}, styles.tabButton]} onPress={()=> this.setState({tab: 2})}>
+                                <TouchableOpacity style={[styles.newlist, styles.tabButton]} onPress={()=> this.setState({tab: 2})}>
                                     <Text style={styles.alertMessageTextStyle}>
                                         New List
                                     </Text>
@@ -169,12 +148,14 @@ export default class SaveAlert extends Component{
                     </View>
                 </View>
             </Modal>
-</KeyboardAvoidingView>
+
         );
     }
 }
 
 const styles = StyleSheet.create({
+    newlist: {borderBottomEndRadius: 10,backgroundColor: this.state.tab==2? 'green': '#b0b0b0'},
+    existing:{borderBottomStartRadius: 10,backgroundColor: this.state.tab==1? 'green': '#b0b0b0'},
     textInput:{
         marginTop:15,
         height: 40, 
@@ -220,8 +201,6 @@ const styles = StyleSheet.create({
         color: 'black',
         fontSize: 18,
         fontWeight: "bold",
-        // borderWidth: 1,
-        // borderColor: '#660066',
         padding: 2,
         marginHorizontal: 2
     },
@@ -264,10 +243,9 @@ const styles = StyleSheet.create({
     bottomPart:{
         flex: 0.5,
         width: '100%',
-        // borderWidth: 1,
-        // borderColor: '#0066FF',
         flexDirection: 'row',
         padding: 4,
         justifyContent: 'space-evenly',
     }
 });
+
