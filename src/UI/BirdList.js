@@ -1,13 +1,14 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Picker, StatusBar, ActivityIndicator} from "react-native";
+import {KeyboardAvoidingView, Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Platform, StatusBar, ActivityIndicator} from "react-native";
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
-
+import SaveAlert from '../components/SaveAlert';
 const prefix='https://natureinstruct.org';
+
 
 
 const continents = [
@@ -39,33 +40,29 @@ export default class BirdList extends Component {
         scrolltotop: false,
         isTopBarHidden: false,
         barclicked: false,
+
+        selectionMode: false,
+        birdSelected: new Map(),
+        selectionCount: 0,
+
+        displayAlert: false, // saveTo alert
+        saveAlertLoading: false, // to show activity indicator when saving birds
     }
+
+
+
     static navigationOptions = {
         header: null
     }
       
-    /**
-     * Region Handler---------------------------------------------------------------------------
-     */
+    selectHandler = (input) =>{
+        this.setState({
+            regionInput: input,
+            
+        });
+    };
 
-     // 1) get Regions List from Settings config/db.
 
-     // 2) map the Regions and return a Selection view.
-
-     // 3) Selection state handler, to update the state which corresponds to user input.
-        selectHandler = (input) =>{
-            this.setState({
-                regionInput: input,
-                
-            });
-        };
-    /**
-     * ------------------------------------------------------------------------------------------
-     */
-
-    /**
-     * Bird Card List---------------------------------------------------------------------------
-     */
 
     componentDidMount(){
         if(this.state.selected != 0){
@@ -131,20 +128,32 @@ export default class BirdList extends Component {
             searchInput: text,
         });
     };
-    handlerLongClick=(id, name)=>{
-        Alert.alert("LongPress: \n" +id+": "+name);
-    };
-    handlerClick=(id, name, scientific_name)=>{
-        // I need id, name, scientific_name, filename, 
+
+    handlerClick=(id, name, scientific_name)=>{ 
         // Alert.alert("Click:\n" +id+": "+name);
-        this.props.navigation.navigate('BirdInfo',
-            //params
-            {
-                title: name,
-                latin: scientific_name,
-                id: id,
-            }
-        );
+        if(!this.state.selectionMode){
+            this.props.navigation.navigate('BirdInfo',
+                //params
+                {
+                    title: name,
+                    latin: scientific_name,
+                    id: id,
+                }
+            );
+        }else{
+            this.setState((state) => {
+                //create new Map object, maintaining state immutability
+                const selected = new Map(state.birdSelected);
+                let count  = 1;
+                //remove key if selected, add key if not selected
+                this.state.birdSelected.has(id) ? selected.delete(id, !selected.get(id)) : selected.set(id, !selected.get(id));
+                this.state.birdSelected.has(id) ? count = -1: count= 1;
+                // console.log(selected);
+                return {birdSelected: selected, selectionCount: state.selectionCount+count};
+            });
+            console.log(this.state.birdSelected);
+
+        }
 
     };
     handlerScrolltotop=()=>{
@@ -164,30 +173,6 @@ export default class BirdList extends Component {
         this.setState({isTopBarHidden: true});
     }
 
-    getBirdCards = () =>{
-        // return this.state.birds.map((bird, index) =>{
-        //     return (
-        //         <View key={index}>
-        //             <Text key={index}>bird_id {bird.bird_id}, name {bird.name}, latin {bird.scientific_name}, filename {bird.filename}</Text>
-        //         </View>
-        //     );
-        // });
-
-        return this.state.birds.map((bird) =>{
-            return (
-                <BirdCard 
-                    key={bird.bird_id} 
-                    birdName={bird.name} 
-                    latin={bird.scientific_name}
-                    imgUrl={MediaHandler.getMediaFile(bird.filename)}
-                    //imgUrl={prefix+bird.filename}
-                    onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
-                    // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
-                    style={{marginBottom: 3}}
-                />
-            );
-        });
-        }
     /**
      * ------------------------------------------------------------------------------------------
      */
@@ -212,10 +197,113 @@ export default class BirdList extends Component {
         );
 
     }
+    handlerLongClick=()=>{
+        console.log("Toggle Selection Mode");
+        this.setState({
+            selectionMode: !this.state.selectionMode,
+            birdSelected: new Map(),
+            selectionCount: 0,
+            displayAlert: false
+        });
+    };
+    getFlatList=()=>{
+        return (
+        <FlatList 
+            style={{flex:1, paddingHorizontal: 5}}
+            data={this.state.birds}
+            initialNumToRender={10}
+            keyExtractor={item => `${item.bird_id}`}
+            renderItem={({item, index}) =>(
+                <BirdCard 
+                    birdName={item.name} 
+                    latin={item.scientific_name}
+                    imgUrl={MediaHandler.getMediaFile(item.filename)}
+                    selected={!!this.state.birdSelected.get(item.key)}
+                    onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
+                    onLongPress={()=>{this.handlerLongClick()}}
+                    style={{marginBottom: 3}}
+                    selected={!!this.state.birdSelected.get(item.bird_id)}
+                />
+            )}
+            extraData={this.state}
+        />);
+    }
+    getSpeciesOrSelection=()=>{
+        if(this.state.selectionMode){
+            return (
+                <View>
+                    <SearchBar
+                    placeholder="Search..."
+                    onChangeText={this.updateSearch}
+                    value={this.state.searchInput}
+                    placeholderTextColor="#474747"
+                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
+                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
+                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    />
+                    <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: "space-between"}}>
+                        <TouchableOpacity disabled={this.state.selectionCount>0? false:true} style={this.state.selectionCount>0? styles.btn:styles.disabledBtn} onPress={() => {this.setState({displayAlert: true})}}>
+                            <Text>
+                                Save To
+                            </Text>
+                        </TouchableOpacity>
+                            <Text style={{fontSize: 18,fontWeight: '500', alignSelf: "center"}}>{this.state.selectionCount}</Text>
+                        <TouchableOpacity style={styles.btn} onPress={()=> this.handlerLongClick()}>
+                            <Text>
+                                Cancel
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    {/* <View>
+                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Birds Selected: {this.state.birdSelected.length}</Text>
+                    </View> */}
+               </View>
+            );
+
+        }else{
+            return(
+               <View>
+                    <SearchBar
+                    placeholder="Search..."
+                    onChangeText={this.updateSearch}
+                    value={this.state.searchInput}
+                    placeholderTextColor="#474747"
+                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
+                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
+                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    />
+
+                    <View>
+                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
+                    </View>
+               </View>
+            );
+        }
+    }
+    saveToCallback=(listid)=>{
+           // we have list id now, lets add birds to it.
+           let temp = [];
+           this.state.birdSelected.forEach((value, key)=>{
+                temp.push(key);
+           });
+           DatabaseModule.addBirdsToCustomList(listid, temp, {success: () => {
+                this.handlerLongClick();
+                console.log('Added:'+temp);
+           }});
+    }
     render(){
         const topBarStyle = this.state.isTopBarHidden;
         return (
             <View style={{backgroundColor:"white",flex:1}}>
+                {/* SaveTo alert */}
+                {this.state.displayAlert && (<SaveAlert 
+                    displayAlert={this.state.displayAlert} 
+                    confirm={(res)=> this.saveToCallback(res)}
+                    cancel={()=> this.setState({displayAlert: !this.state.displayAlert})}
+                    loading={!!this.state.saveAlertLoading}
+                />)}
+                
+
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />
                 {topBarStyle ? 
@@ -227,66 +315,33 @@ export default class BirdList extends Component {
                     
                     <View style={{paddingHorizontal: 5}}>
                         <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
-                        <Text style={styles.header}>Explore |</Text>
-                        <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                            <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
-                            <ActionSheet
-                                ref={o => this.ActionSheet = o}
-                                title={<Text style={{color: 'black',fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
-                                cancelButtonIndex={0}
-                                destructiveButtonIndex={0}
-                                options={continents}
-                                onPress={(index) => { /* do something */ 
-                                    console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
-                                    index != 0? (this.state.selected != index? this.selectedNewContinent(index): {}) : {};
-                                }}
-                            />
+                            <Text style={styles.header}>Explore |</Text>
+                                <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
+                                    <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
+                                    <ActionSheet
+                                        ref={o => this.ActionSheet = o}
+                                        title={<Text style={{color: 'black',fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
+                                        cancelButtonIndex={0}
+                                        destructiveButtonIndex={0}
+                                        options={continents}
+                                        onPress={(index) => { /* do something */ 
+                                            console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
+                                            index != 0? (this.state.selected != index? this.selectedNewContinent(index): {}) : {};
+                                        }}
+                                    />
 
+                                </View>
                         </View>
-                        {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
-                            <TouchableOpacity>
-                                <Icon 
-                                    name='settings'
-                                    color='orange'
-                                />
-                            </TouchableOpacity>
-                        </View> */}
-                    </View>
-                        <SearchBar
-                            placeholder="Search..."
-                            onChangeText={this.updateSearch}
-                            value={this.state.searchInput}
-                            placeholderTextColor="#474747"
-                            inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                            inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                            containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
-                        />
-
-                        <View>
-                            <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
-                        </View>
+                        
+                        {this.getSpeciesOrSelection()}
+                            
                     </View>)
+                    
                 }
             {this.state.dataReady? 
 
                 (
-                    <FlatList 
-                    style={{flex:1, paddingHorizontal: 5}}
-                    data={this.state.birds}
-                    initialNumToRender={10}
-                    keyExtractor={item => `${item.bird_id}`}
-                    renderItem={({item, index}) =>(
-                        <BirdCard 
-                            birdName={item.name} 
-                            latin={item.scientific_name}
-                            imgUrl = {MediaHandler.getMediaFile(item.filename)}
-                            //imgUrl={prefix+item.filename}
-                            onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
-                            onLongPress={()=>{this.handlerLongClick(item.bird_id, item.name, item.scientific_name)}}
-                            style={{marginBottom: 3}}
-                        />
-                    )}
-                />
+                    this.getFlatList()
                 )
             :
                 (
@@ -332,6 +387,12 @@ const styles = StyleSheet.create({
          justifyContent: "center", 
          alignItems: "center", 
          backgroundColor:'orange'
+    },
+    disabledBtn:{
+        padding:15, 
+        justifyContent: "center", 
+        alignItems: "center", 
+        backgroundColor:'#b0b0b0'
     },
      select: {
         width:"100%",

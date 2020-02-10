@@ -37,9 +37,11 @@ export default class MyList extends Component {
                 this.setState({
                     lists: temp,
                     options: opt_temp,
-                })
+                });
+                // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
             }
         });
+        
 
     }
 
@@ -104,7 +106,7 @@ export default class MyList extends Component {
         this.setState({birds:[], selected: index, dataReady: false, selectedReady: true});
         // we should call out the new list.
         DatabaseModule.getListDisplayInfo(
-            this.state.lists[index][0]._id,
+            this.state.lists[1][index-1]._id, // ["Cancel",[{"_id":25088,"name":"Test List"},{"_id":25089,"name":"Select a List"},{"_id":25090,"name":"testing1"},{"_id":25091,"name":"testing2"}]]
             {
                 success: (result)=>{
                     this.setState({
