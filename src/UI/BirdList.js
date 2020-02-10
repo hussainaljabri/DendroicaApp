@@ -5,8 +5,7 @@ import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
-
-
+import MediaHandler from '../DB/MediaHandler';
 
 const prefix='https://natureinstruct.org';
 
@@ -85,6 +84,7 @@ export default class BirdList extends Component {
                     }
                 }
             );
+
             // DatabaseModule.getDisplayInfo(
             //     43,
             //     {
@@ -179,7 +179,8 @@ export default class BirdList extends Component {
                     key={bird.bird_id} 
                     birdName={bird.name} 
                     latin={bird.scientific_name}
-                    imgUrl={prefix+bird.filename} 
+                    imgUrl={MediaHandler.getMediaFile(bird.filename)}
+                    //imgUrl={prefix+bird.filename}
                     onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
                     // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
                     style={{marginBottom: 3}}
@@ -278,7 +279,8 @@ export default class BirdList extends Component {
                         <BirdCard 
                             birdName={item.name} 
                             latin={item.scientific_name}
-                            imgUrl={prefix+item.filename} 
+                            imgUrl = {MediaHandler.getMediaFile(item.filename)}
+                            //imgUrl={prefix+item.filename}
                             onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
                             onLongPress={()=>{this.handlerLongClick(item.bird_id, item.name, item.scientific_name)}}
                             style={{marginBottom: 3}}

@@ -6,7 +6,7 @@ import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 const prefix='https://natureinstruct.org';
-
+import MediaHandler from '../DB/MediaHandler';
 
 export default class MyList extends Component {
     state ={
@@ -76,7 +76,8 @@ export default class MyList extends Component {
                     key={bird.bird_id} 
                     birdName={bird.name} 
                     latin={bird.scientific_name}
-                    imgUrl={prefix+bird.filename} 
+                    imgUrl={MediaHandler.getMediaFile(bird.filename)}
+                    //imgUrl={prefix+bird.filename}
                     onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
                     // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
                     style={{marginBottom: 3}}
