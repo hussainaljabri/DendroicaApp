@@ -7,9 +7,9 @@ const FIELDS = {
     "Birds": ["_id","name","scientific_name","range_description","song_description"],
     "Regions": ["_id","project_id","name"],
     "Lists": ["_id","name"],
-    "BirdImages": ["_id","bird_id","filename","credits","displayOrder"],
-    "MapImages": ["_id","bird_id","filename","credits"],
-    "Vocalizations": ["_id","bird_id","filename","mp3_filename","credits"],
+    "BirdImages": ["_id","bird_id","filename","credits","displayOrder","isDownloaded"],
+    "MapImages": ["_id","bird_id","filename","credits","isDownloaded"],
+    "Vocalizations": ["_id","bird_id","filename","mp3_filename","credits","isDownloaded"],
     "SubRegions": ["_id","region_id","name","abbrev"],
     "FileSubRegions": ["subregion_id","file_id","displayOrder"],
     "BirdSubRegions": ["subregion_id","bird_id","non_breeder","rare"],
@@ -87,6 +87,12 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     var parameters = [];
     var sqlQuestionMarks="";
 
+    //For mapImages, vocalizations, and  birdImages need to add default isDownloaded param to false
+    if (tableName == "BirdImages" || tableName == "MapImages" || tableName == "Vocalizations") {
+        jsonArrayNames.push("isDownloaded");
+        json["isDownloaded"] = Array(json[jsonArrayNames[0]].length).fill("false");
+    }
+
     db.transaction(function(tx) {
         for (var i = 0; i < json[jsonArrayNames[0]].length; i++) {
             //Build question mark string for sql statement (?,?,?...) for number of params
@@ -127,6 +133,11 @@ var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     var insertQuery = "INSERT INTO " + tableName + " VALUES (";
     var updateQuery = "UPDATE " + tableName + " SET ";
 
+    //For mapImages, vocalizations, and  birdImages need to add default isDownloaded param to false
+    if (tableName == "BirdImages" || tableName == "MapImages" || tableName == "Vocalizations") {
+        jsonArrayNames.push("isDownloaded");
+        json["isDownloaded"] = Array(json[jsonArrayNames[0]].length).fill("false");
+    }
 
     FIELDS[tableName].forEach(field => {
         insertQuery += "?,";
@@ -275,11 +286,65 @@ var getMapsUrlByBirdId = function (id, callbacks){
     }});
 }
 
+var getUriData = function (callbacks) {
+    var imagesQuery =   "SELECT bird_id, filename, isDownloaded FROM BirdImages where isDownloaded=? Order By displayOrder";
+    var mapsQuery   =   "SELECT bird_id, filename, isDownloaded FROM MapImages where isDownloaded=?";
+    var vocalQuery  =   "SELECT bird_id, filename, mp3_filename, isDownloaded FROM Vocalizations where isDownloaded=?";
+
+    _sqlQuery(imagesQuery, ["true"], {success:(tx,imgres) => {
+        _sqlQuery(mapsQuery, ["true"], {success:(tx,mapres) => {
+            _sqlQuery(vocalQuery, ["true"], {success:(tx,vocalres) => {
+                callbacks.success({
+                     "imageData":   imgres.rows._array,
+                     "mapData":     mapres.rows._array,
+                     "vocalData":   vocalres.rows._array
+                });
+            }},tx);
+        }},tx);
+    }});
+}
+
+var getImageUrlsForCustomList = function (list_id, callbacks) {
+    var query = "SELECT filename from BirdImages INNER JOIN BirdLists on BirdImages.bird_id = BirdLists.bird_id where BirdLists.list_id=?";
+
+    _sqlQuery(query, [list_id], {success: (tx,res) => {
+        callbacks.success(res.rows._array);
+    }});
+}
+
+//For BirdImages or MapImages
+var setImageMediaDownloaded = function (filename, tableName, isDownloaded, callbacks) {
+    var query = "UPDATE " + tableName + " SET isDownloaded=? where filename=?";
+
+    _sqlQuery(query, [isDownloaded,filename], {success: (tx,res) => {
+        callbacks.success();
+    }})
+}
+
+var setVocalizationsDownloaded = function (filename, isMP3, isDownloaded, callbacks) {
+    var filefield = isMP3? "mp3_filename" : "filename";
+
+    var query = "UPDATE Vocalizations SET isDownloaded=? where " + filefield + "=?";
+
+    _sqlQuery(query, [isDownloaded,filename], {success: (res) => {
+        callbacks.success();
+        console.log("success");
+    }});
+}
+
 var getThumbnailUrlByBirdId = function (id, callbacks){
     var query = `SELECT filename from BirdImages where (bird_id=?) and (displayOrder=1)`;
     _sqlQuery(query, [id], {success:(tx,res) => {
         var result = res.rows._array[0];
         callbacks.success(result);
+    }});
+}
+
+var getCustomListBirdIds = function (list_id, callbacks) {
+    var query = "SELECT bird_id from BirdLists where list_id=?";
+
+    _sqlQuery(query, [list_id], {success: (tx,res) => {
+        callbacks.success(res.rows._array);
     }});
 }
 
@@ -612,15 +677,15 @@ var initDB = function(onFinishedCallback) {
                         _sqlQuery(query, [], {success: (tx,res) => {
                             console.log("--> Created Lists Table");
                             //BirdImages Table
-                            query = `CREATE TABLE if not exists BirdImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)`;
+                            query = `CREATE TABLE if not exists BirdImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer, isDownloaded boolean)`;
                             _sqlQuery(query, [], {success: (tx,res) => {
                                 console.log("--> Created BirdImages Table");
                                 //MapImages Table
-                                query = `CREATE TABLE if not exists MapImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text)`;
+                                query = `CREATE TABLE if not exists MapImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, isDownloaded boolean)`;
                                 _sqlQuery(query, [], {success: (tx,res) => {
                                     console.log("--> Created MapImages Table");
                                     //Vocalizations Table
-                                    query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text)`;
+                                    query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text, isDownloaded boolean)`;
                                     _sqlQuery(query, [], {success: (tx,res) => {
                                         console.log("--> Created Vocalizations Table");
                                          //SubRegions Table
@@ -685,9 +750,15 @@ const DatabaseModule = {
     getDisplayInfo: getDisplayInfo,
 
     getLists: getLists,
+    getCustomListBirdIds: getCustomListBirdIds,
+    getImageUrlsForCustomList: getImageUrlsForCustomList,
     getBirdListFromListId: getBirdListFromListId, // i dont need this anymore.
     getListDisplayInfo: getListDisplayInfo,
     getMapsUrlByBirdId: getMapsUrlByBirdId,
+    getUriData: getUriData,
+
+    setImageMediaDownloaded: setImageMediaDownloaded,
+    setVocalizationsDownloaded: setVocalizationsDownloaded,
 
     createCustomList: createCustomList,
     deleteCustomList: deleteCustomList,
