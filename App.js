@@ -23,15 +23,10 @@ const password = "appH@ppy";
 DatabaseManagementModule.init(() => {
     //Authenticates user with hard coded credentials
     Authentication.userLogin(username, password, () => {
-        //Import API data for 1 = Canada
-        DatabaseManagementModule.importApiData(1, () => {
-            //Import API data for 2 = Mexico
-            DatabaseManagementModule.importApiData(2, () => {
-                console.log("All Api data imported");
-                MediaHandler.init(() => {
-
-                });
-            });
+        //Import API data for all projects
+        DatabaseManagementModule.importApiData([1,2,3,4,5,6], () => {
+            console.log("All Api data imported");
+            MediaHandler.init(() => { });
         });
     });
 });
