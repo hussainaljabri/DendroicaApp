@@ -89,6 +89,8 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
 
     //For mapImages, vocalizations, and  birdImages need to add default isDownloaded param to false
     if (tableName == "BirdImages" || tableName == "MapImages" || tableName == "Vocalizations") {
+        //Make shallow copy or isDownloaded appended for each project iterated through (jsonArrayNames param is reused)
+        jsonArrayNames = jsonArrayNames.slice();
         jsonArrayNames.push("isDownloaded");
         json["isDownloaded"] = Array(json[jsonArrayNames[0]].length).fill("false");
     }
@@ -97,7 +99,7 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
         for (var i = 0; i < json[jsonArrayNames[0]].length; i++) {
             //Build question mark string for sql statement (?,?,?...) for number of params
             //Fill parameters for sql statement. Stop at length * 100 (100 inserts at a time)
-            sqlQuestionMarks += ("(")
+            sqlQuestionMarks += ("(");
             jsonArrayNames.forEach((arrayName,index) => {
                 sqlQuestionMarks += "?";
                 if (index != jsonArrayNames.length - 1)
@@ -109,7 +111,7 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
 
             // sending every 100 records to DB
             if (parameters.length == jsonArrayNames.length * 100) {
-                tx.executeSql("INSERT  INTO " + tableName + " VALUES " + sqlQuestionMarks + ";", parameters);
+                tx.executeSql("INSERT OR REPLACE INTO " + tableName + " VALUES " + sqlQuestionMarks + ";", parameters);
 
                 // reset the variables
                 parameters= [];
@@ -118,7 +120,7 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
         }
         // send the rest of it (for remainder params < 100 inserts)
         if (sqlQuestionMarks != "")  {
-            tx.executeSql("INSERT INTO " + tableName + " VALUES " + sqlQuestionMarks.slice(0,-1)+ ";", parameters, () => {
+            tx.executeSql("INSERT OR REPLACE INTO " + tableName + " VALUES " + sqlQuestionMarks.slice(0,-1)+ ";", parameters, () => {
                 onFinishedCallback();
             });
         }
@@ -128,82 +130,13 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     });
 }
 
-var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallback) {
-    var countQuery = "SELECT COUNT(*) from " + tableName + " WHERE _id=";
-    var insertQuery = "INSERT INTO " + tableName + " VALUES (";
-    var updateQuery = "UPDATE " + tableName + " SET ";
-
-    //For mapImages, vocalizations, and  birdImages need to add default isDownloaded param to false
-    if (tableName == "BirdImages" || tableName == "MapImages" || tableName == "Vocalizations") {
-        jsonArrayNames.push("isDownloaded");
-        json["isDownloaded"] = Array(json[jsonArrayNames[0]].length).fill("false");
-    }
-
-    FIELDS[tableName].forEach(field => {
-        insertQuery += "?,";
-        if (field !== "_id") updateQuery += field + "=?,";
-    })
-    insertQuery = insertQuery.slice(0,-1) + ")";
-    updateQuery = updateQuery.slice(0,-1) + " WHERE _id=";
-
-    var idArray = json[jsonArrayNames[0]];
-
-    db.transaction((tx) => {
-        var i,index,innerIndex;
-
-        for (var i = 0, index = 0, innerIndex = 0; i < idArray.length; i++) {
-            var params = [];
-            var updateQueryWithId = updateQuery + idArray[i];
-
-            _sqlQuery(countQuery + idArray[i], [], {success: (tx,res) => {
-                var isInsertQuery = false;
-                var query = "";
-                var params = [];
-
-                if (res.rows._array[0]["COUNT(*)"] === 0) isInsertQuery = true;
-
-                if (isInsertQuery) query = insertQuery;
-                else query = updateQuery + idArray[index];
-
-                //build params array
-                jsonArrayNames.forEach(arrayName => {
-                    if (! (arrayName === "id" && !isInsertQuery)) //Don't push id for update query
-                    params.push(json[arrayName][index]);
-                })
-
-                _sqlQuery(query, params, {success: (tx,res) => {
-                    if (++innerIndex === idArray.length) onFinishedCallback();
-                }},tx);
-
-                index ++;
-            }, error: (err) => { //Seems to throw error if table is empty (for example if new project has custom lists) in this case insert
-                var params = [];
-
-                jsonArrayNames.forEach(arrayName => {
-                    params.push(json[arrayName][index]);
-                });
-                _sqlQuery(insertQuery, params, {success: (tx,res) => {
-                    if (++innerIndex === idArray.length) onFinishedCallback();
-                }})
-                index++;
-            }}, tx);
-        }
-    });
-}
-
 //  ["regionId","speciesId","nonBreederInRegion","rareInRegion"]
 //  region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean
-//  Function to create both BirdRegions table and SubRegions table as they are populated from the same json
+//  Function to insert into both BirdRegions table and SubRegions table as they are populated from the same json
 var updateInsertBirdRegionsAndBirdSubRegions = function (json, regionIds, onFinishedCallback) {
     var numDatasets = json.regionId.length;
     var numUpdated = 0;
     var tableName = "";
-
-
-    var birdRegionsInserts = 0;
-    var birdSubRegionsInserts = 0;
-    var updates = 0;
-    var inserts = 0;
 
     db.transaction(function(tx) {
         var index = 0;
@@ -219,30 +152,12 @@ var updateInsertBirdRegionsAndBirdSubRegions = function (json, regionIds, onFini
                 tableIdName = "region_id";
             }
 
-            _sqlQuery("SELECT COUNT(*) from " + tableName + " where " + tableIdName + " = " + json.regionId[i] + " and bird_id=" + json.speciesId[i] , [], {success: (tx,res) => {
-                var callbackTableName = regionIds.includes(json.regionId[index]) ? "BirdRegions" : "BirdSubRegions";
-                if (res.rows._array[0]["COUNT(*)"] === 0) {
-                    _sqlQuery("INSERT INTO " + callbackTableName + " VALUES (?,?,?,?)",
-                        [json.regionId[index], json.speciesId[index], json.nonBreederInRegion[index], json.rareInRegion[index]], {success: (tx,res) => {
-                            if (++numUpdated == numDatasets) {
-                            onFinishedCallback();
-                            }
-                    }},tx);
-                    index++;
-                }
-
-                else {
-                    updates++;
-                    var idName = ""
-                    if (tableName === "BirdSubRegions") idName = "subregion_id";
-                    else idName = "region_id";
-                    _sqlQuery("UPDATE " + callbackTableName + " SET non_breeder=?,rare=? WHERE " + idName + "=?, bird_id=?",
-                        [json.nonBreederInRegion[index], json.rareInRegion[index], json.regionId[index], json.speciesId[index]], {success: (tx,res) => {
-                            if (++numUpdated == numDatasets) onFinishedCallback();
-                    }}, tx);
-                    index++;
-                }
+            var callbackTableName = regionIds.includes(json.regionId[index]) ? "BirdRegions" : "BirdSubRegions";
+            _sqlQuery("INSERT OR REPLACE INTO " + callbackTableName + " VALUES (?,?,?,?)",
+                [json.regionId[index], json.speciesId[index], json.nonBreederInRegion[index], json.rareInRegion[index]], {success: (tx,res) => {
+                    if (++numUpdated == numDatasets) onFinishedCallback();
             }},tx);
+            index++;
         }
     });
 };
@@ -738,7 +653,6 @@ const DatabaseModule = {
     updateVersionData: updateVersionData,
     getBirdById: getBirdById,
     insertMultiple: insertMultiple,
-    upsertMultiple: upsertMultiple,
     updateInsertBirdRegionsAndBirdSubRegions: updateInsertBirdRegionsAndBirdSubRegions,
     printDatabase: printDatabase,
     printTable: printTable,

@@ -5,9 +5,6 @@ var versionUpdateInfo;
 var versionData;
 var regionIds;
 
-var firstImport = true;
-
-
 var init = function(onFinishedCallback) {
     fetchAndSaveVersionData(() => {
         //versionUpdateInfo.dataVersionUpdate = true; //Uncomment me to force flush db
@@ -56,22 +53,11 @@ var importApiData = function(projectId, onFinishedCallback) {
     //also use the upsert function in db rather than insert
     var lastModified = versionUpdateInfo.dataVersionUpdate? null : versionUpdateInfo.lastUpdateTimeStamp;
     var lastModifiedApiParam = "";
-    var updateInsertFunction = DatabaseModule.insertMultiple;
-    if (lastModified || !firstImport) {
-        lastModifiedApiParam = '&ifModifiedSince=' + lastModified;
-        updateInsertFunction = DatabaseModule.upsertMultiple;
-    }
+    if (lastModified) lastModifiedApiParam = '&ifModifiedSince=' + lastModified;
 
-
-    var projectIds;
-
-    if (projectId) projectIds = [projectId];
+    var projectIds = Array.isArray(projectId) ?  projectId : [projectId];
 
     var importRegions = function(onFinishedCallback) {
-        if (!firstImport) {
-            onFinishedCallback();
-            return;
-        }
         fetch('https://www.natureinstruct.org/api/projects?token=' + Authentication.getAuthToken() + lastModifiedApiParam)
             .then((response) => response.json())
             .then((responseJson) => {
@@ -79,7 +65,7 @@ var importApiData = function(projectId, onFinishedCallback) {
                     onFinishedCallback();
                     return;
                 }
-                updateInsertFunction(responseJson, ["masterRegionId","id","name"], "Regions", onFinishedCallback);
+                DatabaseModule.insertMultiple(responseJson, ["masterRegionId","id","name"], "Regions", onFinishedCallback);
                 if (!projectId) projectIds = responseJson.id;
                 regionIds = responseJson.masterRegionId;
             })
@@ -89,16 +75,26 @@ var importApiData = function(projectId, onFinishedCallback) {
     }
 
     var importBirdRegionsAndSubRegions = function(onFinishedCallback) {
+        var projectsAdded = 0;
+
         for (var id in projectIds) {
             fetch('https://www.natureinstruct.org/api/speciesRegions?token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam)
                 .then((response) => response.json())
                 .then((responseJson) => {
                     if (Object.entries(responseJson).length === 0) {
-                        console.log("no data to update");
-                        onFinishedCallback();
-                        return;
+                        if (++projectsAdded === projectIds.length) {
+                            onFinishedCallback();
+                            return;
+                        }
                     }
-                    DatabaseModule.updateInsertBirdRegionsAndBirdSubRegions(responseJson, regionIds, onFinishedCallback);
+                    else {
+                        DatabaseModule.updateInsertBirdRegionsAndBirdSubRegions(responseJson, regionIds, () => {
+                            if (++projectsAdded === projectIds.length) {
+                                onFinishedCallback();
+                                return;
+                            }
+                        });
+                    }
                 })
                 .catch((error) => {
                     console.error(error);
@@ -106,67 +102,26 @@ var importApiData = function(projectId, onFinishedCallback) {
         }
     }
 
-    var importTableForProject = function(url, jsonNamesArray, tableName, duplicateIds, onFinishedCallback) {
+    var importTableForProject = function(url, jsonNamesArray, tableName, onFinishedCallback) {
             var projectsAdded = 0;
-            var uniqueJson = {};
-            if (duplicateIds) {
-                for (var i = 0; i < jsonNamesArray.length; i++) {
-                    uniqueJson[jsonNamesArray[i]] = [];
-                }
-            }
+
             for (var id in projectIds) {
                 fetch('https://www.natureinstruct.org/api/' + url + 'token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam)
                     .then((response) => response.json())
                     .then((responseJson) => {
                         if (Object.entries(responseJson).length === 0) {
-                            console.log("-- no data to update in " + tableName);
-                            onFinishedCallback();
-                            return;
-                        }
-
-                        var insertJson = responseJson;
-                        if (responseJson !== null) {
-                            if (duplicateIds) {
-                                //If there is a potential for duplicate IDs (such as across projects) create new array parsing out any duplicates
-                                for (var i = 0; i < responseJson.id.length; i++) {
-                                    if (uniqueJson.id.indexOf(responseJson.id[i]) == -1) {
-                                        for (var j = 0; j < jsonNamesArray.length; j++) {
-                                            //If statement for debugging mostly. If a field name gets changed in api errors will occur
-                                            if (!responseJson[jsonNamesArray[j]]) {
-                                                console.error("json name " + jsonNamesArray[j] + " does not exist in table " + tableName);
-                                                return;
-                                            }
-                                            if (!responseJson[jsonNamesArray[j]][i]) {
-                                                uniqueJson[jsonNamesArray[j]].push(null);
-                                            }
-                                            else {
-                                                uniqueJson[jsonNamesArray[j]].push(responseJson[jsonNamesArray[j]][i]);
-                                            }
-                                        }
-                                    }
-                                }
-                                projectsAdded ++;
-                                if (projectsAdded == projectIds.length) {
-                                    updateInsertFunction(uniqueJson, jsonNamesArray, tableName, onFinishedCallback);
-                                }
-                            }
-                            else {
-                                updateInsertFunction(responseJson, jsonNamesArray, tableName, () => {
-                                    projectsAdded ++;
-                                    if (projectsAdded == projectIds.length)
-                                        onFinishedCallback();
-                                });
+                            if (++projectsAdded === projectIds.length) {
+                                console.log("-- no data to update in " + tableName);
+                                onFinishedCallback();
+                                return;
                             }
                         }
                         else {
-                            projectsAdded ++;
-                            if (projectsAdded == projectIds.length) {
-                                if (duplicateIds) {
-                                    updateInsertFunction(uniqueJson, jsonNamesArray, tableName, onFinishedCallback);
-                                }
-                                else
+                            DatabaseModule.insertMultiple(responseJson, jsonNamesArray, tableName, () => {
+                                if (++projectsAdded === projectIds.length) {
                                     onFinishedCallback();
-                            }
+                                }
+                            });
                         }
                     })
                     .catch((error) => {
@@ -178,44 +133,39 @@ var importApiData = function(projectId, onFinishedCallback) {
     importRegions(() => {
         var i,j,k,l,m,n = false;
         console.log("importing from projectRegions?");
-        importTableForProject("projectRegions?", ["id","parentRegionId","region","abbrev"], "SubRegions", false, ()=> {
+        importTableForProject("projectRegions?", ["id","parentRegionId","region","abbrev"], "SubRegions", ()=> {
             console.log("inserted all SubRegions");
-            importTableForProject('species?', ["id","commonName","scientificName","mapDescription","songDescription"], "Birds", false, () => {
+            importTableForProject('species?', ["id","commonName","scientificName","mapDescription","songDescription"], "Birds", () => {
                 console.log("inserted all Birds");
-                importTableForProject('customLists?', ["id","name"], "Lists", false, () => {
+                importTableForProject('customLists?', ["id","name"], "Lists", () => {
                     console.log("inserted all Lists");
-                    importTableForProject('customListSpecies?', ["customListId","speciesId"], "BirdLists", false, () => {
+                    importTableForProject('customListSpecies?', ["customListId","speciesId"], "BirdLists", () => {
                         i = true; console.log("inserted all BirdLists");
                         if (i && j && k && l && m && n) {
-                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
-                    importTableForProject('speciesImages?', ["id","speciesId","url","source","displayOrder"], "BirdImages", true, () => {
+                    importTableForProject('speciesImages?', ["id","speciesId","url","source","displayOrder"], "BirdImages", () => {
                         k = true; console.log("inserted all SpeciesImages");
                         if (i && j && k && l && m && n) {
-                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
-                    importTableForProject('speciesMaps?', ["id","speciesId","url","source"], "MapImages", true, () => {
+                    importTableForProject('speciesMaps?', ["id","speciesId","url","source"], "MapImages", () => {
                         l = true; console.log("inserted all MapImages");
                         if (i && j && k && l && m && n) {
-                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
-                    importTableForProject('speciesSounds?', ["id","speciesId","spectrogramUrl","url","source"], "Vocalizations", true, () => {
+                    importTableForProject('speciesSounds?', ["id","speciesId","spectrogramUrl","url","source"], "Vocalizations", () => {
                         m = true; console.log("inserted all Vocalizations");
                         if (i && j && k && l && m && n) {
-                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
-                    importTableForProject('fileRegions?', ["regionId","fileId","displayOrder"], "FileSubRegions", false, () => {
+                    importTableForProject('fileRegions?', ["regionId","fileId","displayOrder"], "FileSubRegions", () => {
                         n = true; console.log("inserted all FileSubRegions");
                         if (i && j && k && l && m && n) {
-                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
@@ -225,7 +175,6 @@ var importApiData = function(projectId, onFinishedCallback) {
                         console.log("inserted all BirdRegions");
                         console.log("inserted all BirdSubRegions");
                         if (i && j && k && l && m && n) {
-                            firstImport = false;
                             DatabaseModule.updateVersionData(versionData, onFinishedCallback);
                         }
                     });
@@ -237,6 +186,6 @@ var importApiData = function(projectId, onFinishedCallback) {
 
 const DatabaseManagementModule = {
     init: init,
-    importApiData
+    importApiData: importApiData
 };
 export default DatabaseManagementModule;
