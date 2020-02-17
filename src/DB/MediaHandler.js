@@ -1,9 +1,8 @@
 import * as FileSystem from 'expo-file-system';
-import NetInfo from '@react-native-community/netinfo';
 
 import DatabaseModule from './DatabaseModule';
 
-const MediaDirectory = FileSystem.documentDirectory + "media";
+const MediaDirectory = FileSystem.documentDirectory;
 const prefix = 'https://natureinstruct.org';
 
 //All data that has isDownloaded=true
@@ -13,7 +12,7 @@ var mediaData;
 //"vocalData":
 
 var init = (onFinishedCallback) => {
-    makeMediaDirectory();
+    //makeMediaDirectory();
     DatabaseModule.getUriData({success: (res) => {
         mediaData = res;
         onFinishedCallback();
