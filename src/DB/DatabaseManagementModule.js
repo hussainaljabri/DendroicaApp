@@ -55,7 +55,11 @@ var importApiData = function(projectId, onFinishedCallback) {
     var lastModifiedApiParam = "";
     if (lastModified) lastModifiedApiParam = '&ifModifiedSince=' + lastModified;
 
-    var projectIds = Array.isArray(projectId) ?  projectId : [projectId];
+    //Might be a little unnescessary.
+    //projectId param can be single project to import, list of projects to import, or null for all projects
+    var projectIds;
+    if (projectId)
+        projectIds = Array.isArray(projectId) ?  projectId : [projectId];
 
     var importRegions = function(onFinishedCallback) {
         fetch('https://www.natureinstruct.org/api/projects?token=' + Authentication.getAuthToken() + lastModifiedApiParam)
@@ -77,8 +81,8 @@ var importApiData = function(projectId, onFinishedCallback) {
     var importBirdRegionsAndSubRegions = function(onFinishedCallback) {
         var projectsAdded = 0;
 
-        for (var id in projectIds) {
-            fetch('https://www.natureinstruct.org/api/speciesRegions?token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam)
+        projectIds.forEach((id) => {
+            fetch('https://www.natureinstruct.org/api/speciesRegions?token=' + Authentication.getAuthToken() + '&projectId=' + id + lastModifiedApiParam)
                 .then((response) => response.json())
                 .then((responseJson) => {
                     if (Object.entries(responseJson).length === 0) {
@@ -99,14 +103,14 @@ var importApiData = function(projectId, onFinishedCallback) {
                 .catch((error) => {
                     console.error(error);
                 });
-        }
+        });
     }
 
     var importTableForProject = function(url, jsonNamesArray, tableName, onFinishedCallback) {
             var projectsAdded = 0;
 
-            for (var id in projectIds) {
-                fetch('https://www.natureinstruct.org/api/' + url + 'token=' + Authentication.getAuthToken() + '&projectId=' + projectIds[id] + lastModifiedApiParam)
+            projectIds.forEach((id) => {
+                fetch('https://www.natureinstruct.org/api/' + url + 'token=' + Authentication.getAuthToken() + '&projectId=' + id + lastModifiedApiParam)
                     .then((response) => response.json())
                     .then((responseJson) => {
                         if (Object.entries(responseJson).length === 0) {
@@ -127,7 +131,7 @@ var importApiData = function(projectId, onFinishedCallback) {
                     .catch((error) => {
                         console.error(error);
                     });
-            }
+            });
     }
 
     importRegions(() => {
