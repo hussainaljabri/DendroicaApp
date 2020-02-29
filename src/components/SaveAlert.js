@@ -94,13 +94,13 @@ export default class SaveAlert extends Component{
                         <View style={styles.middlePart}>
                             <View style={{flexDirection:'row', justifyContent: "center"}}>
                                 {/* Existing List*/}
-                                <TouchableOpacity style={[styles.existing, styles.tabButton]} onPress={()=> this.setState({tab: 1})}>
+                                <TouchableOpacity style={[{borderBottomStartRadius: 10,backgroundColor: this.state.tab==1? 'green': '#b0b0b0'}, styles.tabButton]} onPress={()=> this.setState({tab: 1})}>
                                     <Text style={styles.alertMessageTextStyle}>
                                         Existing List
                                     </Text>
                                 </TouchableOpacity>
                                 {/* New List */}
-                                <TouchableOpacity style={[styles.newlist, styles.tabButton]} onPress={()=> this.setState({tab: 2})}>
+                                <TouchableOpacity style={[{borderBottomEndRadius: 10,backgroundColor: this.state.tab==2? 'green': '#b0b0b0'}, styles.tabButton]} onPress={()=> this.setState({tab: 2})}>
                                     <Text style={styles.alertMessageTextStyle}>
                                         New List
                                     </Text>
@@ -154,8 +154,6 @@ export default class SaveAlert extends Component{
 }
 
 const styles = StyleSheet.create({
-    newlist: {borderBottomEndRadius: 10,backgroundColor: this.state.tab==2? 'green': '#b0b0b0'},
-    existing:{borderBottomStartRadius: 10,backgroundColor: this.state.tab==1? 'green': '#b0b0b0'},
     textInput:{
         marginTop:15,
         height: 40, 
