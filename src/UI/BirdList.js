@@ -8,6 +8,8 @@ import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
 import SaveAlert from '../components/SaveAlert';
 const prefix='https://natureinstruct.org';
+import NetInfo from '@react-native-community/netinfo';
+
 
 
 
@@ -47,6 +49,8 @@ export default class BirdList extends Component {
 
         displayAlert: false, // saveTo alert
         saveAlertLoading: false, // to show activity indicator when saving birds
+
+        connected: false
     }
 
 
@@ -65,6 +69,17 @@ export default class BirdList extends Component {
 
 
     componentDidMount(){
+    //Subscribe to network state updates
+        const unsubscribe = NetInfo.addEventListener(c => {
+            this.setState({connected: c.isConnected});
+          console.log(
+             'Connection type: ' +
+              c.type +
+             ', Is connected?: ' +
+              c.isConnected);
+        });
+
+
         if(this.state.selected != 0){
 
             DatabaseModule.getDisplayInfo(
@@ -217,7 +232,7 @@ export default class BirdList extends Component {
                 <BirdCard 
                     birdName={item.name} 
                     latin={item.scientific_name}
-                    imgUrl={MediaHandler.getMediaFile(item.filename)}
+                    imgUrl={MediaHandler.getMediaFile(item.bird_id, item.filename,this.state.connected)}
                     selected={!!this.state.birdSelected.get(item.key)}
                     onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
                     onLongPress={()=>{this.handlerLongClick()}}
