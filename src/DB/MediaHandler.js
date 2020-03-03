@@ -1,101 +1,130 @@
 import * as FileSystem from 'expo-file-system';
-
 import DatabaseModule from './DatabaseModule';
 
 const MediaDirectory = FileSystem.documentDirectory;
 const prefix = 'https://natureinstruct.org';
 
 //All data that has isDownloaded=true
-var mediaData;
-//"imageData":
-//"mapData":
-//"vocalData":
+var mediaData; //{imageData, vocalData}
 
 var init = (onFinishedCallback) => {
-    //makeMediaDirectory();
     DatabaseModule.getUriData({success: (res) => {
         mediaData = res;
         onFinishedCallback();
     }});
 }
 
-async function makeMediaDirectory() {
-    try {
-        try {
-              await FileSystem.makeDirectoryAsync(MediaDirectory,{
-                intermediates: true
-              })
-            } catch(error) {
-                console.log(error);
-            }
-        console.log("created Media Folder");
-    } catch(error) {
-        alert(error)
-    }
+//Transforms file name in DB to Dendroica URL
+var _toUrl = (s) => {
+    return prefix+s;
+}
+//Transforms URL to file name in DB
+var _toDbName = (s) => {
+    return s.replace(prefix,'');
+}
+//Transforms file name in DB to FileSystem URI
+var _toFsPath = (s) => {
+    return MediaDirectory + s.split("/").pop();
 }
 
 //Returns the URL to the API or the URI into the File System
-var getMediaFile = (partialPath) =>{
-    if (!mediaData) return prefix+partialPath;
-
-    var filename = partialPath.split("/").pop();
-    var dbName = "/files/avian_images/" + filename;
+var getMediaFile = (bird_id, dbFileName, onlineStatus) => {
+    //Fetch from URL if app is online or
+    //Media data not yet loaded from back end - can't fetch from FS yet
+    if (!mediaData || onlineStatus) return _toUrl(dbFileName);
 
     for (var i = 0; i < mediaData.imageData.length; i++) {
-        if (mediaData.imageData[i].filename === dbName) {
-            //Can't store actual true in db. Compare must be as string
-            if (mediaData.imageData[i].isDownloaded === "true") {
-                return MediaDirectory + filename;
-            }
+        if (bird_id == mediaData.imageData[i].bird_id && mediaData.imageData[i].filename == dbFileName) {
+            _toFsPath(dbFileName)
         }
     }
 
-    return prefix+partialPath;
+    return _toUrl(dbFileName);
 }
 
-var tempGetMediaFile = () => {
-    return MediaDirectory + 'GB2-128916-Vanellus_chilensis_AOU_7_52.jpg';
-}
+//@FIXME downloads attempted even if media downloaded. no error but maybe a performance cost
+var downloadCustomList = (list_id, onFinishedCallback) => {
+    //FIXME Get from user preferences?
+    var numRequested = 3;
 
-var downloadList = (list_id) => {
-    DatabaseModule.getImageUrlsForCustomList(list_id, {success: (image_urls) => {
+    //@FIXME.. a lot of params
+    var numImgDownloaded = 0;
+    var numSpctgDownloaded = 0;
+    var numMp3Downloaded = 0;
+    var fileTypesDone = 0;
+
+    DatabaseModule.getImageUrlsForCustomList(list_id, numRequested, {success: (image_urls) => {
         for (var i = 0; i < image_urls.length; i++) {
-            downloadFile(prefix + image_urls[i].filename);
+            
+            _downloadFile("img", image_urls[i].filename, () => {
+                if (++numImgDownloaded == image_urls.length) {
+                    if (++fileTypesDone == 3) _getUriData();
+                }
+            });
         }
+    }})
+    DatabaseModule.getVocalizationUrlsForCustomList(list_id, numRequested, {success: (vocal_urls) => {
+        for (var i = 0; i < vocal_urls.length; i++) {
+            
+            _downloadFile("spct", vocal_urls[i].filename, () => {
+                if (++numSpctgDownloaded == vocal_urls.length) {
+                    if (++fileTypesDone == 3) _getUriData();
+                }
+            });
+            
+            _downloadFile("mp3", vocal_urls[i].mp3_filename, () => {
+                if (++numMp3Downloaded == vocal_urls.length) {
+                    if (++fileTypesDone == 3) _getUriData();               
+                }
+            });
+        }
+    }})
+    _getUriData = () => {
         DatabaseModule.getUriData({success: (data) => {
             mediaData = data;
-            console.log("List Downloaded!");
         }});
-    }})
+        DatabaseModule.setCustomListDownloaded(list_id, "true", {success: () => { 
+            console.log("Custom List Downloaded!")
+            if (onFinishedCallback) onFinishedCallback(); 
+        }});
+    }
 }
 
-var downloadFile = async function(url) {
-    var filename = url.split("/").pop();
-    var dbName = "/files/avian_images/" + filename;
-
+var _downloadFile = (type, dbFileName, onFinishedCallback)  => {
     FileSystem.downloadAsync(
-        url,
-        MediaDirectory + filename
+        _toUrl(dbFileName),
+        _toFsPath(dbFileName)
     )
     .then(({ uri }) => {
-        for (var i = 0; i < mediaData.imageData; i++) {
-            if (mediaData.imageData[i].filename === dbName) {
-                mediaData.imageData[i].isDownloaded = "true";
-            }
+        if (type == "img") {
+            DatabaseModule.setImageMediaDownloaded(dbFileName, "true", {success: () => {
+                onFinishedCallback();
+            }});
         }
-        DatabaseModule.setImageMediaDownloaded(dbName, "BirdImages", "true", {success: () => {
-        }});
+        else {
+            DatabaseModule.setVocalizationsDownloaded(dbFileName, type === "mp3", "true", {success: () => {
+                onFinishedCallback();
+            }});
+        }
     })
     .catch(error => {
         console.error(error);
     });
 }
 
+var purgeCustomList = (list_id) => {
+    DatabaseModule.purgeCustomListDB(list_id, _purgeFile);
+
+    var _purgeFile = (dbFileName, onFinishedCallback) => {
+        FileSystem.deleteAsync(_toFsPath(dbFileName));
+        onFinishedCallback();
+    }
+}
+
 const MediaHandler = {
     init: init,
-    makeMediaDirectory: makeMediaDirectory,
-    downloadFile: downloadFile,
-    downloadList: downloadList,
+    downloadCustomList: downloadCustomList,
+    purgeCustomList: purgeCustomList,
     getMediaFile: getMediaFile
 };
 export default MediaHandler;
