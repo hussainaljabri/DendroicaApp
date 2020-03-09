@@ -50,7 +50,7 @@ export default class Slider extends React.PureComponent {
                 <Carousel
                     ref={(cb) => { this._carouselMap = cb; }}
                     data={this.props.data}
-                    renderItem={this._renderItem}
+                    renderItem={this.props.renderItem? this.props.renderItem: this._renderItem}
                     sliderWidth={sliderWidth}
                     itemWidth={itemWidth}
                     firstItem={this.state.activeMapSlide}
