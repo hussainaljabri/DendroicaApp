@@ -3,14 +3,14 @@ import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions,
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import NetInfo from '@react-native-community/netinfo';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
+import Slider from '../components/Slider';
 
 const prefix='https://natureinstruct.org';
-const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
+
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 function wp (percentage) {
     const value = (percentage * viewportWidth) / 100;
@@ -232,30 +232,9 @@ export default class BirdInfo extends Component {
         return (
             <ScrollView >
                 {this.getImageModal('info')}
-                <Carousel
-                    ref={(c) => { this._carousel = c; }}
+                <Slider 
                     data={this.state.images}
-                    renderItem={this._renderItem}
-                    sliderWidth={sliderWidth}
-                    itemWidth={itemWidth}
-                    firstItem={this.state.activeSlide}
-                    hasParallaxImages={true}
-                    containerCustomStyle={styles.slider}
-                    contentContainerCustomStyle={styles.sliderContentContainer}
-                    scrollEnabled={ this.state.scrollable }
-                    onSnapToItem={(index) => this.setState({ activeSlide: index }) }
-                />
-                <Pagination 
-                    dotsLength={this.state.images.length}
-                    activeDotIndex={this.state.activeSlide}
-                    containerStyle={styles.paginationContainer}
-                    dotColor={'#34C759'}
-                    dotStyle={styles.paginationDot}
-                    inactiveDotColor={colors.black}
-                    inactiveDotOpacity={0.4}
-                    inactiveDotScale={0.6}
-                    carouselRef={this._slider1Ref}
-                    tappableDots={!!this._slider1Ref}
+                    onPress={this._handleModalButton}
                 />
                 <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
                     <Icon 
@@ -285,39 +264,10 @@ export default class BirdInfo extends Component {
                             
 
                      {/* TODO: VOCALIZATIONS CODE GOES HERE */}
-                     <View>
-                    <Carousel
-                        ref={(cb) => { this._carouselMap = cb; }}
-                        data={NotFoundImage}
-                        renderItem={({item,index})=>{
-                            return (
-                                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
-                                 <View key={'VW'+index} style={styles.imageContainer}>
-                                     <Image key={'IM'+index} style={styles.image} source={item} />
-                                 </View>
-                                 </TouchableOpacity>)
-                        }}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeMapSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={NotFoundImage.length}
-                        activeDotIndex={this.state.activeMapSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'#34C759'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider2Ref}
-                        tappableDots={!!this._slider2Ref}
-                    />
-                </View>
+                <Slider 
+                    data={this.state.mapImages}
+                    onPress={this._handleModalButton}
+                />
                 <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
                     <Icon 
                         name='music'
@@ -332,69 +282,11 @@ export default class BirdInfo extends Component {
     getMapPage=()=>{
         return (<ScrollView>
                 {this.getImageModal('map')}
-                {this.state.mapImages.length != 0?
-                    (<View>
-                        <Carousel
-                        ref={(cb) => { this._carouselMap = cb; }}
-                        data={this.state.mapImages}
-                        renderItem={this._renderItem}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeMapSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={this.state.mapImages.length}
-                        activeDotIndex={this.state.activeMapSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'#34C759'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider2Ref}
-                        tappableDots={!!this._slider2Ref}
-                    />
-                    </View>)
-                :
-                (<View>
-                    <Carousel
-                        ref={(cb) => { this._carouselMap = cb; }}
-                        data={NotFoundImage}
-                        renderItem={({item,index})=>{
-                            return (
-                                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
-                                 <View key={'VW'+index} style={styles.imageContainer}>
-                                     <Image key={'IM'+index} style={styles.image} source={item} />
-                                 </View>
-                                 </TouchableOpacity>)
-                        }}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeMapSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={NotFoundImage.length}
-                        activeDotIndex={this.state.activeMapSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'#34C759'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider2Ref}
-                        tappableDots={!!this._slider2Ref}
-                    />
-                </View>)
                 
-                }
+                <Slider 
+                    data={this.state.mapImages}
+                    onPress={this._handleModalButton}
+                />
                 <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
                     <Icon 
                         name='map'
