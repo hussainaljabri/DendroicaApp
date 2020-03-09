@@ -5,7 +5,9 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import ImageViewer from 'react-native-image-zoom-viewer';
+import NetInfo from '@react-native-community/netinfo';
 import DatabaseModule from '../DB/DatabaseModule';
+import MediaHandler from '../DB/MediaHandler';
 
 const prefix='https://natureinstruct.org';
 const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
@@ -61,66 +63,66 @@ export default class BirdInfo extends Component {
         
     })
    componentDidMount(){
-    let id = this.props.navigation.state.params.id
-    console.log('birdinfo: id :'+ id);
+    //Only get connection info once when component is loaded. No need to rerender when connection changes
+    NetInfo.fetch().then(connectionState => {
+        let id = this.props.navigation.state.params.id
+        console.log('birdinfo: id :'+ id);
 
-    DatabaseModule.getImagesUrlByBirdId(
-        id,
-        { //{"_id":78886,"bird_id":257,"filename":"/files/avian_images/78886-Empidonax_virescens_AOU_7_52.jpg","credits":"Kelly Colgan Azar","displayOrder":1}
-            success: (result)=>{
-                // console.log(JSON.stringify(result));
-                let images = [];
-                let imageCredit = [];
-                result.map((item, index)=>{
-                    //images
-                    images.push(prefix+item.image_filename);
-                    //image credit
-                    imageCredit.push(item.image_credits);
+        DatabaseModule.getImageUrlsByBirdId(
+            id,
+            { //{"_id":78886,"bird_id":257,"filename":"/files/avian_images/78886-Empidonax_virescens_AOU_7_52.jpg","credits":"Kelly Colgan Azar","displayOrder":1}
+                success: (result)=>{
+                    let images = [];
+                    let imageCredit = [];
+                    result.map((item, index)=>{
+                        //if offline - only show downloaded images
+                        if (connectionState.isConnected == true || item.isDownloaded == "true") {
+                            images.push(MediaHandler.getMediaFile(item.bird_id, item.image_filename, connectionState.isConnected));
+                            imageCredit.push(item.image_credits);
+                        }
+                    });
+                    // console.log(JSON.stringify(imageCredit));
+                    this.setState({
+                        page: 0,
+                        images: images,
+                        imageCredit: imageCredit,
+                        imageReady: true,
+                    });
+                    // call for info
+                    DatabaseModule.getBirdById(id,{
+                        success: (result)=>{
+                            //{"_id":257,"name":"Acadian Flycatcher","scientific_name":"Empidonax virescens","range_description":"CANADA - Breeding only: 9,784 square km\nCARIBBEAN - Migration only: 119,391 square km\nCENTRAL AMERICA - Wintering only: 104,297 square km; Migration only: 405,573 square km\nMEXICO - Migration only: 433,743 square km\nSOUTH AMERICA - Wintering only: 555,165 square km\nUSA - Breeding only: 2,451,982 square km; Migration only: 168,294 square km","song_description":"Song is an emphatic \"peet-seet\", \"peet-suh\", with
+                            //  accent on second syllable. Call is a sharp \"peet\"."}
+                            // console.log(JSON.stringify(result));
+                            this.setState({
+                                info: result,
+                                infoReady: true,
+                            });
+                            DatabaseModule.getMapsUrlByBirdId(id, {
+                                //@FIXME. Render maps component differently if !connectionState.isConnected
+                                success: (result)=>{
+                                    let mapImages = [];
+                                    let mapCredit = [];
+                                    result.map((item, index)=>{
+                                        //images
+                                        mapImages.push(prefix+item.map_filename);
+                                        //image credit
+                                        mapCredit.push(item.map_credits);
+                                    });
+                                    this.setState({
+                                        mapImages: mapImages,
+                                        mapCredit: mapCredit,
+                                        mapImagesReady: true,
+                                    });
+                                }
+                            });
+                        }
+                    });
 
-
-                });
-                // console.log(JSON.stringify(imageCredit));
-                this.setState({
-                    page: 0,
-                    images: images,
-                    imageCredit: imageCredit,
-                    imageReady: true,
-                });
-                // call for info
-                DatabaseModule.getBirdById(id,{
-                    success: (result)=>{
-                        //{"_id":257,"name":"Acadian Flycatcher","scientific_name":"Empidonax virescens","range_description":"CANADA - Breeding only: 9,784 square km\nCARIBBEAN - Migration only: 119,391 square km\nCENTRAL AMERICA - Wintering only: 104,297 square km; Migration only: 405,573 square km\nMEXICO - Migration only: 433,743 square km\nSOUTH AMERICA - Wintering only: 555,165 square km\nUSA - Breeding only: 2,451,982 square km; Migration only: 168,294 square km","song_description":"Song is an emphatic \"peet-seet\", \"peet-suh\", with
-                        //  accent on second syllable. Call is a sharp \"peet\"."}
-                        // console.log(JSON.stringify(result));
-                        this.setState({
-                            info: result,
-                            infoReady: true,
-                        });
-                        DatabaseModule.getMapsUrlByBirdId(id, {
-                            success: (result)=>{
-                                let mapImages = [];
-                                let mapCredit = [];
-                                result.map((item, index)=>{
-                                    //images
-                                    mapImages.push(prefix+item.map_filename);
-                                    //image credit
-                                    mapCredit.push(item.map_credits);
-                
-                
-                                });
-                                this.setState({
-                                    mapImages: mapImages,
-                                    mapCredit: mapCredit,
-                                    mapImagesReady: true,
-                                });
-                            }
-                        });
-                    }
-                });
-
+                }
             }
-        }
-    );
+        );
+    });
 
     
    }

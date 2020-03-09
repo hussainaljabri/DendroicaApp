@@ -6,10 +6,10 @@ const FIELDS = {
     "VersionData": ["_id","apiVersion","dataVersion","lastUpdateTimeStamp"],
     "Birds": ["_id","name","scientific_name","range_description","song_description"],
     "Regions": ["_id","project_id","name"],
-    "Lists": ["_id","name"],
-    "BirdImages": ["_id","bird_id","filename","credits","displayOrder"],
-    "MapImages": ["_id","bird_id","filename","credits"],
-    "Vocalizations": ["_id","bird_id","filename","mp3_filename","credits"],
+    "Lists": ["_id","name","isDownloaded"],
+    "BirdImages": ["_id","bird_id","filename","credits","displayOrder","isDownloaded"],
+    "MapImages": ["_id","bird_id","filename","credits","isDownloaded"],
+    "Vocalizations": ["_id","bird_id","filename","mp3_filename","credits","isDownloaded"],
     "SubRegions": ["_id","region_id","name","abbrev"],
     "FileSubRegions": ["subregion_id","file_id","displayOrder"],
     "BirdSubRegions": ["subregion_id","bird_id","non_breeder","rare"],
@@ -87,11 +87,19 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     var parameters = [];
     var sqlQuestionMarks="";
 
+    //For mapImages, vocalizations, and  birdImages need to add default isDownloaded param to false
+    if (tableName == "BirdImages" || tableName == "MapImages" || tableName == "Vocalizations" || tableName == "Lists") {
+        //Make shallow copy or isDownloaded appended for each project iterated through (jsonArrayNames param is reused)
+        jsonArrayNames = jsonArrayNames.slice();
+        jsonArrayNames.push("isDownloaded");
+        json["isDownloaded"] = Array(json[jsonArrayNames[0]].length).fill("false");
+    }
+
     db.transaction(function(tx) {
         for (var i = 0; i < json[jsonArrayNames[0]].length; i++) {
             //Build question mark string for sql statement (?,?,?...) for number of params
             //Fill parameters for sql statement. Stop at length * 100 (100 inserts at a time)
-            sqlQuestionMarks += ("(")
+            sqlQuestionMarks += ("(");
             jsonArrayNames.forEach((arrayName,index) => {
                 sqlQuestionMarks += "?";
                 if (index != jsonArrayNames.length - 1)
@@ -103,7 +111,7 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
 
             // sending every 100 records to DB
             if (parameters.length == jsonArrayNames.length * 100) {
-                tx.executeSql("INSERT  INTO " + tableName + " VALUES " + sqlQuestionMarks + ";", parameters);
+                tx.executeSql("INSERT OR REPLACE INTO " + tableName + " VALUES " + sqlQuestionMarks + ";", parameters);
 
                 // reset the variables
                 parameters= [];
@@ -112,7 +120,7 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
         }
         // send the rest of it (for remainder params < 100 inserts)
         if (sqlQuestionMarks != "")  {
-            tx.executeSql("INSERT INTO " + tableName + " VALUES " + sqlQuestionMarks.slice(0,-1)+ ";", parameters, () => {
+            tx.executeSql("INSERT OR REPLACE INTO " + tableName + " VALUES " + sqlQuestionMarks.slice(0,-1)+ ";", parameters, () => {
                 onFinishedCallback();
             });
         }
@@ -122,77 +130,13 @@ var insertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallba
     });
 }
 
-var upsertMultiple = function (json, jsonArrayNames, tableName, onFinishedCallback) {
-    var countQuery = "SELECT COUNT(*) from " + tableName + " WHERE _id=";
-    var insertQuery = "INSERT INTO " + tableName + " VALUES (";
-    var updateQuery = "UPDATE " + tableName + " SET ";
-
-
-    FIELDS[tableName].forEach(field => {
-        insertQuery += "?,";
-        if (field !== "_id") updateQuery += field + "=?,";
-    })
-    insertQuery = insertQuery.slice(0,-1) + ")";
-    updateQuery = updateQuery.slice(0,-1) + " WHERE _id=";
-
-    var idArray = json[jsonArrayNames[0]];
-
-    db.transaction((tx) => {
-        var i,index,innerIndex;
-
-        for (var i = 0, index = 0, innerIndex = 0; i < idArray.length; i++) {
-            var params = [];
-            var updateQueryWithId = updateQuery + idArray[i];
-
-            _sqlQuery(countQuery + idArray[i], [], {success: (tx,res) => {
-                var isInsertQuery = false;
-                var query = "";
-                var params = [];
-
-                if (res.rows._array[0]["COUNT(*)"] === 0) isInsertQuery = true;
-
-                if (isInsertQuery) query = insertQuery;
-                else query = updateQuery + idArray[index];
-
-                //build params array
-                jsonArrayNames.forEach(arrayName => {
-                    if (! (arrayName === "id" && !isInsertQuery)) //Don't push id for update query
-                    params.push(json[arrayName][index]);
-                })
-
-                _sqlQuery(query, params, {success: (tx,res) => {
-                    if (++innerIndex === idArray.length) onFinishedCallback();
-                }},tx);
-
-                index ++;
-            }, error: (err) => { //Seems to throw error if table is empty (for example if new project has custom lists) in this case insert
-                var params = [];
-
-                jsonArrayNames.forEach(arrayName => {
-                    params.push(json[arrayName][index]);
-                });
-                _sqlQuery(insertQuery, params, {success: (tx,res) => {
-                    if (++innerIndex === idArray.length) onFinishedCallback();
-                }})
-                index++;
-            }}, tx);
-        }
-    });
-}
-
 //  ["regionId","speciesId","nonBreederInRegion","rareInRegion"]
 //  region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean
-//  Function to create both BirdRegions table and SubRegions table as they are populated from the same json
+//  Function to insert into both BirdRegions table and SubRegions table as they are populated from the same json
 var updateInsertBirdRegionsAndBirdSubRegions = function (json, regionIds, onFinishedCallback) {
     var numDatasets = json.regionId.length;
     var numUpdated = 0;
     var tableName = "";
-
-
-    var birdRegionsInserts = 0;
-    var birdSubRegionsInserts = 0;
-    var updates = 0;
-    var inserts = 0;
 
     db.transaction(function(tx) {
         var index = 0;
@@ -208,37 +152,14 @@ var updateInsertBirdRegionsAndBirdSubRegions = function (json, regionIds, onFini
                 tableIdName = "region_id";
             }
 
-            _sqlQuery("SELECT COUNT(*) from " + tableName + " where " + tableIdName + " = " + json.regionId[i] + " and bird_id=" + json.speciesId[i] , [], {success: (tx,res) => {
-                var callbackTableName = regionIds.includes(json.regionId[index]) ? "BirdRegions" : "BirdSubRegions";
-                if (res.rows._array[0]["COUNT(*)"] === 0) {
-                    _sqlQuery("INSERT INTO " + callbackTableName + " VALUES (?,?,?,?)",
-                        [json.regionId[index], json.speciesId[index], json.nonBreederInRegion[index], json.rareInRegion[index]], {success: (tx,res) => {
-                            if (++numUpdated == numDatasets) {
-                            onFinishedCallback();
-                            }
-                    }},tx);
-                    index++;
-                }
-
-                else {
-                    updates++;
-                    var idName = ""
-                    if (tableName === "BirdSubRegions") idName = "subregion_id";
-                    else idName = "region_id";
-                    _sqlQuery("UPDATE " + callbackTableName + " SET non_breeder=?,rare=? WHERE " + idName + "=?, bird_id=?",
-                        [json.nonBreederInRegion[index], json.rareInRegion[index], json.regionId[index], json.speciesId[index]], {success: (tx,res) => {
-                            if (++numUpdated == numDatasets) onFinishedCallback();
-                    }}, tx);
-                    index++;
-                }
+            var callbackTableName = regionIds.includes(json.regionId[index]) ? "BirdRegions" : "BirdSubRegions";
+            _sqlQuery("INSERT OR REPLACE INTO " + callbackTableName + " VALUES (?,?,?,?)",
+                [json.regionId[index], json.speciesId[index], json.nonBreederInRegion[index], json.rareInRegion[index]], {success: (tx,res) => {
+                    if (++numUpdated == numDatasets) onFinishedCallback();
             }},tx);
+            index++;
         }
     });
-};
-
-var _insertRegion = function (id, projectID, name, callbacks) {
-    var query = `INSERT INTO Regions (_id, project_id, name) VALUES (?,?,?)`;
-    _sqlQuery(query, [id, projectID, name], callbacks);
 };
 
 //DatabaseModule.getBirdById(1, {success: (bird) =>{
@@ -252,9 +173,9 @@ var getBirdById = function (id, callbacks) {
     }});
 }
 //(_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)
-var getImagesUrlByBirdId = function (id, callbacks){
+var getImageUrlsByBirdId = function (id, callbacks){
     // var query = `SELECT filename, credits from BirdImages where (bird_id=?) order by displayOrder`;
-    var query = "SELECT BirdImages.bird_id as bird_id, BirdImages.filename as image_filename, BirdImages.credits as image_credits, displayOrder from Birds ";
+    var query = "SELECT BirdImages.bird_id as bird_id, BirdImages.filename as image_filename, BirdImages.credits as image_credits, isDownloaded, displayOrder from Birds ";
     query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
     query += "where BirdImages.bird_id=? ORDER BY displayOrder";
     // query += "INNER JOIN MapImages on BirdImages.bird_id = MapImages.bird_id ";
@@ -275,11 +196,104 @@ var getMapsUrlByBirdId = function (id, callbacks){
     }});
 }
 
+var getUriData = function (callbacks) {
+    var imagesQuery =   "SELECT bird_id, filename, isDownloaded FROM BirdImages where isDownloaded=? Order By displayOrder";
+    var vocalQuery  =   "SELECT bird_id, filename, mp3_filename, isDownloaded FROM Vocalizations where isDownloaded=?";
+
+    _sqlQuery(imagesQuery, ["true"], {success:(tx,imgres) => {
+        _sqlQuery(vocalQuery, ["true"], {success:(tx,vocalres) => {
+            callbacks.success({
+                    "imageData":   imgres.rows._array,
+                    "vocalData":   vocalres.rows._array
+            });
+        
+        }},tx);
+    }});
+}
+
+//Returns the url for the number of images requested for each species in the custom list
+var getImageUrlsForCustomList = function (list_id, numRequested, callbacks) {
+    if (!numRequested) numRequested = "ALL";
+
+    var query = "SELECT filename from BirdImages where bird_id=? LIMIT ?";
+    var numBirdsDone = 0;
+    var result = [];
+    getBirdIdsFromListId(list_id, {success: (res) => {
+        res.forEach(row => {
+            _sqlQuery(query, [row.bird_id,numRequested], {success: (tx,res) => {
+                result = result.concat(res.rows._array);
+                if (++numBirdsDone == numRequested) callbacks.success(result);
+            }});
+        })
+    }});
+}
+
+//Returns the urls for the number of vocalizations requested (mp3 AND spectrogram)
+//For each species in the custom list
+var getVocalizationUrlsForCustomList = function (list_id, numRequested, callbacks) {
+    if (!numRequested) numRequested = "ALL";
+
+    var query = "SELECT filename, mp3_filename from Vocalizations where bird_id=? LIMIT ?";
+    var numBirdsDone = 0;
+    var result = [];
+    getBirdIdsFromListId(list_id, {success: (res) => {
+        res.forEach(row => {
+            _sqlQuery(query, [row.bird_id,numRequested], {success: (tx,res) => {
+                result = result.concat(res.rows._array);
+                if (++numBirdsDone == numRequested) callbacks.success(result);
+            }});
+        })
+    }})
+}
+
+//BirdImages
+var setImageMediaDownloaded = function (filename, isDownloaded, callbacks) {
+    if (isDownloaded == true) isDownloaded == "true";
+    if (isDownloaded == false) isDownloaded == "false";
+    var query = "UPDATE BirdImages SET isDownloaded=? where filename=?";
+
+    _sqlQuery(query, [isDownloaded,filename], {success: (tx,res) => {
+        if (callbacks.success) callbacks.success();
+    }})
+}
+
+//MP3 and Spectrograms
+var setVocalizationsDownloaded = function (filename, isMP3, isDownloaded, callbacks) {
+    if (isDownloaded == true) isDownloaded == "true";
+    if (isDownloaded == false) isDownloaded == "false";
+    var filefield = isMP3? "mp3_filename" : "filename";
+    var query = "UPDATE Vocalizations SET isDownloaded=? where " + filefield + "=?";
+
+    _sqlQuery(query, [isDownloaded,filename], {success: (tx, res) => {
+        callbacks.success();
+    }});
+}
+
+var setCustomListDownloaded = function (list_id, isDownloaded, callbacks) {
+    if (isDownloaded == true) isDownloaded == "true";
+    if (isDownloaded == false) isDownloaded == "false";
+
+    var query = "UPDATE Lists SET isDownloaded=? where _id=?";
+
+    _sqlQuery(query, [isDownloaded,list_id], {success: (tx,res) => {
+        callbacks.success();
+    }});
+}
+
+
 var getThumbnailUrlByBirdId = function (id, callbacks){
     var query = `SELECT filename from BirdImages where (bird_id=?) and (displayOrder=1)`;
     _sqlQuery(query, [id], {success:(tx,res) => {
         var result = res.rows._array[0];
         callbacks.success(result);
+    }});
+}
+
+var getCustomListBirdIds = function (list_id, callbacks) {
+    var query = "SELECT bird_id from BirdLists where list_id=?";
+
+    _sqlQuery(query, [list_id], {success: (tx,res) => {
+        callbacks.success(res.rows._array);
     }});
 }
 
@@ -289,9 +303,9 @@ var getThumbnailUrlByBirdId = function (id, callbacks){
  * @return          -> ID of new list
  */
 var createCustomList = function (listName, callbacks) {
-    var query = 'INSERT INTO Lists (name) VALUES (?)';
-    var params = [listName];
-    _sqlQuery(query, [listName], {success: (tx,res) => {
+    var query = 'INSERT INTO Lists (name,isDownloaded) VALUES (?,?)';
+
+    _sqlQuery(query, [listName,"false"], {success: (tx,res) => {
         callbacks.success(res.insertId);
     }});
 }
@@ -347,6 +361,30 @@ var removeBirdsFromCustomList = function (listId, birdIds, callbacks) {
     }
 }
 
+//Should be called from Media Handler. Helper function as there is a lot of DB logic
+var purgeCustomListDB = function(list_id, purgeFunction, callbacks) {
+    //Select all Birds from list that do not belong to a different downloaded list
+    var query = "SELECT bird_id from BirdLists WHERE list_id=? AND NOT EXISTS (" +
+                "SELECT bird_id from BirdLists INNER JOIN Lists ON BirdLists.list_id=Lists._id WHERE Lists.isDownloaded=? AND NOT BirdLists.list_id=?)";
+
+    _sqlQuery(query,[list_id,"true",list_id], {success: (tx,res) => {
+        res.rows._array.forEach(item => {
+            query = "SELECT BirdImages.filename, Vocalizations.filename as spectro_file, Vocalizations.mp3_filename from Birds INNER JOIN " +
+                    "BirdImages on Birds._id = BirdImages.bird_id INNER JOIN " +
+                    "Vocalizations on BirdImages.bird_id = Vocalizations.bird_id WHERE birds._id=? AND BirdImages.isDownloaded=? AND Vocalizations.isDownloaded=?";
+            _sqlQuery(query, [item.bird_id,"true","true"], {success: (tx,res) => {
+                res.rows._array.forEach(urlTuple => {
+                    purgeFunction(urlTuple.filename);
+                    purgeFunction(urlTuple.mp3_filename);
+                    purgeFunction(urlTuple.spectro_file);
+                    setImageMediaDownloaded(urlTuple.filename, false);
+                    setVocalizationsDownloaded(urlTuple.mp3_filename, true, false);
+                    setVocalizationsDownloaded(urlTuple.spectro_file, false, false);
+                });
+            },tx});
+        });
+    }}); 
+}
 
 /**
  * BirdRegions (region_id integer REFERENCES Regions(_id), bird_id integer REFERENCES Birds(_id), non_breeder boolean, rare boolean,
@@ -384,22 +422,25 @@ var getDisplayInfo = function(id, callbacks){ // id is region_id
     query += "where displayOrder=1 and BirdRegions.region_id=? GROUP BY BirdRegions.bird_id ORDER BY name";
     _sqlQuery(query, [id], {success:(tx,res) => {
         var result = res.rows._array;
+        for (var i = 0; i < result.length; i++) {
+            result[i].url = 'https://natureinstruct.org' + result[i].filename;
+        }
         callbacks.success(result);
     }});
 }
 
 var getLists = function(callbacks){
     var query =`SELECT * from Lists`;
+
     _sqlQuery(query, [], {success:(tx,res) => {
         var result = res.rows._array;
         callbacks.success(result);
     }});
 }
-var getBirdListFromListId = function(id, callbacks){
-    var query =`SELECT BirdLists.List_id, BirdLists.bird_id from Lists `;
-    query += `INNER JOIN BirdLists on Lists._id = BirdLists.List_id `
-    query += `where List_id =? `
-    _sqlQuery(query, [id], {success:(tx,res) => {
+var getBirdIdsFromListId = function(list_id, callbacks){
+    var query =`SELECT DISTINCT bird_id from BirdLists where list_id=?`;
+
+    _sqlQuery(query, [list_id], {success:(tx,res) => {
         var result = res.rows._array;
         callbacks.success(result);
     }});
@@ -413,11 +454,6 @@ var getListDisplayInfo = function(id, callbacks){
         var result = res.rows._array;
         callbacks.success(result);
     }});
-}
-
-var _getRegionIDByName = function (name, callbacks) {
-    var query = `SELECT _id from Regions where (name = ?)`;
-    _sqlQuery(query, [name], callbacks);
 }
 
 //param query    --> sqlite query
@@ -454,6 +490,7 @@ var _sqlQuery = function (query, params, callbacks, tx) {
 
 
 //FIXME Can't use ID constraint if table has composite keys
+//Warning Function might freeze up the app if numRowsOrId not specified (will try to print the whole table)
 var printTable = function(tableName, numRowsOrId, isIdConstraint, onFinishedCallback) {
     var constraint = "";
 
@@ -583,6 +620,8 @@ var destroyDB = function(onFinishedCallback) {
     }}, null)
 };
 
+//@FIXME all booleans need to be replaced. Currently are represented as strings and cause errors in SQL queries
+//Can not hard code them into queries and throw errors if replaced with null or actual true/false
 var initDB = function(onFinishedCallback) {
     db.transaction(function(tx) {
       tx.executeSql('PRAGMA foreign_keys=ON', [], (tx) => { createTables(onFinishedCallback); } );
@@ -608,19 +647,19 @@ var initDB = function(onFinishedCallback) {
                     _sqlQuery(query, [], {success: (tx,res) => {
                         console.log("--> Created Regions Table");
                         //Create Lists Table
-                        query = `CREATE TABLE if not exists Lists (_id integer primary key not null unique, name text)`;
+                        query = `CREATE TABLE if not exists Lists (_id integer primary key not null unique, name text, isDownloaded boolean)`;
                         _sqlQuery(query, [], {success: (tx,res) => {
                             console.log("--> Created Lists Table");
                             //BirdImages Table
-                            query = `CREATE TABLE if not exists BirdImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)`;
+                            query = `CREATE TABLE if not exists BirdImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer, isDownloaded boolean)`;
                             _sqlQuery(query, [], {success: (tx,res) => {
                                 console.log("--> Created BirdImages Table");
                                 //MapImages Table
-                                query = `CREATE TABLE if not exists MapImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text)`;
+                                query = `CREATE TABLE if not exists MapImages (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, isDownloaded boolean)`;
                                 _sqlQuery(query, [], {success: (tx,res) => {
                                     console.log("--> Created MapImages Table");
                                     //Vocalizations Table
-                                    query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text)`;
+                                    query = `CREATE TABLE if not exists Vocalizations (_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text unique, mp3_filename text not null unique, credits text, isDownloaded boolean)`;
                                     _sqlQuery(query, [], {success: (tx,res) => {
                                         console.log("--> Created Vocalizations Table");
                                          //SubRegions Table
@@ -673,25 +712,33 @@ const DatabaseModule = {
     updateVersionData: updateVersionData,
     getBirdById: getBirdById,
     insertMultiple: insertMultiple,
-    upsertMultiple: upsertMultiple,
     updateInsertBirdRegionsAndBirdSubRegions: updateInsertBirdRegionsAndBirdSubRegions,
     printDatabase: printDatabase,
     printTable: printTable,
 
-    getImagesUrlByBirdId: getImagesUrlByBirdId,
+    getImageUrlsByBirdId: getImageUrlsByBirdId,
     getThumbnailUrlByBirdId:getThumbnailUrlByBirdId,
     getBirdsIdByRegionId: getBirdsIdByRegionId,
     getRegionsIdAndNames: getRegionsIdAndNames,
     getDisplayInfo: getDisplayInfo,
 
     getLists: getLists,
-    getBirdListFromListId: getBirdListFromListId, // i dont need this anymore.
+    getCustomListBirdIds: getCustomListBirdIds,
+    getImageUrlsForCustomList: getImageUrlsForCustomList,
+    getVocalizationUrlsForCustomList: getVocalizationUrlsForCustomList,
+    getBirdIdsFromListId: getBirdIdsFromListId, // i dont need this anymore.
     getListDisplayInfo: getListDisplayInfo,
     getMapsUrlByBirdId: getMapsUrlByBirdId,
+    getUriData: getUriData,
+
+    setImageMediaDownloaded: setImageMediaDownloaded,
+    setVocalizationsDownloaded: setVocalizationsDownloaded,
+    setCustomListDownloaded: setCustomListDownloaded,
 
     createCustomList: createCustomList,
     deleteCustomList: deleteCustomList,
     addBirdsToCustomList: addBirdsToCustomList,
-    removeBirdsFromCustomList: removeBirdsFromCustomList
+    removeBirdsFromCustomList: removeBirdsFromCustomList,
+    purgeCustomListDB: purgeCustomListDB
 };
 export default DatabaseModule;

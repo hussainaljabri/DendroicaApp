@@ -5,8 +5,8 @@ import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
-const prefix='https://natureinstruct.org';
-
+import MediaHandler from '../DB/MediaHandler';
+import NetInfo from '@react-native-community/netinfo';
 
 export default class MyList extends Component {
     state ={
@@ -18,7 +18,7 @@ export default class MyList extends Component {
         lists: ['Cancel'],
         listsReady: false,
         options: ['Cancel'],
-
+        connected: false
     }
     static navigationOptions = {
         header: null
@@ -42,7 +42,12 @@ export default class MyList extends Component {
             }
         });
         
-
+        const unsubscribe = NetInfo.addEventListener(c => {
+            this.setState({connected: c.isConnected});
+            MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
+                if(birdProps) this.state.birds = birdProps;
+            });
+        });
     }
 
 
@@ -78,7 +83,8 @@ export default class MyList extends Component {
                     key={bird.bird_id} 
                     birdName={bird.name} 
                     latin={bird.scientific_name}
-                    imgUrl={prefix+bird.filename} 
+                    imgUrl={MediaHandler.getMediaFile(bird.bird_id, bird.filename,this.state.connected)}
+                    //imgUrl={prefix+bird.filename}
                     onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
                     // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
                     style={{marginBottom: 3}}
@@ -103,6 +109,7 @@ export default class MyList extends Component {
     }
     selectedNewList=(index)=>{
         this.setState({birds:[], selected: index, dataReady: false, selectedReady: true});
+
         // we should call out the new list.
         DatabaseModule.getListDisplayInfo(
             this.state.lists[1][index-1]._id, // ["Cancel",[{"_id":25088,"name":"Test List"},{"_id":25089,"name":"Select a List"},{"_id":25090,"name":"testing1"},{"_id":25091,"name":"testing2"}]]

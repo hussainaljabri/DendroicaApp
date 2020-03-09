@@ -90,7 +90,7 @@ export default class Quiz extends Component{
             if(result == undefined){
                 temp.push(data[RandomAnswerIndex]);
                 // call for its images.
-                DatabaseModule.getImagesUrlByBirdId(data[RandomAnswerIndex].bird_id,{
+                DatabaseModule.getImageUrlsByBirdId(data[RandomAnswerIndex].bird_id,{
                     success:(result)=>{
                         let images = [];
                         result.map((item, index)=>{

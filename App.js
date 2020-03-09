@@ -12,35 +12,25 @@ import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
 import DatabaseModule from "./src/DB/DatabaseModule";
 import Authentication from "./src/DB/Authentication";
+import MediaHandler from "./src/DB/MediaHandler";
 // import TestingPage from './src/UI/TestingPage';
+
 const username = "tmobile";
 const password = "appH@ppy";
 
+//Initialize DB -> Will check if there if db is instantiated.
+//Destroys and rebuilds tables if no db or dataVersionUpdate
 DatabaseManagementModule.init(() => {
+    //Authenticates user with hard coded credentials
     Authentication.userLogin(username, password, () => {
-        DatabaseManagementModule.importApiData(1, () => {
-            DatabaseManagementModule.importApiData(2, () => {
-                console.log("All Api data imported");
-
-                //Test Code - Needs to be removed
-                DatabaseModule.createCustomList("Robyn Test", {success: (id) => {
-                    console.log("created new list with id = " + id);
-                    DatabaseModule.addBirdsToCustomList(id, [257,691,63], {success: () => {
-                        console.log("added bird to custom list")
-                        DatabaseModule.removeBirdsFromCustomList(id, [257], {success: () => {
-                            console.log("removed bird from custom list");
-                            DatabaseModule.deleteCustomList(id, {success: ()=> {
-                                console.log("deleted list");
-                            }});
-                        }});
-                    }});
-                }});
-                //
-
-            });
+        //Import API data for all projects
+        DatabaseManagementModule.importApiData([1,2,3,4,5,6], () => {
+            console.log("All Api data imported");
+            MediaHandler.init(() => { });
         });
     });
 });
+
 export default class App extends Component {
 
   render(){
