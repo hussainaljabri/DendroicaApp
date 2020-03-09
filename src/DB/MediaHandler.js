@@ -35,7 +35,7 @@ var getMediaFile = (bird_id, dbFileName, onlineStatus) => {
 
     for (var i = 0; i < mediaData.imageData.length; i++) {
         if (bird_id == mediaData.imageData[i].bird_id && mediaData.imageData[i].filename == dbFileName) {
-            _toFsPath(dbFileName)
+            return _toFsPath(dbFileName);
         }
     }
 
@@ -121,10 +121,21 @@ var purgeCustomList = (list_id) => {
     }
 }
 
+//Changes the urls in the bird props object according to connection state and isDownloaded
+var connectionStateChange = (connected, birdProps, onFinishedCallback) => {
+    //If downloaded data is not yet loaded on the front end
+    if (!this.mediaData) return;
+
+    getMediaFile(birdProps[i].bird_id,birdProps.filename,connected);
+    
+    onFinishedCallback([...birdProps]);
+}
+
 const MediaHandler = {
     init: init,
     downloadCustomList: downloadCustomList,
     purgeCustomList: purgeCustomList,
-    getMediaFile: getMediaFile
+    getMediaFile: getMediaFile,
+    connectionStateChange: connectionStateChange,
 };
 export default MediaHandler;
