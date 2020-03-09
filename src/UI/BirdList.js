@@ -72,11 +72,9 @@ export default class BirdList extends Component {
     //Subscribe to network state updates
         const unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
-          console.log(
-             'Connection type: ' +
-              c.type +
-             ', Is connected?: ' +
-              c.isConnected);
+            MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
+                if(birdProps) this.state.birds = [...birdProps];
+            });
         });
 
 
@@ -232,7 +230,7 @@ export default class BirdList extends Component {
                 <BirdCard 
                     birdName={item.name} 
                     latin={item.scientific_name}
-                    imgUrl={MediaHandler.getMediaFile(item.bird_id, item.filename,this.state.connected)}
+                    imgUrl={item.url}
                     selected={!!this.state.birdSelected.get(item.key)}
                     onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
                     onLongPress={()=>{this.handlerLongClick()}}
