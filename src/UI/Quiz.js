@@ -2,13 +2,10 @@ import React, {Component} from 'react';
 import { Platform, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Alert, ActivityIndicator} from 'react-native';
 import Constants from 'expo-constants';
 import {Icon} from 'react-native-elements';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import DatabaseModule from '../DB/DatabaseModule';
-
+import Slider from '../components/Slider';
 
 const prefix='https://natureinstruct.org';
-
-
 
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 function wp (percentage) {
@@ -176,33 +173,11 @@ export default class Quiz extends Component{
             var chosenBird = this.state.answerImages; // if we got vocalization working then here make them {images: , voice: }
             
             return (
-                <View>
-                    <Carousel
-                        ref={(c) => { this._carousel = c; }}
-                        data={chosenBird}
-                        renderItem={this._renderItem}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        scrollEnabled={ this.state.scrollable }
-                        onSnapToItem={(index) => this.setState({ activeSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={chosenBird.length}
-                        activeDotIndex={this.state.activeSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'black'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider1Ref}
-                        tappableDots={!!this._slider1Ref}
-                    />
-            </View>
+                <Slider 
+                    data={chosenBird}
+                    renderItem={this._renderItem}
+                />
+                
             );
         }
     }
