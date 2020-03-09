@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar, Platform} from "react-native";
 import Constants from 'expo-constants';
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
@@ -170,8 +170,8 @@ export default class MyList extends Component {
                         containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
                     />
                     <View style={{flexDirection:"row", justifyContent:"space-between"}}>
-                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} disabled={!this.state.selectedReady} style={this.state.selectedReady? styles.btn: styles.disabledBtn}>
-                            <Text style={this.state.selectedReady? {fontWeight:"600", color: "red"}: {fontWeight:"600", color: "grey"}}>Quiz</Text>
+                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} disabled={(!this.state.selectedReady || (this.state.birds.length<4))} style={(!this.state.selectedReady || (this.state.birds.length<4))? styles.disabledBtn: styles.btn}>
+                <Text style={(!this.state.selectedReady || (this.state.birds.length<4))? {fontWeight:"600", color: "grey"}:{fontWeight:"600", color: "red"}}>Quiz</Text>
                         </TouchableOpacity>
                         <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
                     </View>
