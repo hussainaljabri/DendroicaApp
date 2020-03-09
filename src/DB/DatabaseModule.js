@@ -173,9 +173,9 @@ var getBirdById = function (id, callbacks) {
     }});
 }
 //(_id integer primary key not null unique, bird_id integer REFERENCES Birds(_id), filename text not null unique, credits text, displayOrder integer)
-var getImagesUrlByBirdId = function (id, callbacks){
+var getImageUrlsByBirdId = function (id, callbacks){
     // var query = `SELECT filename, credits from BirdImages where (bird_id=?) order by displayOrder`;
-    var query = "SELECT BirdImages.bird_id as bird_id, BirdImages.filename as image_filename, BirdImages.credits as image_credits, displayOrder from Birds ";
+    var query = "SELECT BirdImages.bird_id as bird_id, BirdImages.filename as image_filename, BirdImages.credits as image_credits, isDownloaded, displayOrder from Birds ";
     query += "INNER JOIN BirdImages on Birds._id = BirdImages.bird_id ";
     query += "where BirdImages.bird_id=? ORDER BY displayOrder";
     // query += "INNER JOIN MapImages on BirdImages.bird_id = MapImages.bird_id ";
@@ -422,6 +422,9 @@ var getDisplayInfo = function(id, callbacks){ // id is region_id
     query += "where displayOrder=1 and BirdRegions.region_id=? GROUP BY BirdRegions.bird_id ORDER BY name";
     _sqlQuery(query, [id], {success:(tx,res) => {
         var result = res.rows._array;
+        for (var i = 0; i < result.length; i++) {
+            result[i].url = 'https://natureinstruct.org' + result[i].filename;
+        }
         callbacks.success(result);
     }});
 }
@@ -451,11 +454,6 @@ var getListDisplayInfo = function(id, callbacks){
         var result = res.rows._array;
         callbacks.success(result);
     }});
-}
-
-var _getRegionIDByName = function (name, callbacks) {
-    var query = `SELECT _id from Regions where (name = ?)`;
-    _sqlQuery(query, [name], callbacks);
 }
 
 //param query    --> sqlite query
@@ -718,7 +716,7 @@ const DatabaseModule = {
     printDatabase: printDatabase,
     printTable: printTable,
 
-    getImagesUrlByBirdId: getImagesUrlByBirdId,
+    getImageUrlsByBirdId: getImageUrlsByBirdId,
     getThumbnailUrlByBirdId:getThumbnailUrlByBirdId,
     getBirdsIdByRegionId: getBirdsIdByRegionId,
     getRegionsIdAndNames: getRegionsIdAndNames,
