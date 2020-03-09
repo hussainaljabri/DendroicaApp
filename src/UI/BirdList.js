@@ -133,6 +133,9 @@ export default class BirdList extends Component {
     // }
 
     showActionSheet = () => {
+        if(this.state.selectionMode){
+            this.handlerLongClick();
+        }
         this.ActionSheet.show();
     };
 
