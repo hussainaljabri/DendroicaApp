@@ -50,7 +50,8 @@ export default class BirdList extends Component {
         displayAlert: false, // saveTo alert
         saveAlertLoading: false, // to show activity indicator when saving birds
 
-        connected: false
+        connected: false,
+        searchedBirds: [], 
     }
 
 
@@ -59,16 +60,11 @@ export default class BirdList extends Component {
         header: null
     }
       
-    selectHandler = (input) =>{
-        this.setState({
-            regionInput: input,
-            
-        });
-    };
 
 
 
-    componentDidMount(){
+
+    componentWillMount(){
     //Subscribe to network state updates
         const unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
@@ -139,12 +135,19 @@ export default class BirdList extends Component {
         this.ActionSheet.show();
     };
 
-    updateSearch=(text)=>{
+    searchHandler=(text)=>{
+        // Search algo.
+        const newData = this.state.birds.filter(bird =>{
+            const birdData = `${bird.name.toUpperCase()} ${bird.name.split(' ')[0].toUpperCase()}`;
+            const textData = text.toUpperCase();
+            return birdData.indexOf(textData) > -1;
+        });
         this.setState({
             searchInput: text,
+            searchedBirds: newData,
         });
     };
-
+    
     handlerClick=(id, name, scientific_name)=>{ 
         // Alert.alert("Click:\n" +id+": "+name);
         if(!this.state.selectionMode){
@@ -226,7 +229,7 @@ export default class BirdList extends Component {
         return (
         <FlatList 
             style={{flex:1, paddingHorizontal: 5}}
-            data={this.state.birds}
+            data={this.state.searchInput? this.state.searchedBirds: this.state.birds}
             initialNumToRender={10}
             keyExtractor={item => `${item.bird_id}`}
             renderItem={({item, index}) =>(
@@ -250,7 +253,7 @@ export default class BirdList extends Component {
                 <View>
                     <SearchBar
                     placeholder="Search..."
-                    onChangeText={this.updateSearch}
+                    onChangeText={this.searchHandler}
                     value={this.state.searchInput}
                     placeholderTextColor="#474747"
                     inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
@@ -281,7 +284,7 @@ export default class BirdList extends Component {
                <View>
                     <SearchBar
                     placeholder="Search..."
-                    onChangeText={this.updateSearch}
+                    onChangeText={this.searchHandler}
                     value={this.state.searchInput}
                     placeholderTextColor="#474747"
                     inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
