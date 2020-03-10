@@ -138,7 +138,7 @@ export default class BirdList extends Component {
     searchHandler=(text)=>{
         // Search algo.
         const newData = this.state.birds.filter(bird =>{
-            const birdData = `${bird.name.toUpperCase()} ${bird.name.split(' ')[0].toUpperCase()}`;
+            const birdData = `${bird.name.toUpperCase()} ${bird.name.split(' ')[0].toUpperCase()} ${bird.scientific_name.toUpperCase()} ${bird.scientific_name.split(' ')[0].toUpperCase()} ${bird.scientific_name.split(' ')[1].toUpperCase()}`;
             const textData = text.toUpperCase();
             /**
              * indexOf to compare both the text and return true if the text is found inside birdData.
