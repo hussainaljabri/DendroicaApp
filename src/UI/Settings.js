@@ -4,18 +4,28 @@ import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import {Icon} from 'react-native-elements';
 import ListCard from '../components/ListCard';
-const lists =[
-    'List1',
-    'List2',
-    'List3',
-    'List4',
-    'List5',
-];
+import DatabaseModule from '../DB/DatabaseModule';
+
+
 export default class Settings extends Component {
     state = {
         rateSelect: true,
         migrationSelect: true,
         selected: 1,
+        lists: [],
+    }
+    componentWillMount(){
+        DatabaseModule.getLists({
+            success: (result)=>{
+                // console.log('Lists: '+JSON.stringify(result)); 
+//Lists: [{"_id":25088,"name":"Test List","isDownloaded":"false"},{"_id":25089,"name":"test","isDownloaded":"false"}]
+
+                this.setState({
+                    lists: result,
+                });
+                // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
+            }
+        });
     }
     toggleRate = (value) => {
         this.setState({rateSelect: value})
@@ -29,8 +39,8 @@ export default class Settings extends Component {
         this.ActionSheet.show();
     };
     getListCard = ()=>{
-        return lists.map((item, index)=>{
-            return (<ListCard key={index} name={item} id={index}/>)
+        return this.state.lists.map((item, index)=>{
+            return (<ListCard key={index} name={item.name} id={index}/>)
         });
     };
     render(){
@@ -134,9 +144,9 @@ export default class Settings extends Component {
                     <View style={{flexDirection:'row', margin:15,}}>
                         <Text style={{marginHorizontal:15, textAlignVertical: "center", fontSize: 15, fontWeight: '500', opacity:0.7}}>Downloaded Lists</Text>
                     </View>
-                    <View style={{marginHorizontal:15}}>
+                    <ScrollView style={{marginHorizontal:15}}>
                         {this.getListCard()}
-                    </View>
+                    </ScrollView>
 
                 </View>
 

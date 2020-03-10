@@ -26,7 +26,7 @@ export default class MyList extends Component {
         header: null
     }
 
-    componentDidMount(){
+    componentWillMount(){
         DatabaseModule.getLists({
             success: (result)=>{
                 // console.log('Lists: '+JSON.stringify(result));
