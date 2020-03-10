@@ -51,7 +51,7 @@ export default class Quiz extends Component{
         header: null
     }
 
-    componentDidMount(){
+    componentWillMount(){
         let tempData = this.props.navigation.getParam('data', []);
         // console.log(tempData);
         let t = this._genRandom(tempData.length,0);

@@ -62,7 +62,7 @@ export default class BirdInfo extends Component {
         headerTintColor: "#34C759",
         
     })
-   componentDidMount(){
+    componentWillMount(){
     //Only get connection info once when component is loaded. No need to rerender when connection changes
     NetInfo.fetch().then(connectionState => {
         let id = this.props.navigation.state.params.id
