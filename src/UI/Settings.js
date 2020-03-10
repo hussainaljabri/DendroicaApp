@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar} from "react-native";
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar, Alert} from "react-native";
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import {Icon} from 'react-native-elements';
@@ -38,9 +38,30 @@ export default class Settings extends Component {
     showActionSheet = () => {
         this.ActionSheet.show();
     };
+    listDeletionHandler=(id, name)=>{
+        console.log(`Deletion: ${id}: ${name}`);
+    }
+    listDownloadHandler=(id, name)=>{
+        Alert.alert(
+            `Downloading ${name}`,
+            `Do you want to proceed to download "${name}" list? `,
+            [
+                {
+                    text: 'Cancel',
+                    onPress: ()=> console.log('cancel pressed'),
+                    style: 'cancel',
+                },
+                {
+                    text: 'Confirm', 
+                    onPress: ()=>{MediaHandler.downloadCustomList(id);},
+                }
+            ],
+            {cancelable: true}
+        );
+    }
     getListCard = ()=>{
         return this.state.lists.map((item, index)=>{
-            return (<ListCard key={index} name={item.name} id={index}/>)
+            return (<ListCard key={index} onPressDownload={()=> this.listDownloadHandler(item._id, item.name)} onPressDelete={()=>this.listDeletionHandler(item._id, item.name)} name={item.name} id={index}/>)
         });
     };
     render(){
