@@ -5,6 +5,7 @@ import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
+import DownloadButton from '../components/DownloadButton';
 import MediaHandler from '../DB/MediaHandler';
 import NetInfo from '@react-native-community/netinfo';
 
@@ -13,6 +14,7 @@ export default class MyList extends Component {
         selected: -1,
         selectedReady: false,
         searchInput: '',
+        selectedList: {},
         birds: [],
         birdsReady: false,
         lists: ['Cancel'],
@@ -142,12 +144,15 @@ export default class MyList extends Component {
                             cancelButtonIndex={0}
                             destructiveButtonIndex={0}
                             options={this.state.options}
-                            onPress={(index) => { /* do something */ 
+                            onPress={(index) => {
+                                this.state.selectedList = this.state.lists[1][index-1];
                                 console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
                                 index != 0? (this.state.selected != index? this.selectedNewList(index): {}) : {};
                             }}
                         />
-
+                    </View>
+                    <View style={{marginRight:10, marginTop:5}}>
+                        <DownloadButton listIsSelected={this.state.selected} selectedList={this.state.selectedList}></DownloadButton>
                     </View>
                     {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
                         <TouchableOpacity>
