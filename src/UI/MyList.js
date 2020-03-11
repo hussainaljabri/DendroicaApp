@@ -24,25 +24,36 @@ export default class MyList extends Component {
     }
     static navigationOptions = {
         header: null
+        
     }
-
-    componentWillMount(){
-        DatabaseModule.getLists({
-            success: (result)=>{
-                // console.log('Lists: '+JSON.stringify(result));
-                let temp = this.state.lists;
-                temp.push(result);
-                let opt_temp = this.state.options;
-                result.map((item, index)=>{
-                    opt_temp.push(item.name);
-                });
-                this.setState({
-                    lists: temp,
-                    options: opt_temp,
-                });
-                // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
-            }
+    componentDidMount(){
+        const { navigation } = this.props;
+        this.focusListener = navigation.addListener("didFocus", () => {// This hook returns `true` if the screen is focused, `false` otherwise
+          // The screen is focused
+          // Call any action
+          this.refreshLists();
         });
+    }
+    componentWillUnmount(){
+        this.focusListener.remove();
+    }
+    componentWillMount(){
+        // DatabaseModule.getLists({
+        //     success: (result)=>{
+        //         // console.log('Lists: '+JSON.stringify(result));
+        //         let temp = this.state.lists;
+        //         temp.push(result);
+        //         let opt_temp = this.state.options;
+        //         result.map((item, index)=>{
+        //             opt_temp.push(item.name);
+        //         });
+        //         this.setState({
+        //             lists: temp,
+        //             options: opt_temp,
+        //         });
+        //         // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
+        //     }
+        // });
         
         const unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
@@ -127,7 +138,25 @@ export default class MyList extends Component {
         
     }
 
-
+    refreshLists=()=>{
+        DatabaseModule.getLists({
+            success: (result)=>{
+                // console.log('Lists: '+JSON.stringify(result));
+                let temp = ['Cancel'];
+                temp.push(result);
+                let opt_temp = ['Cancel'];
+                result.map((item, index)=>{
+                    opt_temp.push(item.name);
+                });
+                this.setState({
+                    lists: temp,
+                    options: opt_temp,
+                });
+                console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
+            }
+        });
+        
+    }
 
     render(){
         return (
