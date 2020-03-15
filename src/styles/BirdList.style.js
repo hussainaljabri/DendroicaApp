@@ -79,7 +79,7 @@ export default StyleSheet.create({
         justifyContent: "space-between",
         padding: 10
     },
-    actionSheetOptions: {
+    actionSheetTitle: {
         color: 'black',
         fontSize: 18,
         fontWeight: '500',
@@ -102,7 +102,7 @@ export default StyleSheet.create({
         alignContent: "center",
         flexGrow: 1
     },
-    continentsText: {
+    actionSheetText: {
         fontSize: 22,
         fontWeight: '500',
         opacity: 0.7,

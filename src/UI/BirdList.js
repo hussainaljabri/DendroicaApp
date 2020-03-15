@@ -311,10 +311,10 @@ export default class BirdList extends Component {
                         <View style={styles.innerHeaderContainer}>
                             <Text style={styles.headerText}>Explore |</Text>
                                 <View style={styles.actionSheetContainer}>
-                                    <Text onPress={this.showActionSheet} style={styles.continentsText}>{continents[this.state.selected]}</Text>
+                                    <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{continents[this.state.selected]}</Text>
                                     <ActionSheet
                                         ref={o => this.ActionSheet = o}
-                                        title={<Text style={styles.actionSheetOptions}>Select Region</Text>}
+                                        title={<Text style={styles.actionSheetTitle}>Select Region</Text>}
                                         cancelButtonIndex={0}
                                         destructiveButtonIndex={0}
                                         options={continents}
