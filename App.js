@@ -16,7 +16,7 @@ const password = "appH@ppy";
 //Initialize DB -> Will check if there if db is instantiated.
 //Destroys and rebuilds tables if no db or dataVersionUpdate
 DatabaseManagementModule.init(() => {
-    
+
 });
 
 /**

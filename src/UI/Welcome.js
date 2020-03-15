@@ -5,6 +5,8 @@ import { images } from '../constants/images';
 import Authentication from "../DB/Authentication";
 import DatabaseManagementModule from "../DB/DatabaseManagementModule";
 import MediaHandler from "../DB/MediaHandler";
+
+
 const LoginButton = ({children, onPress}) =>(
     <TouchableOpacity onPress={onPress}>
         <View 
@@ -36,7 +38,7 @@ const LoginButton = ({children, onPress}) =>(
     </TouchableOpacity>
 );
 
-const UserNameInput = ({children, onChange, value, type}) =>(
+const InputBox = ({children, onChange, value, type}) =>(
     <View 
     style={{
         marginBottom: 5,
@@ -77,6 +79,12 @@ class Welcome extends Component{
         username: '',
         password: '',
         isLoading: false,
+    }
+
+    componentWillMount(){
+        Authentication.getNewToken({
+            success:()=> this.props.navigation.navigate('Main')
+        });
     }
 
     componentDidMount(){
@@ -158,8 +166,8 @@ class Welcome extends Component{
                 <Animated.View style={{flex: 0.9, alignSelf:'center', justifyContent:'center', width: '100%', opacity, transform: [{
                     translateY: btnTransition,
                 }]}}>
-                   <UserNameInput type="user" onChange={(txt)=>this.setState({username: txt})} value={username}>Username....</UserNameInput>
-                   <UserNameInput type="pass" onChange={(txt)=>this.setState({password: txt})} value={password}>password....</UserNameInput>
+                   <InputBox type="user" onChange={(txt)=>this.setState({username: txt})} value={username}>Username....</InputBox>
+                   <InputBox type="pass" onChange={(txt)=>this.setState({password: txt})} value={password}>password....</InputBox>
                    {isLoading? <ActivityIndicator size="large" color="orange"/>:<LoginButton onPress={this.onLoginPress}>Login</LoginButton>}
                 </Animated.View>
             </View>

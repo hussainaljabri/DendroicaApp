@@ -42,11 +42,11 @@ var updateUser = function (dendroicaId, username, password, email, firstName, la
     }});
 }
 
-var getCredentials = function(onFinishedCallback) {
+var getCredentials = function(callbacks) {
     var query = `SELECT username,password from User`;
     _sqlQuery(query, [], { success: (tx,res) => {
-        onFinishedCallback(res.rows._array[0]);
-    }});
+        callbacks.success(res.rows._array[0]);
+    }, error: (error) => callbacks.error()});
 }
 
 var getVersionData = function(onFinishedCallback) {
