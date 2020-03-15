@@ -90,43 +90,10 @@ export default class BirdList extends Component {
                     }
                 }
             );
-
-            // DatabaseModule.getDisplayInfo(
-            //     43,
-            //     {
-            //         success: (result)=>{
-            //             console.log('testing MEXICO: '+ result);
-            //         }
-            //         // success: (result)=>{
-            //         //     this.setState({
-            //         //         birds: result,
-            //         //         dataReady: true,
-            //         //     });
-            //         // }
-            //     }
-            // );
                 
         }
-        /**
-         * Whats needed in Explore Page is
-         * Bird_id, Thumbnail image, Name, Scientific_name.
-         * Object {
-                "bird_id": 54,
-                "filename": "/files/avian_images/AC-602-Mergus_merganser.jpg",
-                "name": "Common Merganser",
-                "scientific_name": "Mergus merganser",
-            },
-         */
         
     };
-
-    // shouldComponentUpdate(nextProps, nextState){
-    //     if(nextState.dataReady){
-    //         return true;
-    //     }else{
-    //         return false;
-    //     }
-    // }
 
     showActionSheet = () => {
         if(this.state.selectionMode){
