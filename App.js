@@ -16,14 +16,7 @@ const password = "appH@ppy";
 //Initialize DB -> Will check if there if db is instantiated.
 //Destroys and rebuilds tables if no db or dataVersionUpdate
 DatabaseManagementModule.init(() => {
-    //Authenticates user with hard coded credentials
-    Authentication.userLogin(username, password, () => {
-        //Import API data for all projects
-        DatabaseManagementModule.importApiData([1,2,3,4,5,6], () => {
-            console.log("All Api data imported");
-            MediaHandler.init(() => { });
-        });
-    });
+    
 });
 
 /**

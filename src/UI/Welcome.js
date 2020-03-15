@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
 import OnboardingLogo from '../commons/OnboardingLogo';
-import {TextInput, TouchableOpacity, Alert, Animated, Image, View, Text } from 'react-native';
+import {TextInput, TouchableOpacity, Alert, Animated, Image, View, Text, ActivityIndicator } from 'react-native';
 import { images } from '../constants/images';
-
-
+import Authentication from "../DB/Authentication";
+import DatabaseManagementModule from "../DB/DatabaseManagementModule";
+import MediaHandler from "../DB/MediaHandler";
 const LoginButton = ({children, onPress}) =>(
     <TouchableOpacity onPress={onPress}>
         <View 
@@ -35,7 +36,7 @@ const LoginButton = ({children, onPress}) =>(
     </TouchableOpacity>
 );
 
-const UserNameInput = ({children, onChange, value}) =>(
+const UserNameInput = ({children, onChange, value, type}) =>(
     <View 
     style={{
         marginBottom: 5,
@@ -54,6 +55,8 @@ const UserNameInput = ({children, onChange, value}) =>(
                 value={value}
                 placeholder={children}
                 placeholderTextColor='whitesmoke'
+                underlineColorAndroid="transparent"
+                secureTextEntry={type==='pass'? true: false}
             />
         </View>
         {/* <View>
@@ -73,6 +76,7 @@ class Welcome extends Component{
         btnposition: new Animated.Value(0),
         username: '',
         password: '',
+        isLoading: false,
     }
 
     componentDidMount(){
@@ -105,17 +109,34 @@ class Welcome extends Component{
         }).start()
     }
 
-    onLoginPress = async () =>{
-        try{
-            // const token = await GoogleApi.loginAsync();
-            console.log('token: ', token);
-        }catch (err){
-            console.log('error: ', err);
+    onLoginPress = () =>{
+        const {username, password} = this.state;
+        console.log('username: ', username, ' password', password);
+        if(!(username==='') || !(password==='')){
+            try{
+                //turn on the Login ActivityIndicator
+                this.setState({isLoading: true});
+                //Authenticates user with hard coded credentials
+                Authentication.userLogin(username, password, () => {
+                    //Import API data for all projects
+                    DatabaseManagementModule.importApiData([1,2,3,4,5,6], () => {
+                        console.log("All Api data imported");
+                        MediaHandler.init(() => { });
+                        this.props.navigation.navigate('Main');
+                    });
+                });
+
+                
+            }catch (err){
+                console.log('error: ', err);
+            }
+        }else{
+            alert('Please fill empty fields');
         }
     }
 
     render(){
-        const {opacity, position, btnposition, username, password} = this.state;
+        const {opacity, position, btnposition, username, password, isLoading} = this.state;
         const logoTransition = position.interpolate({
             inputRange: [0, 1], // 0 to 1 
             outputRange: [200, 0], // at 0 => position 50, and at 1 => position 0
@@ -137,9 +158,9 @@ class Welcome extends Component{
                 <Animated.View style={{flex: 0.9, alignSelf:'center', justifyContent:'center', width: '100%', opacity, transform: [{
                     translateY: btnTransition,
                 }]}}>
-                   <UserNameInput onChange={(txt)=>this.setState({username: txt})} value={username}>Username....</UserNameInput>
-                   <UserNameInput onChange={(txt)=>this.setState({password: txt})} value={password}>password....</UserNameInput>
-                   <LoginButton onPress={this.onLoginPress}>Login</LoginButton>
+                   <UserNameInput type="user" onChange={(txt)=>this.setState({username: txt})} value={username}>Username....</UserNameInput>
+                   <UserNameInput type="pass" onChange={(txt)=>this.setState({password: txt})} value={password}>password....</UserNameInput>
+                   {isLoading? <ActivityIndicator size="large" color="orange"/>:<LoginButton onPress={this.onLoginPress}>Login</LoginButton>}
                 </Animated.View>
             </View>
         )
