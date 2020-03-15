@@ -4,7 +4,9 @@ import { images } from '../constants/images';
 import Authentication from "../DB/Authentication";
 import DatabaseManagementModule from "../DB/DatabaseManagementModule";
 import MediaHandler from "../DB/MediaHandler";
-import '../commons/'; // InputBox, LoginButton, OnboardingLogo.
+import InputBox from '../commons/InputBox'
+import LoginButton from '../commons/LoginButton';
+import OnboardingLogo from '../commons/OnboardingLogo';
 
 
 

@@ -9,6 +9,7 @@ import MediaHandler from '../DB/MediaHandler';
 import SaveAlert from '../components/SaveAlert';
 const prefix='https://natureinstruct.org';
 import NetInfo from '@react-native-community/netinfo';
+import theme from '../constants/theme';
 
 
 
@@ -202,7 +203,7 @@ export default class BirdList extends Component {
     getFlatList=()=>{
         return (
         <FlatList 
-            style={{flex:1, paddingHorizontal: 5}}
+            style={theme.BirdListTheme.FlatList}
             data={this.state.searchInput? this.state.searchedBirds: this.state.birds}
             initialNumToRender={10}
             keyExtractor={item => `${item.bird_id}`}
@@ -214,7 +215,7 @@ export default class BirdList extends Component {
                     selected={!!this.state.birdSelected.get(item.key)}
                     onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
                     onLongPress={()=>{this.handlerLongClick()}}
-                    style={{marginBottom: 3}}
+                    style={theme.BirdListTheme.BirdCard}
                     selected={!!this.state.birdSelected.get(item.bird_id)}
                 />
             )}
@@ -230,18 +231,18 @@ export default class BirdList extends Component {
                     onChangeText={this.searchHandler}
                     value={this.state.searchInput}
                     placeholderTextColor="#474747"
-                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    inputStyle={theme.BirdListTheme.SearchTextInput} // style the TextInput
+                    inputContainerStyle={theme.BirdListTheme.SearchTextInputContainer}
+                    containerStyle={theme.BirdListTheme.SearchBarContainer} // style of the container which contains the search bar.
                     />
-                    <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: "space-between"}}>
-                        <TouchableOpacity disabled={this.state.selectionCount>0? false:true} style={this.state.selectionCount>0? styles.btn:styles.disabledBtn} onPress={() => {this.setState({displayAlert: true})}}>
+                    <View style={theme.BirdListTheme.SelectionActionContainer}>
+                        <TouchableOpacity disabled={this.state.selectionCount>0? false:true} style={this.state.selectionCount>0? theme.BirdListTheme.btn:theme.BirdListTheme.disabledBtn} onPress={() => {this.setState({displayAlert: true})}}>
                             <Text>
                                 Save To
                             </Text>
                         </TouchableOpacity>
-                            <Text style={{fontSize: 18,fontWeight: '500', alignSelf: "center"}}>{this.state.selectionCount}</Text>
-                        <TouchableOpacity style={styles.btn} onPress={()=> this.handlerLongClick()}>
+                            <Text style={theme.BirdListTheme.SelectionCountText}>{this.state.selectionCount}</Text>
+                        <TouchableOpacity style={theme.BirdListTheme.btn} onPress={()=> this.handlerLongClick()}>
                             <Text>
                                 Cancel
                             </Text>
@@ -261,13 +262,13 @@ export default class BirdList extends Component {
                     onChangeText={this.searchHandler}
                     value={this.state.searchInput}
                     placeholderTextColor="#474747"
-                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    inputStyle={theme.BirdListTheme.SearchTextInput} // style the TextInput
+                    inputContainerStyle={theme.BirdListTheme.SearchTextInputContainer}
+                    containerStyle={theme.BirdListTheme.SearchBarContainer} // style of the container which contains the search bar.
                     />
 
                     <View>
-                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
+                        <Text style={theme.BirdListTheme.SpeciesCountText}>Species: {this.state.birds.length}</Text>
                     </View>
                </View>
             );
@@ -287,7 +288,7 @@ export default class BirdList extends Component {
     render(){
         const topBarStyle = this.state.isTopBarHidden;
         return (
-            <View style={{backgroundColor:"white",flex:1}}>
+            <View style={theme.BirdListTheme.container}>
                 {/* SaveTo alert */}
                 {this.state.displayAlert && (<SaveAlert 
                     displayAlert={this.state.displayAlert} 
@@ -297,23 +298,23 @@ export default class BirdList extends Component {
                 />)}
                 
 
-                <View style={styles.statusBar}/>
+                <View style={theme.BirdListTheme.statusBar}/>
                 <StatusBar barStyle="dark-content" />
                 {topBarStyle ? 
-                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"#DCDCDC", paddingHorizontal: 5}}>
+                    <TouchableOpacity onPress={()=> this.topShow()} style={theme.BirdListTheme.expandButton}>
                         <Icon size={22} type='material-community' name='menu-down' color='black'/>
                     </TouchableOpacity>
                 :
                     (
                     
-                    <View style={{paddingHorizontal: 5}}>
-                        <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
-                            <Text style={styles.header}>Explore |</Text>
-                                <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                                    <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
+                    <View style={theme.BirdListTheme.headerContainer}>
+                        <View style={theme.BirdListTheme.innerHeaderContainer}>
+                            <Text style={theme.BirdListTheme.headerText}>Explore |</Text>
+                                <View style={theme.BirdListTheme.actionSheetContainer}>
+                                    <Text onPress={this.showActionSheet} style={theme.BirdListTheme.continentsText}>{continents[this.state.selected]}</Text>
                                     <ActionSheet
                                         ref={o => this.ActionSheet = o}
-                                        title={<Text style={{color: 'black',fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
+                                        title={<Text style={theme.BirdListTheme.actionSheetOptions}>Select Region</Text>}
                                         cancelButtonIndex={0}
                                         destructiveButtonIndex={0}
                                         options={continents}
@@ -338,7 +339,7 @@ export default class BirdList extends Component {
                 )
             :
                 (
-                    <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                    <View style={theme.BirdListTheme.loadingContainer}>
                         {/* <Image source={require("../../assets/loading.gif")} style={{width:300,height:150, resizeMode:'center'}} /> */}
                         <ActivityIndicator size="large" color="orange"/>
                         <Text>Birds are coming your way</Text>
@@ -365,11 +366,7 @@ export default class BirdList extends Component {
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
+    container:{backgroundColor:"white",flex:1},
     statusBar:{
         height: Constants.statusBarHeight,
         width: '100%',
@@ -393,7 +390,19 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         backgroundColor:"white",
      },
-     header:{
+     FlatList:{flex:1, paddingHorizontal: 5},
+     BirdCard: {marginBottom: 3},
+     SearchTextInput: {fontSize: 14, color: '#474747'},
+     SearchTextInputContainer: {borderRadius:10, backgroundColor: '#E8E8E8'},
+     SearchBarContainer:{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2},
+     SelectionActionContainer: {paddingTop: 3, flexDirection: 'row', justifyContent: "space-between"},
+     SelectionCountText: {fontSize: 18,fontWeight: '500', alignSelf: "center"},
+     SpeciesCountText: {paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"},
+     headerContainer: {paddingHorizontal: 5},
+     innerHeaderContainer: {flexDirection: "row",justifyContent: "space-between", padding: 10},
+     actionSheetOptions: {color: 'black',fontSize: 18, fontWeight:'500', letterSpacing:1},
+     
+     headerText:{
          
          paddingLeft: 15, 
          paddingRight: 15,
@@ -403,6 +412,11 @@ const styles = StyleSheet.create({
          justifyContent: "center", 
          alignSelf:"center"
         },
+    actionSheetContainer: {marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1},
+    continentsText: {fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'},
+    loadingContainer: {justifyContent: 'center', alignItems: "center", top: 50},
+    expandButton: {backgroundColor:"#DCDCDC", paddingHorizontal: 5},
+    
     FloatingButton:{
 
         position: 'absolute',
