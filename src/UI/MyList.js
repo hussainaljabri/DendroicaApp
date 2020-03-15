@@ -186,7 +186,7 @@ export default class MyList extends Component {
                         inputContainerStyle={styles.SearchTextInputContainer}
                         containerStyle={styles.SearchBarContainer} // style of the container which contains the search bar.
                     />
-                    <View style={{flexDirection:"row", justifyContent:"space-between"}}>
+                    <View style={styles.belowSearchBar}>
                         <TouchableOpacity onPress={()=> this.quizBtnHandler()} disabled={(!this.state.selectedReady || (this.state.birds.length<4))} style={(!this.state.selectedReady || (this.state.birds.length<4))? styles.disabledBtn: styles.btn}>
                             <Text style={(!this.state.selectedReady || (this.state.birds.length<4))? styles.quizDisabledText : styles.quizEnabledText}>Quiz</Text>
                         </TouchableOpacity>

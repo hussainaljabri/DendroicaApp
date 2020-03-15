@@ -7,6 +7,10 @@ export default StyleSheet.create({
         flex: 1,
         backgroundColor: "white"
     },
+    belowSearchBar: {
+        flexDirection:"row",
+        justifyContent:"space-between"
+    },
     statusBar: {
         height: Constants.statusBarHeight,
         width: '100%',
