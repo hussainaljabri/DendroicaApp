@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'row',
-        borderRadius: 1,
+        borderRadius: 10,
         borderColor: 'black',
         borderWidth: 0.3,
         backgroundColor: '#F8F8F8',
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     img: {
         width: 130,
         height: 110,
-        // borderRadius: 2,
+        borderRadius: 5,
         // borderColor: "black",
         // borderWidth: 1,
     },
