@@ -1,6 +1,5 @@
 import React from 'react';
 import {Image, View, TextInput} from 'react-native';
-import {images} from '../constants/images';
 
 const InputBox = ({children, onChange, value, type}) =>(
     <View 
