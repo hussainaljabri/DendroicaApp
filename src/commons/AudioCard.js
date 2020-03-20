@@ -20,7 +20,8 @@ const AudioCard = ({songDescription, songName, selected, onPress, buttonExtraSty
                 left: 0,
                 right: 0,
                 top: 0,
-                height: 300,
+                height: 35,
+                borderRadius: 10,
             }}
             />)
         :
