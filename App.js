@@ -5,9 +5,9 @@ import {Text} from 'react-native';
 import {createAppContainer, createSwitchNavigator} from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
-import DatabaseModule from "./src/DB/DatabaseModule";
-import Authentication from "./src/DB/Authentication";
-import MediaHandler from "./src/DB/MediaHandler";
+// import DatabaseModule from "./src/DB/DatabaseModule";
+// import Authentication from "./src/DB/Authentication";
+// import MediaHandler from "./src/DB/MediaHandler";
 // import TestingPage from './src/UI/TestingPage';
 
 const username = "tmobile";
