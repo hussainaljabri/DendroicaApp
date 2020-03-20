@@ -9,6 +9,7 @@ import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
 import Slider from '../components/Slider';
 import styles from '../styles/BirdInfo.style';
+import VocalizationsTab from "../components/VocalizationsTab";
 const prefix='https://natureinstruct.org';
 
 
@@ -236,23 +237,21 @@ export default class BirdInfo extends Component {
         )
     }
     getVocalPage=()=>{
-        return (<ScrollView>
-                            
-
-                     {/* TODO: VOCALIZATIONS CODE GOES HERE */}
-                <Slider 
-                    data={this.state.mapImages}
-                    onPress={this._handleModalButton}
-                />
-                <View style={styles.sectionHeaderContainer}>
-                    <Icon 
-                        name='music'
-                        type={'font-awesome'}
-                        color='#34C759' // COLOR
-                    />
-                    <Text style={styles.title}> Vocalizations</Text>
-                </View> 
-        </ScrollView>)
+        let temp =[
+            {
+                name:'hi 1',
+                description: 'bla bla bla',
+            },
+            {
+                name:'hi 2',
+                description: 'Hla hla hla',
+            }
+        ]
+        return (
+        <VocalizationsTab
+            audioList={temp}
+            sectionHeaderContainer={styles.sectionHeaderContainer}
+        />)
     }
 
     getMapPage=()=>{
