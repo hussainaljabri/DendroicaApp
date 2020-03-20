@@ -14,7 +14,9 @@ export default class VocalizationsTab extends PureComponent {
         audioSelected: 0, /* so i could compare index to this state. */
     }
     audioCardOnPress = (id)=>{
-        console.log('Clicked AudioIndex: ', id);
+        this.setState({
+            audioSelected: id,
+        });
     }
 
     getAudioCards = () =>{
