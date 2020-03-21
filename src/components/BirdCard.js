@@ -33,7 +33,7 @@ export default class BirdCard extends React.PureComponent {
                     resizeMode="cover"
                     style={styles.img}
                 />
-                    <View style={{flexDirection:'column', justifyContent: "center"}}>
+                    <View style={{flex: 1, flexDirection:'column', justifyContent: "center"}}>
                         <Text style={styles.birdName}>{this.props.birdName}</Text>
                         <Text style={styles.latin}>{this.props.latin}</Text>
                     </View>
