@@ -21,7 +21,6 @@ export default class BirdCard extends React.PureComponent {
                         right: 0,
                         top: 0,
                         height: 35,
-                        borderRadius: 10,
                     }}
                     />)
                 :
