@@ -35,7 +35,7 @@ export default StyleSheet.create({
         paddingHorizontal: 5
     },
     BirdCard: {
-        marginBottom: 3
+        marginBottom: 0
     },
     SearchTextInput: {
         fontSize: 14,
