@@ -24,7 +24,7 @@ export default class MyList extends Component {
         listsReady: false,
         optionsText: ['Cancel'], // to navigate and display the correct text when a Block is chosen.
         optionsBlocks:[], // holds options blocks used when ActionSheet opens. <Text> blocks.
-        connected: false,
+        connected: true, // assumes its connected to internet first.
     }
     static navigationOptions = {
         header: null
@@ -44,10 +44,18 @@ export default class MyList extends Component {
     }
     componentWillMount(){
         this.unsubscribe = NetInfo.addEventListener(c => {
-            this.setState({connected: c.isConnected});
+            this.setState((state)=>{
+                // do some refreshing here.
+                this.refreshLists();
+                return {
+                    connected: c.isConnected
+                };
+            });
             MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
                 if(birdProps) this.state.birds = birdProps;
             });
+
+            
         });
     }
 
@@ -141,7 +149,7 @@ export default class MyList extends Component {
                     optionsText: opt_temp,
                     optionsBlocks: this.getOptionsArray(temp),
                 });
-                console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
+                //console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
             }
         });
         
@@ -156,7 +164,7 @@ export default class MyList extends Component {
         lists[1].map((item, index)=>{
             if(item.isDownloaded === "true"){
                 temp.push(
-                    <Text key={index} style={{fontWeight: "600", flex:1}}>
+                    <Text key={index} style={{width:'100%', textAlign:'center', textAlignVertical:'center', fontWeight: "600", flex:1}}>
                         {item.name}
                         <Text style={{
                                     color:'green',
@@ -168,7 +176,7 @@ export default class MyList extends Component {
                 );   
             }else{
                 temp.push(
-                    <Text key={index} style={{fontWeight: "600", flex:1}}>
+                    <Text key={index} style={{width:'100%',textAlign:'center', textAlignVertical:'center', fontWeight: "600", flex:1, backgroundColor: this.state.connected? null: 'lightgray'}}>
                         {item.name}
                     </Text>
                 );
