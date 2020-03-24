@@ -13,6 +13,7 @@ export default class Settings extends Component {
         migrationSelect: true,
         selected: 1,
         lists: [],
+        listsReady: false,
     }
     componentWillMount(){
         DatabaseModule.getLists({
@@ -21,6 +22,7 @@ export default class Settings extends Component {
 //Lists: [{"_id":25088,"name":"Test List","isDownloaded":"false"},{"_id":25089,"name":"test","isDownloaded":"false"}]
 
                 this.setState({
+                    listsReady: true,
                     lists: result,
                 });
                 // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
@@ -60,9 +62,11 @@ export default class Settings extends Component {
         );
     }
     getListCard = ()=>{
-        return this.state.lists.map((item, index)=>{
-            return (<ListCard key={index} onPressDownload={()=> this.listDownloadHandler(item._id, item.name)} onPressDelete={()=>this.listDeletionHandler(item._id, item.name)} name={item.name} id={index}/>)
-        });
+        if(this.state.listsReady){
+            return this.state.lists.map((item, index)=>{
+                return (<ListCard key={index} isDownloaded={item.isDownloaded} onPressDownload={()=> this.listDownloadHandler(item._id, item.name)} onPressDelete={()=>this.listDeletionHandler(item._id, item.name)} name={item.name} id={index}/>)
+            });
+        }
     };
     render(){
         return (

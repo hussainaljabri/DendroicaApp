@@ -1,13 +1,11 @@
 import React, { Component } from "react";
 import {KeyboardAvoidingView, Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Platform, StatusBar, ActivityIndicator} from "react-native";
-import {SearchBar, Icon, withTheme} from 'react-native-elements';
+import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
-import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
 import SaveAlert from '../components/SaveAlert';
-const prefix='https://natureinstruct.org';
 import NetInfo, { isConnected } from '@react-native-community/netinfo';
 import styles from '../styles/BirdList.style.js';
 

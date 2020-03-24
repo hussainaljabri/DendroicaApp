@@ -2,6 +2,7 @@ import React, { PureComponent } from "react";
 import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import {Icon} from 'react-native-elements';
+import { FontAwesome5 } from '@expo/vector-icons';
 export default class ListCard extends PureComponent {
 
 
@@ -12,14 +13,23 @@ export default class ListCard extends PureComponent {
         return (
             
             <View style={styles.container}>
-                <Text style={styles.listName}>{this.props.name}</Text>
-                <View style={{flexDirection:'row'}}>
-                    <Icon size={22} onPress={this.props.onPressDelete} type='material-community' color='#ff7f7f' name='minus-circle'/>
-                    <View style={styles.icon}/>
+                <Text style={styles.listName}>{this.props.name}  {this.props.isDownloaded}</Text>
+                    {/* <View style={styles.icon}/> */}
                     {/* <Icon size={22} onPress={()=> alert('Edit: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#808080' name='square-edit-outline'/>
                     <View style={styles.icon}/> */}
-                    <Icon size={22} onPress={this.props.onPressDownload} type='material-community' color='#34C759' name='arrow-down-box'/>
-                </View>
+                    {this.props.isDownloaded === "true"?
+
+                        (<View style={{flexDirection:'row'}}>
+                            <Icon size={22} onPress={this.props.onPressDelete} type='material-community' color='#ff7f7f' name='minus-circle'/>
+                            <View style={{marginHorizontal: 5}}/>
+                            <FontAwesome5 name = 'check' size = {22} color = 'green' />
+                        </View>)
+                        
+                    :
+                        (<View style={{flexDirection:'row'}}>
+                            <Icon size={22} onPress={this.props.onPressDownload} type='material-community' color='#34C759' name='arrow-down-box'/>
+                        </View>)
+                    }
             </View>
 
         );
