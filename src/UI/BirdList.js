@@ -51,8 +51,6 @@ export default class BirdList extends Component {
 
         connected: true, // assume net is on first!
         searchedBirds: [], 
-
-        unsubscribe: undefined, // holds the subscription obj of NetStat.
     }
 
 
@@ -65,11 +63,11 @@ export default class BirdList extends Component {
 
 
     componentWillUnmount(){
-        this.state.unsubscribe();
+        this.unsubscribe();
     }
     componentWillMount(){
     //Subscribe to network state updates
-        this.state.unsubscribe = NetInfo.addEventListener(c => {
+        this.unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
             MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
                 if(birdProps) this.state.birds = [...birdProps];

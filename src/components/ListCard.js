@@ -13,7 +13,7 @@ export default class ListCard extends PureComponent {
         return (
             
             <View style={styles.container}>
-                <Text style={styles.listName}>{this.props.name}  {this.props.isDownloaded}</Text>
+                <Text style={styles.listName}>{this.props.name}</Text>
                     {/* <View style={styles.icon}/> */}
                     {/* <Icon size={22} onPress={()=> alert('Edit: '+this.props.name +', id:'+ this.props.id)} type='material-community' color='#808080' name='square-edit-outline'/>
                     <View style={styles.icon}/> */}

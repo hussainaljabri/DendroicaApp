@@ -8,6 +8,9 @@ import DatabaseModule from '../DB/DatabaseModule';
 import DownloadButton from '../components/DownloadButton';
 import MediaHandler from '../DB/MediaHandler';
 import NetInfo from '@react-native-community/netinfo';
+import { FontAwesome5 } from '@expo/vector-icons';
+import images from '../constants/images';
+
 
 export default class MyList extends Component {
     state ={
@@ -19,8 +22,9 @@ export default class MyList extends Component {
         birdsReady: false,
         lists: ['Cancel'],
         listsReady: false,
-        options: ['Cancel'],
-        connected: false
+        optionsText: ['Cancel'], // to navigate and display the correct text when a Block is chosen.
+        optionsBlocks:[], // holds options blocks used when ActionSheet opens. <Text> blocks.
+        connected: false,
     }
     static navigationOptions = {
         header: null
@@ -36,9 +40,10 @@ export default class MyList extends Component {
     }
     componentWillUnmount(){
         this.focusListener.remove();
+        this.unsubscribe();
     }
     componentWillMount(){
-        const unsubscribe = NetInfo.addEventListener(c => {
+        this.unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
             MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
                 if(birdProps) this.state.birds = birdProps;
@@ -133,14 +138,45 @@ export default class MyList extends Component {
                 });
                 this.setState({
                     lists: temp,
-                    options: opt_temp,
+                    optionsText: opt_temp,
+                    optionsBlocks: this.getOptionsArray(temp),
                 });
                 console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
             }
         });
         
     }
-
+    /**
+     * This method will attach 'downloaded' to lists that are downloaded in the phone.
+     * So it will only show 'downloaded' when the action sheet is opened.
+     * returns a string[] Attached with <Text> array.
+     */
+    getOptionsArray=(lists)=>{
+        let temp = ["Cancel"];
+        lists[1].map((item, index)=>{
+            if(item.isDownloaded === "true"){
+                temp.push(
+                    <Text key={index} style={{fontWeight: "600", flex:1}}>
+                        {item.name}
+                        <Text style={{
+                                    color:'green',
+                                    paddingLeft:30,
+                                    paddingRight:30,
+                                }}>  [Downloaded]</Text>
+                        
+                    </Text>
+                );   
+            }else{
+                temp.push(
+                    <Text key={index} style={{fontWeight: "600", flex:1}}>
+                        {item.name}
+                    </Text>
+                );
+            }
+            
+        });
+        return temp;
+    }
     render(){
         return (
             <View style={styles.container}>
@@ -149,13 +185,17 @@ export default class MyList extends Component {
                 <View style={styles.headerContainer}>
                     <Text style={styles.header}>MyLists |</Text>
                     <View style={styles.ActionSheetContainer}>
-                        <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{this.state.selectedReady? (this.state.options[this.state.selected]):("Select a List")}</Text>
+                        <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{this.state.selectedReady?
+                         (this.state.optionsText[this.state.selected])
+                         :
+                         ("Select a List")}
+                         </Text>
                         <ActionSheet
                             ref={o => this.ActionSheet = o}
                             title={<Text style={styles.actionSheetTitle}>Select a List</Text>}
                             cancelButtonIndex={0}
                             destructiveButtonIndex={0}
-                            options={this.state.options}
+                            options={this.state.optionsBlocks}
                             onPress={(index) => {
                                 this.state.selectedList = this.state.lists[1][index-1];
                                 console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
