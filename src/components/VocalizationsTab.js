@@ -2,7 +2,7 @@
 
 
 import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
+import { StyleSheet, View, Text, Image, Dimensions, ScrollView, Alert, Button, TextInput} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import {Icon} from 'react-native-elements';
 import AudioCard from "../commons/AudioCard";
@@ -22,14 +22,16 @@ export default class VocalizationsTab extends PureComponent {
     getAudioCards = () =>{
         return this.props.audioList.map((item, index)=>{
                 return (
-                    <AudioCard
-                        key={index}
-                        songName={item.name}
-                        songDescription={item.description}
-                        selected={!!(index === this.state.audioSelected)}
-                        onPress={()=> this.audioCardOnPress(index)}
-                        buttonExtraStyle={{padding: 15}}
-                    />
+                    <View key={`V-${index}`} style={styles.AudioCardContainer}>
+                        <AudioCard
+                            key={index}
+                            songName={item.name}
+                            songDescription={item.description}
+                            selected={!!(index === this.state.audioSelected)}
+                            onPress={()=> this.audioCardOnPress(index)}
+                            containerStyle={styles.AudioCardContainer}
+                        />
+                    </View>
                 );
             }
         );
@@ -39,7 +41,7 @@ export default class VocalizationsTab extends PureComponent {
     
         return (
             
-            <ScrollView>
+            <ScrollView style={{flex: 1}}>
                 <AudioPlayer/>
                 <View style={sectionHeaderContainer}>
                     <Icon 
@@ -50,38 +52,29 @@ export default class VocalizationsTab extends PureComponent {
                     <Text style={styles.title}> Vocalizations</Text>
                     {/* List of the audio to be played. */}
                 </View> 
-
-                <View style={{paddingHorizontal: 15, marginTop: 15}}>
-                {this.getAudioCards()}
+                <View style={{padding: 2, flex:1, flexDirection:'row', flexWrap:'wrap', marginTop: 15}}>
+                    {this.getAudioCards()}
                 </View>
-                
             </ScrollView>
 
         );
 
 
     }
-
+    
 
 }
 
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 15,
-        flexDirection: 'row',
-        justifyContent:'space-between',
-        // borderRadius: 0.5,
-        // borderColor: 'black',
-        // borderWidth: 0.2,
-        // borderBottomColor:'black',
-        // borderBottomWidth:0.3,
-        backgroundColor: '#F5F5F5',
-        // flexGrow:1,
-        borderRadius: 0.5,
+    AudioCardContainer:{
+        margin: 2,
+        width: Dimensions.get('window').width/4 -10,
+        height: 60,
+        justifyContent: "center",
+        alignItems: "center",
         borderColor: 'black',
-        borderWidth: 0.2,
+        borderWidth: 0.3,
     },
     icon: {
         marginHorizontal: 5,

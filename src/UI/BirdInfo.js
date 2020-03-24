@@ -239,11 +239,26 @@ export default class BirdInfo extends Component {
     getVocalPage=()=>{
         let temp =[
             {
-                name:'hi 1',
+                name:'1',
                 description: 'bla bla bla',
             },
             {
-                name:'hi 2',
+                name:'2',
+                description: 'Hla hla hla',
+            }
+            ,
+            {
+                name:'3',
+                description: 'Hla hla hla',
+            }
+            ,
+            {
+                name:'4',
+                description: 'Hla hla hla',
+            }
+            ,
+            {
+                name:'5',
                 description: 'Hla hla hla',
             }
         ]
