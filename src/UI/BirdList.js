@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import {KeyboardAvoidingView, Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Platform, StatusBar, ActivityIndicator} from "react-native";
-import {SearchBar, Icon} from 'react-native-elements';
+import {SearchBar, Icon, withTheme} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
@@ -8,7 +8,7 @@ import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
 import SaveAlert from '../components/SaveAlert';
 const prefix='https://natureinstruct.org';
-import NetInfo from '@react-native-community/netinfo';
+import NetInfo, { isConnected } from '@react-native-community/netinfo';
 import styles from '../styles/BirdList.style.js';
 
 
@@ -51,27 +51,34 @@ export default class BirdList extends Component {
         displayAlert: false, // saveTo alert
         saveAlertLoading: false, // to show activity indicator when saving birds
 
-        connected: false,
+        connected: true, // assume net is on first!
         searchedBirds: [], 
+
+        unsubscribe: undefined, // holds the subscription obj of NetStat.
     }
 
 
 
     static navigationOptions = {
-        header: null
+        header: null   
     }
       
 
 
 
-
+    componentWillUnmount(){
+        this.state.unsubscribe();
+    }
     componentWillMount(){
     //Subscribe to network state updates
-        const unsubscribe = NetInfo.addEventListener(c => {
+        this.state.unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
             MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
                 if(birdProps) this.state.birds = [...birdProps];
             });
+            if(!c.isConnected){
+                this.props.navigation.navigate('MyList');
+            }
         });
 
 
@@ -297,6 +304,13 @@ export default class BirdList extends Component {
                     loading={!!this.state.saveAlertLoading}
                 />)}
                 
+                {this.state.connected?
+                null
+                :(
+                    <View style={{height: 80, backgroundColor: 'red', justifyContent: "center", alignItems: "center"}}>
+                        <Text style={{color: 'white', fontWeight:'600'}}>No internet connection..</Text>
+                    </View>
+                )}
 
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />

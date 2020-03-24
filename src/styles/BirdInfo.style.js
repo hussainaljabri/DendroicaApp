@@ -95,7 +95,8 @@ export default StyleSheet.create({
         backgroundColor: theme.colors.black
     },
     container: {
-        paddingHorizontal: 5
+        paddingHorizontal: 5,
+        flex: 1,
     },
     gradient: {
         ...StyleSheet.absoluteFillObject

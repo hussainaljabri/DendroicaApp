@@ -73,8 +73,6 @@ const styles = StyleSheet.create({
         height: 60,
         justifyContent: "center",
         alignItems: "center",
-        borderColor: 'black',
-        borderWidth: 0.3,
     },
     icon: {
         marginHorizontal: 5,
