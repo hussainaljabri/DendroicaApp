@@ -185,6 +185,31 @@ export default class MyList extends Component {
         });
         return temp;
     }
+
+    optionsOnPress = index =>{
+        this.state.selectedList = this.state.lists[1][index-1];
+        console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
+        // here
+        console.log('index: ', index);
+        console.log(this.state.lists[1]);
+        if(index != 0){
+            if(this.state.lists[1][index-1].isDownloaded === "false" && !this.state.connected){
+                // it is not downloaded and offline mode, so display alert.
+                alert('Please, connect to internet to view this List.');
+            }else if(this.state.lists[1][index-1].isDownloaded === "true" && !this.state.connected){
+                // it is downloaded and offline mode, so fine allow it.
+                if(this.state.selected != index){    
+                    this.selectedNewList(index);
+                }
+            }else{
+                // it is connected to internet, allow clicking on options normally.
+                if(this.state.selected != index){    
+                    this.selectedNewList(index);
+                }
+            }
+        }
+    }
+
     render(){
         return (
             <View style={styles.container}>
@@ -204,11 +229,7 @@ export default class MyList extends Component {
                             cancelButtonIndex={0}
                             destructiveButtonIndex={0}
                             options={this.state.optionsBlocks}
-                            onPress={(index) => {
-                                this.state.selectedList = this.state.lists[1][index-1];
-                                console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
-                                index != 0? (this.state.selected != index? this.selectedNewList(index): {}) : {};
-                            }}
+                            onPress={(index)=> this.optionsOnPress(index)}
                         />
                     </View>
                     <View style={styles.DownloadButton}>
