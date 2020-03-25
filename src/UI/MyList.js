@@ -47,6 +47,22 @@ export default class MyList extends Component {
             this.setState((state)=>{
                 // do some refreshing here.
                 this.refreshLists();
+                // if the current list is not downloaded, re-initialize the page and show pull out of the list. to force a change.
+                if(this.state.selectedList.isDownloaded === "false"){
+                        return {
+                            selected: -1,
+                            selectedReady: false,
+                            searchInput: '',
+                            selectedList: {},
+                            birds: [],
+                            birdsReady: false,
+                            lists: ['Cancel'],
+                            listsReady: false,
+                            optionsText: ['Cancel'], // to navigate and display the correct text when a Block is chosen.
+                            optionsBlocks:[], // holds options blocks used when ActionSheet opens. <Text> blocks.
+                            connected: c.isConnected,
+                        }
+                }
                 return {
                     connected: c.isConnected
                 };
@@ -188,9 +204,6 @@ export default class MyList extends Component {
 
     optionsOnPress = index =>{
         this.state.selectedList = this.state.lists[1][index-1];
-        // here
-        console.log('index: ', index);
-        console.log(this.state.lists[1][index-1]);
         if(index != 0){
             if(this.state.lists[1][index-1].isDownloaded === "false" && !this.state.connected){
                 // it is not downloaded and offline mode, so display alert.
