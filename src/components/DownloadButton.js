@@ -29,15 +29,19 @@ export default class DownloadButton extends React.Component {
     };
 
     handleIconPress = () => {
-        if (this.props.selectedList.isDownloaded == "false") this.showDialog();
+        if(this.props.listIsSelected !== -1){
+            if (this.props.selectedList.isDownloaded == "false") this.showDialog();
+        }
     }
 
     render() {
         if (this.props.listIsSelected == -1) return (<View></View>);
 
         var iconType = 'download';
-        if (this.props.selectedList.isDownloaded == "true") {
-            iconType = 'check';
+        if (this.props.listIsSelected !== -1) {
+            if(this.props.selectedList.isDownloaded == "true"){
+                iconType = 'check';
+            }
         }
         
         return(

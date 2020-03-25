@@ -188,10 +188,9 @@ export default class MyList extends Component {
 
     optionsOnPress = index =>{
         this.state.selectedList = this.state.lists[1][index-1];
-        console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
         // here
         console.log('index: ', index);
-        console.log(this.state.lists[1]);
+        console.log(this.state.lists[1][index-1]);
         if(index != 0){
             if(this.state.lists[1][index-1].isDownloaded === "false" && !this.state.connected){
                 // it is not downloaded and offline mode, so display alert.
