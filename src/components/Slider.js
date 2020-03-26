@@ -1,6 +1,7 @@
 import React, { PureComponent } from "react";
 import { StyleSheet, View, Dimensions, Image, TouchableOpacity, Platform, Alert, Button, TextInput} from "react-native";
 import Carousel, { Pagination } from 'react-native-snap-carousel';
+import { images } from "../constants/images";
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
 function wp (percentage) {
     const value = (percentage * viewportWidth) / 100;
@@ -36,7 +37,8 @@ export default class Slider extends React.PureComponent {
         return (
             <TouchableOpacity key={'TH'+index} onPress={this.props.onPress} style={styles.slideInnerContainer} activeOpacity={1}>
                 <View key={'VW'+index} style={styles.imageContainer}>
-                    <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
+                    {this.props.connected? <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
+                    : <Image key={'IM'+index} style={styles.image} source={item} />}
                 </View>
             </TouchableOpacity>
     
@@ -45,11 +47,12 @@ export default class Slider extends React.PureComponent {
 
 
     render() {
+        const {connected} = this.props;
         return (
             <View>
                 <Carousel
                     ref={(cb) => { this._carouselMap = cb; }}
-                    data={this.props.data}
+                    data={connected?this.props.data: images.notfound}
                     renderItem={this.props.renderItem? this.props.renderItem: this._renderItem}
                     sliderWidth={sliderWidth}
                     itemWidth={itemWidth}
@@ -59,6 +62,7 @@ export default class Slider extends React.PureComponent {
                     contentContainerCustomStyle={styles.sliderContentContainer}
                     onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
                 />
+                {connected && 
                 <Pagination 
                     dotsLength={this.props.data.length}
                     activeDotIndex={this.state.activeMapSlide}
@@ -70,7 +74,7 @@ export default class Slider extends React.PureComponent {
                     inactiveDotScale={0.6}
                     carouselRef={this._sliderRef}
                     tappableDots={!!this._sliderRef}
-                />
+                />}
             </View>
         );
 

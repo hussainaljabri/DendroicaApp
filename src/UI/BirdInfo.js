@@ -30,6 +30,7 @@ export default class BirdInfo extends Component {
         mapCredit: [],
         mapImagesReady: false,
         page: 0,
+        connected: true,// assume internet connection is on.
     }
 
     static navigationOptions = ({navigation})=> ({
@@ -41,7 +42,17 @@ export default class BirdInfo extends Component {
         headerTintColor: "#34C759", // COLOR
         
     })
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
     componentWillMount(){
+        this.unsubscribe = NetInfo.addEventListener(c => {
+            this.setState((state)=>{
+                return {
+                    connected: c.isConnected
+                };
+            });
+        });
     //Only get connection info once when component is loaded. No need to rerender when connection changes
     NetInfo.fetch().then(connectionState => {
         let id = this.props.navigation.state.params.id
@@ -212,6 +223,7 @@ export default class BirdInfo extends Component {
                 <Slider 
                     data={this.state.images}
                     onPress={this._handleModalButton}
+                    connected={this.state.connected}
                 />
                 <View style={styles.sectionHeaderContainer}>
                     <Icon 
@@ -277,6 +289,7 @@ export default class BirdInfo extends Component {
                 <Slider 
                     data={this.state.mapImages}
                     onPress={this._handleModalButton}
+                    connected={this.state.connected}
                 />
                 <View style={styles.sectionHeaderContainer}>
                     <Icon 
