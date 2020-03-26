@@ -377,9 +377,9 @@ var purgeCustomListDB = function(list_id, purgeFunction, callbacks) {
                     purgeFunction(urlTuple.filename);
                     purgeFunction(urlTuple.mp3_filename);
                     purgeFunction(urlTuple.spectro_file);
-                    setImageMediaDownloaded(urlTuple.filename, false);
-                    setVocalizationsDownloaded(urlTuple.mp3_filename, true, false);
-                    setVocalizationsDownloaded(urlTuple.spectro_file, false, false);
+                    setImageMediaDownloaded(urlTuple.filename, false, ()=>{console.log('setImageMediaDownload: Success!')});
+                    setVocalizationsDownloaded(urlTuple.mp3_filename, true, false,()=>{console.log('setVocalizationsDownloaded: mp3_filename Success!')});
+                    setVocalizationsDownloaded(urlTuple.spectro_file, false, false, ()=>{console.log('setImageMediaDownload: spectro_file Success!')});
                 });
             },tx});
         });
