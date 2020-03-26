@@ -5,7 +5,7 @@ import ActionSheet from 'react-native-actionsheet';
 import {Icon} from 'react-native-elements';
 import ListCard from '../components/ListCard';
 import DatabaseModule from '../DB/DatabaseModule';
-
+import MediaHandler from '../DB/MediaHandler';
 
 export default class Settings extends Component {
     state = {
@@ -41,7 +41,22 @@ export default class Settings extends Component {
         this.ActionSheet.show();
     };
     listDeletionHandler=(id, name)=>{
-        console.log(`Deletion: ${id}: ${name}`);
+        Alert.alert(
+            `Removing ${name}`,
+            `Do you want to proceed to remove "${name}" list? `,
+            [
+                {
+                    text: 'Cancel',
+                    onPress: ()=> console.log('cancel pressed'),
+                    style: 'cancel',
+                },
+                {
+                    text: 'Confirm', 
+                    onPress: ()=>{MediaHandler.purgeCustomList(id)},
+                }
+            ],
+            {cancelable: true}
+        );
     }
     listDownloadHandler=(id, name)=>{
         Alert.alert(
