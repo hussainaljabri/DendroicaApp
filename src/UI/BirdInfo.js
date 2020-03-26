@@ -224,6 +224,7 @@ export default class BirdInfo extends Component {
                     data={this.state.images}
                     onPress={this._handleModalButton}
                     connected={this.state.connected}
+                    downloaded={this.props.navigation.getParam('downloaded', false)}
                 />
                 <View style={styles.sectionHeaderContainer}>
                     <Icon 
@@ -290,6 +291,7 @@ export default class BirdInfo extends Component {
                     data={this.state.mapImages}
                     onPress={this._handleModalButton}
                     connected={this.state.connected}
+                    downloaded={this.props.navigation.getParam('downloaded', false)}
                 />
                 <View style={styles.sectionHeaderContainer}>
                     <Icon 

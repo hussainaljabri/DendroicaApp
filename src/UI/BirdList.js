@@ -135,6 +135,7 @@ export default class BirdList extends Component {
                     title: name,
                     latin: scientific_name,
                     id: id,
+                    downloaded: false,
                 }
             );
         }else{

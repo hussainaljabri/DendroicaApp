@@ -37,7 +37,7 @@ export default class Slider extends React.PureComponent {
         return (
             <TouchableOpacity key={'TH'+index} onPress={this.props.onPress} style={styles.slideInnerContainer} activeOpacity={1}>
                 <View key={'VW'+index} style={styles.imageContainer}>
-                    {this.props.connected? <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
+                    {this.props.connected || this.props.downloaded? <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
                     : <Image key={'IM'+index} style={styles.image} source={item} />}
                 </View>
             </TouchableOpacity>
@@ -47,12 +47,12 @@ export default class Slider extends React.PureComponent {
 
 
     render() {
-        const {connected} = this.props;
+        const {connected, downloaded} = this.props;
         return (
             <View>
                 <Carousel
                     ref={(cb) => { this._carouselMap = cb; }}
-                    data={connected?this.props.data: images.notfound}
+                    data={this.props.connected || this.props.downloaded? this.props.data: images.notfound}
                     renderItem={this.props.renderItem? this.props.renderItem: this._renderItem}
                     sliderWidth={sliderWidth}
                     itemWidth={itemWidth}
@@ -62,7 +62,7 @@ export default class Slider extends React.PureComponent {
                     contentContainerCustomStyle={styles.sliderContentContainer}
                     onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
                 />
-                {connected && 
+                {(connected || downloaded) &&
                 <Pagination 
                     dotsLength={this.props.data.length}
                     activeDotIndex={this.state.activeMapSlide}

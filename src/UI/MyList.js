@@ -96,6 +96,7 @@ export default class MyList extends Component {
                 title: name,
                 latin: scientific_name,
                 id: id,
+                downloaded: this.state.selectedList.isDownloaded,
             }
         );
 
