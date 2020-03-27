@@ -29,6 +29,8 @@ export default class BirdInfo extends Component {
         mapImages: [],
         mapCredit: [],
         mapImagesReady: false,
+        sounds: [],
+        soundsReady: false,
         page: 0,
         connected: true,// assume internet connection is on.
     }
@@ -105,6 +107,16 @@ export default class BirdInfo extends Component {
                                         mapImagesReady: true,
                                     });
                                 }
+                            });
+                        }
+                    });
+                    
+                    // get vocalizations in Parallel.
+                    DatabaseModule.getVocalizationUrlsForBirdId(id,{
+                        success: (result)=>{
+                            this.setState({
+                                sounds: result,
+                                soundsReady: true,
                             });
                         }
                     });
@@ -250,35 +262,11 @@ export default class BirdInfo extends Component {
         )
     }
     getVocalPage=()=>{
-        let temp =[
-            {
-                name:'1',
-                description: 'bla bla bla',
-            },
-            {
-                name:'2',
-                description: 'Hla hla hla',
-            }
-            ,
-            {
-                name:'3',
-                description: 'Hla hla hla',
-            }
-            ,
-            {
-                name:'4',
-                description: 'Hla hla hla',
-            }
-            ,
-            {
-                name:'5',
-                description: 'Hla hla hla',
-            }
-        ]
         return (
         <VocalizationsTab
-            audioList={temp}
+            audioList={this.state.sounds}
             sectionHeaderContainer={styles.sectionHeaderContainer}
+
         />)
     }
 

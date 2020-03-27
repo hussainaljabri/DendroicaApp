@@ -233,7 +233,7 @@ var getImageUrlsForCustomList = function (list_id, numRequested, callbacks) {
 var getVocalizationUrlsForCustomList = function (list_id, numRequested, callbacks) {
     if (!numRequested) numRequested = "ALL";
 
-    var query = "SELECT filename, mp3_filename from Vocalizations where bird_id=? LIMIT ?";
+    var query = "SELECT filename, mp3_filename, from Vocalizations where bird_id=? LIMIT ?";
     var numBirdsDone = 0;
     var result = [];
     getBirdIdsFromListId(list_id, {success: (res) => {
@@ -244,6 +244,21 @@ var getVocalizationUrlsForCustomList = function (list_id, numRequested, callback
             }});
         })
     }})
+}
+/**
+ * Gets vocalization, credit for a bird id.
+ */
+var getVocalizationUrlsForBirdId = function (bird_id, callbacks){
+    var query = "SELECT filename, mp3_filename, credits, Birds.song_description as description, isDownloaded from Vocalizations ";
+    query += "INNER JOIN Birds on Vocalizations.bird_id = Birds._id ";
+    query += "where bird_id=?";
+
+    var test ="SELECT filename, mp3_filename from Vocalizations where bird_id=?";
+    _sqlQuery(query, [bird_id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+
 }
 
 //BirdImages
@@ -739,6 +754,8 @@ const DatabaseModule = {
     deleteCustomList: deleteCustomList,
     addBirdsToCustomList: addBirdsToCustomList,
     removeBirdsFromCustomList: removeBirdsFromCustomList,
-    purgeCustomListDB: purgeCustomListDB
+    purgeCustomListDB: purgeCustomListDB,
+
+    getVocalizationUrlsForBirdId: getVocalizationUrlsForBirdId, // (Hussain) added this for getting sounds filename.
 };
 export default DatabaseModule;
