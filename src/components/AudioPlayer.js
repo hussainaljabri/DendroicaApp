@@ -22,7 +22,7 @@ export default class AudioPlayer extends React.Component {
         interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
         shouldDuckAndroid: true,
         playThroughEarpieceAndroid: false,
-        staysActiveInBackground: true
+        staysActiveInBackground: false
       })
       
       this.loadAudio()
@@ -34,7 +34,6 @@ export default class AudioPlayer extends React.Component {
   async loadAudio() {
     const {currentIndex, isPlaying, isLooping, volume} = this.state;
     const {bird_id, audioPlaylist, connected} = this.props;
-    console.log('testing: ',MediaHandler.getMediaFile(bird_id, audioPlaylist[currentIndex].mp3_filename, connected));
     try {
       const playbackInstance = new Audio.Sound()
       const source = {
@@ -77,10 +76,11 @@ export default class AudioPlayer extends React.Component {
   }
 
   handlePreviousTrack = async () => {
-    let { playbackInstance, currentIndex } = this.state
+    let { playbackInstance, currentIndex } = this.state;
+    const {audioPlaylist} = this.props;
     if (playbackInstance) {
       await playbackInstance.unloadAsync()
-      currentIndex == 0 ? (currentIndex = this.props.audioPlaylist.length - 1) : (currentIndex -= 1)
+      currentIndex == 0 ? (currentIndex = audioPlaylist.length - 1) : (currentIndex -= 1)
       this.setState({
         currentIndex
       })
@@ -101,18 +101,19 @@ export default class AudioPlayer extends React.Component {
   }
 
   renderFileInfo () {
-    const { playbackInstance, currentIndex } = this.state
+    const { playbackInstance, currentIndex } = this.state;
+    const { audioPlaylist, bird_id, connected } = this.props;
     return playbackInstance ? (
       <View style = {styles.trackInfo}>
-        <Text>{this.props.audioPlaylist[currentIndex].filename}</Text>
-        <Image style = {styles.albumCover} source = {{uri: this.props.audioPlaylist[currentIndex].filename}} resizeMode = "contain" />
+        <Text>Credits: {audioPlaylist[currentIndex].credits===null? 'Not Found': audioPlaylist[currentIndex].credits}</Text>
+        <Image style = {styles.albumCover} source = {{uri: MediaHandler.getMediaFile(bird_id, audioPlaylist[currentIndex].filename, connected) }} resizeMode = "contain" />
 
         <Text style = {[styles.trackInfoText, styles.largeText]}>
-          
+          Song Description:
         </Text>
 
         <Text style = {[styles.trackInfoText, styles.smallText]}>
-          {this.props.audioPlaylist[currentIndex].description}
+          {audioPlaylist[currentIndex].description}
         </Text>
 
         <Text style = {[styles.trackInfoText, styles.smallText]}>
@@ -123,9 +124,10 @@ export default class AudioPlayer extends React.Component {
   }
 
   render() {
+    const {container} = this.props;
     return (
-      <View style={styles.container}>
-          {this.renderFileInfo()}
+      <View style={{flex:1}}>
+      <View style={[styles.container, container]}>
         <View style = {styles.controls}>
           <TouchableOpacity style = {styles.control} onPress = {this.handlePreviousTrack}>
             <Ionicons name = 'ios-skip-backward' size = {48} color = '#1b1b1b' />
@@ -150,6 +152,8 @@ export default class AudioPlayer extends React.Component {
             )}
           </TouchableOpacity>
         </View>
+      </View>
+      {this.renderFileInfo()}
       </View>
     );
   }
@@ -176,10 +180,11 @@ const styles = StyleSheet.create({
   trackInfoText: {
     textAlign: 'center',
     flexWrap: 'wrap',
-    color: '#c0c0c0'
+    color: '#696969'
   },
   largeText: {
-    fontSize: 22
+    fontSize: 22,
+    marginBottom: 5,
   },
   smallText: {
     fontSize: 16

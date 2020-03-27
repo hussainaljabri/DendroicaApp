@@ -20,6 +20,7 @@ export default class VocalizationsTab extends PureComponent {
     }
 
     getAudioCards = () =>{
+        //console.log(this.props.audioList);
         return this.props.audioList.map((item, index)=>{
                 return (
                     <View key={`V-${index}`} style={styles.AudioCardContainer}>
@@ -46,6 +47,9 @@ export default class VocalizationsTab extends PureComponent {
                     audioPlaylist={this.props.audioList}
                     connected={connected}
                     bird_id={bird_id}
+                    container={{
+                        backgroundColor:'#e5e5e5e5'
+                    }}
                 />
                 <View style={sectionHeaderContainer}>
                     <Icon 
