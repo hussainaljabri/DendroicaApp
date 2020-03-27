@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, TouchableOpacity, Text, View, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-
+import MediaHandler from '../DB/MediaHandler';
 
 export default class AudioPlayer extends React.Component {
   state = {
@@ -13,7 +13,7 @@ export default class AudioPlayer extends React.Component {
     isBuffering: false,
     isLooping: false
   }
-  async componentWillMount() {
+  async componentDidMount() {
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -21,7 +21,8 @@ export default class AudioPlayer extends React.Component {
         playsInSilentModeIOS: true,
         interruptionModeAndroid: Audio.INTERRUPTION_MODE_ANDROID_DO_NOT_MIX,
         shouldDuckAndroid: true,
-        playThroughEarpieceAndroid: true
+        playThroughEarpieceAndroid: false,
+        staysActiveInBackground: true
       })
       
       this.loadAudio()
@@ -31,11 +32,13 @@ export default class AudioPlayer extends React.Component {
   }
 
   async loadAudio() {
-    const {currentIndex, isPlaying, isLooping, volume} = this.state
+    const {currentIndex, isPlaying, isLooping, volume} = this.state;
+    const {bird_id, audioPlaylist, connected} = this.props;
+    console.log('testing: ',MediaHandler.getMediaFile(bird_id, audioPlaylist[currentIndex].mp3_filename, connected));
     try {
       const playbackInstance = new Audio.Sound()
       const source = {
-        uri: this.props.audioPlaylist[currentIndex].uri
+        uri: MediaHandler.getMediaFile(bird_id, audioPlaylist[currentIndex].mp3_filename, connected)
       }
       const status = {
         shouldPlay : isPlaying, isLooping,
@@ -101,19 +104,19 @@ export default class AudioPlayer extends React.Component {
     const { playbackInstance, currentIndex } = this.state
     return playbackInstance ? (
       <View style = {styles.trackInfo}>
-        <Text>{this.props.audioPlaylist[currentIndex].imageSource}</Text>
-        <Image style = {styles.albumCover} source = {{uri: this.props.audioPlaylist[currentIndex].imageSource}} resizeMode = "contain" />
+        <Text>{this.props.audioPlaylist[currentIndex].filename}</Text>
+        <Image style = {styles.albumCover} source = {{uri: this.props.audioPlaylist[currentIndex].filename}} resizeMode = "contain" />
 
         <Text style = {[styles.trackInfoText, styles.largeText]}>
-          {this.props.audioPlaylist[currentIndex].title}
+          
         </Text>
 
         <Text style = {[styles.trackInfoText, styles.smallText]}>
-          {this.props.audioPlaylist[currentIndex].author}
+          {this.props.audioPlaylist[currentIndex].description}
         </Text>
 
         <Text style = {[styles.trackInfoText, styles.smallText]}>
-          {this.props.audioPlaylist[currentIndex].source}
+
         </Text>
       </View>
     ) : null

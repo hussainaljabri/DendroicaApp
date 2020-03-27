@@ -266,7 +266,8 @@ export default class BirdInfo extends Component {
         <VocalizationsTab
             audioList={this.state.sounds}
             sectionHeaderContainer={styles.sectionHeaderContainer}
-
+            connected={this.state.connected}
+            bird_id={this.state.info._id}
         />)
     }
 

@@ -25,7 +25,7 @@ export default class VocalizationsTab extends PureComponent {
                     <View key={`V-${index}`} style={styles.AudioCardContainer}>
                         <AudioCard
                             key={index}
-                            songName={item.name}
+                            songName={index+1}
                             songDescription={item.description}
                             selected={!!(index === this.state.audioSelected)}
                             onPress={()=> this.audioCardOnPress(index)}
@@ -37,12 +37,16 @@ export default class VocalizationsTab extends PureComponent {
         );
     }
     render() {
-        const {sectionHeaderContainer} = this.props;
+        const {sectionHeaderContainer, connected, bird_id} = this.props;
     
         return (
             
             <ScrollView style={{flex: 1}}>
-                <AudioPlayer/>
+                <AudioPlayer
+                    audioPlaylist={this.props.audioList}
+                    connected={connected}
+                    bird_id={bird_id}
+                />
                 <View style={sectionHeaderContainer}>
                     <Icon 
                         name='music'
