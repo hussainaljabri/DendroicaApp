@@ -55,10 +55,8 @@ export default class BirdInfo extends Component {
     }
     componentWillUnmount(){
         this.unsubscribe();
-        this.hasUserLeft = true;
     }
     componentWillMount(){
-        this.hasUserLeft = false;
         this.props.navigation.setParams({
             headerLeft: ()=>(
                 <HeaderBackButton
@@ -290,7 +288,7 @@ export default class BirdInfo extends Component {
                 sectionHeaderContainer={styles.sectionHeaderContainer}
                 connected={this.state.connected}
                 bird_id={this.state.info._id}
-                hasUserLeft={this.hasUserLeft} // to stop sound if user left this bird's BirdInfo.js
+                hasUserLeft={this.state.hasUserLeft} // to stop sound if user left this bird's BirdInfo.js
             />)
     }
 
