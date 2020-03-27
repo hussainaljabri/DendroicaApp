@@ -2,13 +2,12 @@ import React, { Component } from "react";
 import {KeyboardAvoidingView, Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Platform, StatusBar, ActivityIndicator} from "react-native";
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
-import Constants from 'expo-constants';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
 import SaveAlert from '../components/SaveAlert';
-const prefix='https://natureinstruct.org';
-import NetInfo from '@react-native-community/netinfo';
+import NetInfo, { isConnected } from '@react-native-community/netinfo';
+import styles from '../styles/BirdList.style.js';
 
 
 
@@ -50,31 +49,32 @@ export default class BirdList extends Component {
         displayAlert: false, // saveTo alert
         saveAlertLoading: false, // to show activity indicator when saving birds
 
-        connected: false
+        connected: true, // assume net is on first!
+        searchedBirds: [], 
     }
 
 
 
     static navigationOptions = {
-        header: null
+        header: null   
     }
       
-    selectHandler = (input) =>{
-        this.setState({
-            regionInput: input,
-            
-        });
-    };
 
 
 
-    componentDidMount(){
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    componentWillMount(){
     //Subscribe to network state updates
-        const unsubscribe = NetInfo.addEventListener(c => {
+        this.unsubscribe = NetInfo.addEventListener(c => {
             this.setState({connected: c.isConnected});
             MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
                 if(birdProps) this.state.birds = [...birdProps];
             });
+            if(!c.isConnected){
+                this.props.navigation.navigate('MyList');
+            }
         });
 
 
@@ -94,54 +94,38 @@ export default class BirdList extends Component {
                     }
                 }
             );
-
-            // DatabaseModule.getDisplayInfo(
-            //     43,
-            //     {
-            //         success: (result)=>{
-            //             console.log('testing MEXICO: '+ result);
-            //         }
-            //         // success: (result)=>{
-            //         //     this.setState({
-            //         //         birds: result,
-            //         //         dataReady: true,
-            //         //     });
-            //         // }
-            //     }
-            // );
                 
         }
-        /**
-         * Whats needed in Explore Page is
-         * Bird_id, Thumbnail image, Name, Scientific_name.
-         * Object {
-                "bird_id": 54,
-                "filename": "/files/avian_images/AC-602-Mergus_merganser.jpg",
-                "name": "Common Merganser",
-                "scientific_name": "Mergus merganser",
-            },
-         */
         
     };
 
-    // shouldComponentUpdate(nextProps, nextState){
-    //     if(nextState.dataReady){
-    //         return true;
-    //     }else{
-    //         return false;
-    //     }
-    // }
-
     showActionSheet = () => {
+        if(this.state.selectionMode){
+            this.handlerLongClick();
+        }
         this.ActionSheet.show();
     };
 
-    updateSearch=(text)=>{
+    searchHandler=(text)=>{
+        // Search algo.
+        const newData = this.state.birds.filter(bird =>{
+            const birdData = `${bird.name.toUpperCase()} ${bird.name.split(' ')[0].toUpperCase()} ${bird.scientific_name.toUpperCase()} ${bird.scientific_name.split(' ')[0].toUpperCase()} ${bird.scientific_name.split(' ')[1].toUpperCase()}`;
+            const textData = text.toUpperCase();
+            /**
+             * indexOf to compare both the text and return true if the text is found inside birdData.
+             * If true is returned, then "filter" will keep that data otherwise ignores it.
+             * Having a -1 there is to make sure the returned index is above -1 to return true. indexOf will return -1 if not found.
+             * Array.prototype.indexOf():
+             * The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+             */
+            return birdData.indexOf(textData) > -1;
+        });
         this.setState({
             searchInput: text,
+            searchedBirds: newData,
         });
     };
-
+    
     handlerClick=(id, name, scientific_name)=>{ 
         // Alert.alert("Click:\n" +id+": "+name);
         if(!this.state.selectionMode){
@@ -151,6 +135,7 @@ export default class BirdList extends Component {
                     title: name,
                     latin: scientific_name,
                     id: id,
+                    downloaded: false,
                 }
             );
         }else{
@@ -222,8 +207,8 @@ export default class BirdList extends Component {
     getFlatList=()=>{
         return (
         <FlatList 
-            style={{flex:1, paddingHorizontal: 5}}
-            data={this.state.birds}
+            style={styles.FlatList}
+            data={this.state.searchInput? this.state.searchedBirds: this.state.birds}
             initialNumToRender={10}
             keyExtractor={item => `${item.bird_id}`}
             renderItem={({item, index}) =>(
@@ -234,7 +219,7 @@ export default class BirdList extends Component {
                     selected={!!this.state.birdSelected.get(item.key)}
                     onPress={()=>{this.handlerClick(item.bird_id, item.name, item.scientific_name)}} 
                     onLongPress={()=>{this.handlerLongClick()}}
-                    style={{marginBottom: 3}}
+                    style={styles.BirdCard}
                     selected={!!this.state.birdSelected.get(item.bird_id)}
                 />
             )}
@@ -247,20 +232,20 @@ export default class BirdList extends Component {
                 <View>
                     <SearchBar
                     placeholder="Search..."
-                    onChangeText={this.updateSearch}
+                    onChangeText={this.searchHandler}
                     value={this.state.searchInput}
                     placeholderTextColor="#474747"
-                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    inputStyle={styles.SearchTextInput} // style the TextInput
+                    inputContainerStyle={styles.SearchTextInputContainer}
+                    containerStyle={styles.SearchBarContainer} // style of the container which contains the search bar.
                     />
-                    <View style={{paddingTop: 3, flexDirection: 'row', justifyContent: "space-between"}}>
+                    <View style={styles.SelectionActionContainer}>
                         <TouchableOpacity disabled={this.state.selectionCount>0? false:true} style={this.state.selectionCount>0? styles.btn:styles.disabledBtn} onPress={() => {this.setState({displayAlert: true})}}>
                             <Text>
                                 Save To
                             </Text>
                         </TouchableOpacity>
-                            <Text style={{fontSize: 18,fontWeight: '500', alignSelf: "center"}}>{this.state.selectionCount}</Text>
+                            <Text style={styles.SelectionCountText}>{this.state.selectionCount}</Text>
                         <TouchableOpacity style={styles.btn} onPress={()=> this.handlerLongClick()}>
                             <Text>
                                 Cancel
@@ -278,16 +263,16 @@ export default class BirdList extends Component {
                <View>
                     <SearchBar
                     placeholder="Search..."
-                    onChangeText={this.updateSearch}
+                    onChangeText={this.searchHandler}
                     value={this.state.searchInput}
                     placeholderTextColor="#474747"
-                    inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                    inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                    containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                    inputStyle={styles.SearchTextInput} // style the TextInput
+                    inputContainerStyle={styles.SearchTextInputContainer}
+                    containerStyle={styles.SearchBarContainer} // style of the container which contains the search bar.
                     />
 
                     <View>
-                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
+                        <Text style={styles.SpeciesCountText}>Species: {this.state.birds.length}</Text>
                     </View>
                </View>
             );
@@ -307,7 +292,7 @@ export default class BirdList extends Component {
     render(){
         const topBarStyle = this.state.isTopBarHidden;
         return (
-            <View style={{backgroundColor:"white",flex:1}}>
+            <View style={styles.container}>
                 {/* SaveTo alert */}
                 {this.state.displayAlert && (<SaveAlert 
                     displayAlert={this.state.displayAlert} 
@@ -316,24 +301,31 @@ export default class BirdList extends Component {
                     loading={!!this.state.saveAlertLoading}
                 />)}
                 
+                {this.state.connected?
+                null
+                :(
+                    <View style={{height: 80, backgroundColor: 'red', justifyContent: "center", alignItems: "center"}}>
+                        <Text style={{color: 'white', fontWeight:'600'}}>No internet connection..</Text>
+                    </View>
+                )}
 
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />
                 {topBarStyle ? 
-                    <TouchableOpacity onPress={()=> this.topShow()} style={{backgroundColor:"#DCDCDC", paddingHorizontal: 5}}>
+                    <TouchableOpacity onPress={()=> this.topShow()} style={styles.expandButton}>
                         <Icon size={22} type='material-community' name='menu-down' color='black'/>
                     </TouchableOpacity>
                 :
                     (
                     
-                    <View style={{paddingHorizontal: 5}}>
-                        <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
-                            <Text style={styles.header}>Explore |</Text>
-                                <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                                    <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{continents[this.state.selected]}</Text>
+                    <View style={styles.headerContainer}>
+                        <View style={styles.innerHeaderContainer}>
+                            <Text style={styles.headerText}>Explore |</Text>
+                                <View style={styles.actionSheetContainer}>
+                                    <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{continents[this.state.selected]}</Text>
                                     <ActionSheet
                                         ref={o => this.ActionSheet = o}
-                                        title={<Text style={{color: 'black',fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select Region</Text>}
+                                        title={<Text style={styles.actionSheetTitle}>Select Region</Text>}
                                         cancelButtonIndex={0}
                                         destructiveButtonIndex={0}
                                         options={continents}
@@ -358,7 +350,7 @@ export default class BirdList extends Component {
                 )
             :
                 (
-                    <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                    <View style={styles.loadingContainer}>
                         {/* <Image source={require("../../assets/loading.gif")} style={{width:300,height:150, resizeMode:'center'}} /> */}
                         <ActivityIndicator size="large" color="orange"/>
                         <Text>Birds are coming your way</Text>
@@ -384,60 +376,3 @@ export default class BirdList extends Component {
 
 }
 
-const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    statusBar:{
-        height: Constants.statusBarHeight,
-        width: '100%',
-        // backgroundColor: 'black',
-     },
-     btn:{
-         padding:15, 
-         justifyContent: "center", 
-         alignItems: "center", 
-         backgroundColor:'orange'
-    },
-    disabledBtn:{
-        padding:15, 
-        justifyContent: "center", 
-        alignItems: "center", 
-        backgroundColor:'#b0b0b0'
-    },
-     select: {
-        width:"100%",
-        color: "black",
-        fontWeight: "700",
-        backgroundColor:"white",
-     },
-     header:{
-         
-         paddingLeft: 15, 
-         paddingRight: 15,
-         fontWeight: "700",
-         color: "orange",
-         fontSize: 20,
-         justifyContent: "center", 
-         alignSelf:"center"
-        },
-    FloatingButton:{
-
-        position: 'absolute',
-        width: 50,
-        height: 50,
-        alignItems: 'center',
-        justifyContent: 'center',
-        right: 30,
-        bottom: 30,
-    },
-    
-    FloatingButtonIcon: {
-    
-        resizeMode: 'contain',
-        width: 50,
-        height: 50,
-    }
-});

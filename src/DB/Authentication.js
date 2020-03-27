@@ -27,9 +27,10 @@ var userLogin = function(username, password, onFinishedCallback) {
         });
 }
 
-var fetchNewToken = function(onFinishedCallback) {
-    DatabaseModule.getCredentials((credentials) => {
-        fetch('https://www.natureinstruct.org/api/authenticate?username=' + credentials.username + '&password=' + credentials.password)
+var getNewToken = function(callbacks){
+    DatabaseModule.getCredentials({
+        success: (credentials)=>{
+            fetch('https://www.natureinstruct.org/api/authenticate?username=' + credentials.username + '&password=' + credentials.password)
             .then((response) => response.json())
             .then((responseJson) => {
                 if (responseJson.errorCode) {
@@ -37,17 +38,21 @@ var fetchNewToken = function(onFinishedCallback) {
                     return;
                 }
                 userAuthToken = responseJson.token;
-                onFinishedCallback();
+                callbacks.success();
             })
             .catch((error) => {
                 console.error(error)
             });
+        },
+        error: (err) =>{
+            callbacks.error();
+        }
     });
 }
 
 const Authentication = {
     getAuthToken: getAuthToken,
     userLogin: userLogin,
-    fetchNewToken: fetchNewToken
+    getNewToken: getNewToken
 };
 export default Authentication;

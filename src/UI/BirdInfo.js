@@ -3,32 +3,16 @@ import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions,
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import NetInfo from '@react-native-community/netinfo';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
-
+import Slider from '../components/Slider';
+import styles from '../styles/BirdInfo.style';
+import VocalizationsTab from "../components/VocalizationsTab";
 const prefix='https://natureinstruct.org';
-const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
-const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
-function wp (percentage) {
-    const value = (percentage * viewportWidth) / 100;
-    return Math.round(value);
-}
-const IS_IOS = Platform.OS === 'ios';
-const slideHeight = viewportHeight * 0.36;
-const slideWidth = wp(75);
-const itemHorizontalMargin = wp(2);
-const sliderWidth = viewportWidth;
-const itemWidth = slideWidth + itemHorizontalMargin * 10;
-const colors = {
-    black: '#1a1917',
-    gray: '#888888',
-    background1: '#B721FF',
-    background2: '#21D4FD'
-};
-const entryBorderRadius = 8;
+
+
 export default class BirdInfo extends Component {
     state={
         id: null,
@@ -45,24 +29,32 @@ export default class BirdInfo extends Component {
         mapImages: [],
         mapCredit: [],
         mapImagesReady: false,
-
+        sounds: [],
+        soundsReady: false,
+        page: 0,
+        connected: true,// assume internet connection is on.
     }
 
     static navigationOptions = ({navigation})=> ({
-        headerTitle:()=> (<View style={{flexDirection:'column', }}>
-            <Text style={{
-                                fontWeight: "700",
-                                color: "#34C759",
-                                fontSize: 20,
-                                justifyContent: "space-between", 
-                                alignSelf:"center"}}
-                          >{navigation.state.params.title}</Text>
-    <Text style={{letterSpacing: 1.5, fontSize:10, justifyContent: "center", fontStyle:'italic'}}>{navigation.state.params.latin}</Text>
+        headerTitle:()=> (
+        <View style={styles.headerTitleContainer}>
+            <Text style={styles.headerTitleBirdName}>{navigation.state.params.title}</Text>
+            <Text style={styles.headerTitleBirdLatin}>{navigation.state.params.latin}</Text>
         </View>),
-        headerTintColor: "#34C759",
+        headerTintColor: "#34C759", // COLOR
         
     })
-   componentDidMount(){
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    componentWillMount(){
+        this.unsubscribe = NetInfo.addEventListener(c => {
+            this.setState((state)=>{
+                return {
+                    connected: c.isConnected
+                };
+            });
+        });
     //Only get connection info once when component is loaded. No need to rerender when connection changes
     NetInfo.fetch().then(connectionState => {
         let id = this.props.navigation.state.params.id
@@ -118,6 +110,16 @@ export default class BirdInfo extends Component {
                             });
                         }
                     });
+                    
+                    // get vocalizations in Parallel.
+                    DatabaseModule.getVocalizationUrlsForBirdId(id,{
+                        success: (result)=>{
+                            this.setState({
+                                sounds: result,
+                                soundsReady: true,
+                            });
+                        }
+                    });
 
                 }
             }
@@ -126,9 +128,7 @@ export default class BirdInfo extends Component {
 
     
    }
-   testing =()=>{
-       return (<Text>We got something!</Text>);
-   }
+
 
 
    ShowModalFunction(visible) {
@@ -148,7 +148,7 @@ export default class BirdInfo extends Component {
             });
             return (
                     <Modal
-                        style={{margin:0}}
+                        style={styles.modalOuterContainer}
                         backdropColor='transparent'
                         visible={this.state.isModelVisible}
                         transparent={false}
@@ -161,10 +161,10 @@ export default class BirdInfo extends Component {
                         <ImageViewer saveToLocalByLongPress={false} index={this.state.activeSlide} imageUrls={img} />
                         <View style={styles.modalContainer}>
                             <TouchableHighlight
-                                style={{padding:15, backgroundColor: 'gray'}}
+                                style={styles.ImageViewerGoBackBtn}
                                 onPress={() => this.ShowModalFunction(!this.state.isModelVisible)}
                                 >
-                                <Text style={{textAlign:"center", fontWeight:'500'}}>Go Back!</Text>
+                                <Text style={styles.ImageViewerGoBackText}>Go Back!</Text>
                             </TouchableHighlight>
                         </View>
                     </Modal>
@@ -177,7 +177,7 @@ export default class BirdInfo extends Component {
             });
             return (
                     <Modal
-                        style={{margin:0}}
+                        style={styles.modalOuterContainer}
                         backdropColor='transparent'
                         visible={this.state.isModelVisible}
                         transparent={false}
@@ -188,10 +188,10 @@ export default class BirdInfo extends Component {
                         <ImageViewer saveToLocalByLongPress={false} index={this.state.activeMapSlide} imageUrls={img} />    
                         <View style={styles.modalContainer}>
                             <TouchableHighlight
-                                style={{padding:15, backgroundColor: 'gray'}}
+                                style={styles.ImageViewerGoBackBtn}
                                 onPress={() => this.ShowModalFunction(!this.state.isModelVisible)}
                                 >
-                                <Text style={{textAlign:"center", fontWeight:'500'}}>Go Back!</Text>
+                                <Text style={styles.ImageViewerGoBackText}>Go Back!</Text>
                             </TouchableHighlight>
                         </View>
                     </Modal>
@@ -232,36 +232,17 @@ export default class BirdInfo extends Component {
         return (
             <ScrollView >
                 {this.getImageModal('info')}
-                <Carousel
-                    ref={(c) => { this._carousel = c; }}
+                <Slider 
                     data={this.state.images}
-                    renderItem={this._renderItem}
-                    sliderWidth={sliderWidth}
-                    itemWidth={itemWidth}
-                    firstItem={this.state.activeSlide}
-                    hasParallaxImages={true}
-                    containerCustomStyle={styles.slider}
-                    contentContainerCustomStyle={styles.sliderContentContainer}
-                    scrollEnabled={ this.state.scrollable }
-                    onSnapToItem={(index) => this.setState({ activeSlide: index }) }
+                    onPress={this._handleModalButton}
+                    connected={this.state.connected}
+                    downloaded={this.props.navigation.getParam('downloaded', false)}
                 />
-                <Pagination 
-                    dotsLength={this.state.images.length}
-                    activeDotIndex={this.state.activeSlide}
-                    containerStyle={styles.paginationContainer}
-                    dotColor={'#34C759'}
-                    dotStyle={styles.paginationDot}
-                    inactiveDotColor={colors.black}
-                    inactiveDotOpacity={0.4}
-                    inactiveDotScale={0.6}
-                    carouselRef={this._slider1Ref}
-                    tappableDots={!!this._slider1Ref}
-                />
-                <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+                <View style={styles.sectionHeaderContainer}>
                     <Icon 
                         name='copyright'
                         type={'font-awesome'}
-                        color='#34C759'
+                        color='#34C759' // COLOR
                     />
                     <Text style={styles.title}> Photo Information</Text>
                 </View>
@@ -281,125 +262,31 @@ export default class BirdInfo extends Component {
         )
     }
     getVocalPage=()=>{
-        return (<ScrollView>
-                            
-
-                     {/* TODO: VOCALIZATIONS CODE GOES HERE */}
-                     <View>
-                    <Carousel
-                        ref={(cb) => { this._carouselMap = cb; }}
-                        data={NotFoundImage}
-                        renderItem={({item,index})=>{
-                            return (
-                                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
-                                 <View key={'VW'+index} style={styles.imageContainer}>
-                                     <Image key={'IM'+index} style={styles.image} source={item} />
-                                 </View>
-                                 </TouchableOpacity>)
-                        }}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeMapSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={NotFoundImage.length}
-                        activeDotIndex={this.state.activeMapSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'#34C759'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider2Ref}
-                        tappableDots={!!this._slider2Ref}
-                    />
-                </View>
-                <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
-                    <Icon 
-                        name='music'
-                        type={'font-awesome'}
-                        color='#34C759'
-                    />
-                    <Text style={styles.title}> Vocalizations</Text>
-                </View> 
-        </ScrollView>)
+        return (
+        <VocalizationsTab
+            audioList={this.state.sounds}
+            sectionHeaderContainer={styles.sectionHeaderContainer}
+            connected={this.state.connected}
+            bird_id={this.state.info._id}
+        />)
     }
 
     getMapPage=()=>{
-        return (<ScrollView>
+        return (
+        <ScrollView>
                 {this.getImageModal('map')}
-                {this.state.mapImages.length != 0?
-                    (<View>
-                        <Carousel
-                        ref={(cb) => { this._carouselMap = cb; }}
-                        data={this.state.mapImages}
-                        renderItem={this._renderItem}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeMapSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={this.state.mapImages.length}
-                        activeDotIndex={this.state.activeMapSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'#34C759'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider2Ref}
-                        tappableDots={!!this._slider2Ref}
-                    />
-                    </View>)
-                :
-                (<View>
-                    <Carousel
-                        ref={(cb) => { this._carouselMap = cb; }}
-                        data={NotFoundImage}
-                        renderItem={({item,index})=>{
-                            return (
-                                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
-                                 <View key={'VW'+index} style={styles.imageContainer}>
-                                     <Image key={'IM'+index} style={styles.image} source={item} />
-                                 </View>
-                                 </TouchableOpacity>)
-                        }}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeMapSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        onSnapToItem={(index) => this.setState({ activeMapSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={NotFoundImage.length}
-                        activeDotIndex={this.state.activeMapSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'#34C759'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider2Ref}
-                        tappableDots={!!this._slider2Ref}
-                    />
-                </View>)
                 
-                }
-                <View style={{flexDirection:'row', paddingHorizontal: 15,}}>
+                <Slider 
+                    data={this.state.mapImages}
+                    onPress={this._handleModalButton}
+                    connected={this.state.connected}
+                    downloaded={this.props.navigation.getParam('downloaded', false)}
+                />
+                <View style={styles.sectionHeaderContainer}>
                     <Icon 
                         name='map'
                         type={'font-awesome'}
-                        color='#34C759'
+                        color='#34C759' // COLOR
                     />
                     <Text style={styles.title}> Location</Text>
 
@@ -423,8 +310,9 @@ export default class BirdInfo extends Component {
      * for future expansions.
      */
     getLayout=()=>{
-        let activity = (<View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
-                    <ActivityIndicator size="large" color="#34C759"/>
+        let activity = (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#34C759"/> {/* COLOR */}
                     <Text>Loading ....</Text>
                 </View>);
         switch(this.state.page){
@@ -468,18 +356,19 @@ export default class BirdInfo extends Component {
         });
     }
     render() {
+        const {page} = this.state;
         return (
-            <View style={{ paddingHorizontal: 5}}>
-                <StatusBar barStyle="dark-content" backgroundColor="black" />
+            <View style={styles.container}>
+                <StatusBar barStyle="dark-content" backgroundColor="black" /> 
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
-                    <TouchableOpacity style={{marginBottom: 5, borderBottomStartRadius: 15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 0? '#34C759':'#DCDCDC'}} onPress={()=> this.infoBtnHandler()}>
-                        <Text style={{opacity:this.state.page==0? 1:0.4,fontWeight:'700',color: this.state.page==0? 'white': 'black'}}>Information</Text>
+                    <TouchableOpacity style={[styles.TabButtonLeft ,{backgroundColor: page == 0? '#34C759':'#DCDCDC'}]} onPress={()=> this.infoBtnHandler()}>
+                        <Text style={[styles.TabText, {opacity:page==0? 1:0.4, color: page==0? 'white': 'black'}]}>Information</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{marginBottom: 5, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 1? '#34C759':'#DCDCDC'}} onPress={()=> this.vocalBtnHandler()}>
-                        <Text style={{opacity:this.state.page==1? 1:0.4,fontWeight:'700',color: this.state.page==1? 'white': 'black'}}>Vocalizations</Text>
+                    <TouchableOpacity style={[styles.TabButtonMiddle ,{backgroundColor: page == 1? '#34C759':'#DCDCDC'}]} onPress={()=> this.vocalBtnHandler()}>
+                        <Text style={[styles.TabText, {opacity:page==1? 1:0.4, color: page==1? 'white': 'black'}]}>Vocalizations</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={{marginBottom: 5, borderBottomEndRadius:15, paddingVertical: 10, paddingHorizontal: 15, backgroundColor: this.state.page == 2? '#34C759':'#DCDCDC'}} onPress={()=> this.mapBtnHandler()}>
-                        <Text style={{opacity:this.state.page==2? 1:0.4, fontWeight:'700', color: this.state.page==2? 'white': 'black'}}>Location</Text>
+                    <TouchableOpacity style={[styles.TabButtonRight ,{backgroundColor: page == 2? '#34C759':'#DCDCDC'}]} onPress={()=> this.mapBtnHandler()}>
+                        <Text style={[styles.TabText ,{opacity:page==2? 1:0.4, color: page==2? 'white': 'black'}]}>Location</Text>
                     </TouchableOpacity>
                 </View>
                 
@@ -488,182 +377,14 @@ export default class BirdInfo extends Component {
                     // (console.log(this.state.data.name))
                    
                         : 
-                    (<View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
-                    <ActivityIndicator size="large" color="#34C759"/>
-                    <Text>Loading bird information...</Text>
                     
-                </View>)}
+                    (
+                    <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                        <ActivityIndicator size="large" color="#34C759"/>
+                        <Text>Loading bird information...</Text>
+                    </View>)}
             </View>
         );
     }
 }
 
-
-const styles = StyleSheet.create({
-    statusBar:{
-        height: Constants.statusBarHeight,
-        backgroundColor: 'black',
-        width: '100%',
-     },
-    header:{
-         
-        paddingLeft: 15, 
-        paddingRight: 15,
-        fontWeight: "700",
-        color: "#34C759",
-        fontSize: 20,
-        justifyContent: "center", 
-        alignSelf:"center"
-       },
-       safeArea: {
-        flex: 1,
-        backgroundColor: colors.black
-    },
-    container: {
-        flex: 1,
-        backgroundColor: colors.background1
-    },
-    gradient: {
-        ...StyleSheet.absoluteFillObject
-    },
-    scrollview: {
-        flex: 1
-    },
-    exampleContainer: {
-        paddingVertical: 30
-    },
-    exampleContainerDark: {
-        backgroundColor: colors.black
-    },
-    exampleContainerLight: {
-        backgroundColor: 'white'
-    },
-    title: {
-        paddingHorizontal: 30,
-        backgroundColor: 'transparent',
-        color: 'rgba(255, 255, 255, 0.9)',
-        fontSize: 20,
-        fontWeight: 'bold',
-        textAlign: 'center'
-    },
-    titleDark: {
-        color: colors.black
-    },
-    subtitle: {
-        marginTop: 5,
-        paddingHorizontal: 30,
-        backgroundColor: 'transparent',
-        color: 'rgba(255, 255, 255, 0.75)',
-        fontSize: 13,
-        fontStyle: 'italic',
-        textAlign: 'center'
-    },
-       slider: {
-        flexGrow: 0,
-        marginTop: 5, // 15
-        overflow: 'visible' // for custom animations
-    },    
-    sliderContentContainer: {
-        paddingVertical: 0, // for custom animation
-        height: slideHeight,
-    },
-    paginationContainer: {
-        paddingTop: 5,
-        paddingBottom: 20,
-        marginHorizontal: 10,
-        
-    },
-    paginationDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 7,
-        // marginHorizontal: 4
-    },
-       slideInnerContainer: {
-        width: itemWidth,
-        height: slideHeight,
-        alignContent: "center",
-        justifyContent: "center",
-        paddingHorizontal: itemHorizontalMargin,
-        paddingBottom: 5 //18 needed for shadow
-        
-    },
-    shadow: {
-        position: 'absolute',
-        top: 0,
-        left: itemHorizontalMargin,
-        right: itemHorizontalMargin,
-        bottom: 18,
-        shadowColor: colors.black,
-        shadowOpacity: 0.25,
-        shadowOffset: { width: 0, height: 10 },
-        shadowRadius: 10,
-        borderRadius: entryBorderRadius
-    },
-    imageContainer: {
-
-        marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue
-        backgroundColor: 'white',
-        borderTopLeftRadius: entryBorderRadius,
-        borderTopRightRadius: entryBorderRadius
-    },
-    imageContainerEven: {
-        backgroundColor: colors.black
-    },
-    image: {
-        resizeMode: 'contain',
-        width: '100%',
-        height: '100%',
-        borderRadius: IS_IOS ? entryBorderRadius : 0,
-        borderTopLeftRadius: entryBorderRadius,
-        borderTopRightRadius: entryBorderRadius
-    },
-    // image's border radius is buggy on iOS; let's hack it!
-    radiusMask: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        height: entryBorderRadius,
-        backgroundColor: 'white'
-    },
-    radiusMaskEven: {
-        backgroundColor: colors.black
-    },
-    textContainer: {
-        justifyContent: 'center',
-        paddingTop: 20 - entryBorderRadius,
-        paddingBottom: 20,
-        paddingHorizontal: 16,
-        backgroundColor: 'white',
-        borderBottomLeftRadius: entryBorderRadius,
-        borderBottomRightRadius: entryBorderRadius
-    },
-    textContainerEven: {
-        backgroundColor: colors.black
-    },
-    title: {
-        color: 'black',
-        fontSize: 16,
-        fontWeight: 'bold',
-        letterSpacing: 0.5
-    },
-    titleEven: {
-        color: 'white'
-    },
-    subtitle: {
-        marginTop: 6,
-        color: colors.gray,
-        fontSize: 12,
-        fontStyle: 'italic'
-    },
-    subtitleEven: {
-        color: 'rgba(255, 255, 255, 0.7)'
-    },  
-    modalContainer: {
-
-        justifyContent: 'center',
-
-      },
-
-});

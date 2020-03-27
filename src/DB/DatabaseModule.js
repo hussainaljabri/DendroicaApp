@@ -42,11 +42,11 @@ var updateUser = function (dendroicaId, username, password, email, firstName, la
     }});
 }
 
-var getCredentials = function(onFinishedCallback) {
+var getCredentials = function(callbacks) {
     var query = `SELECT username,password from User`;
     _sqlQuery(query, [], { success: (tx,res) => {
-        onFinishedCallback(res.rows._array[0]);
-    }});
+        callbacks.success(res.rows._array[0]);
+    }, error: (error) => callbacks.error()});
 }
 
 var getVersionData = function(onFinishedCallback) {
@@ -233,7 +233,7 @@ var getImageUrlsForCustomList = function (list_id, numRequested, callbacks) {
 var getVocalizationUrlsForCustomList = function (list_id, numRequested, callbacks) {
     if (!numRequested) numRequested = "ALL";
 
-    var query = "SELECT filename, mp3_filename from Vocalizations where bird_id=? LIMIT ?";
+    var query = "SELECT filename, mp3_filename, from Vocalizations where bird_id=? LIMIT ?";
     var numBirdsDone = 0;
     var result = [];
     getBirdIdsFromListId(list_id, {success: (res) => {
@@ -244,6 +244,21 @@ var getVocalizationUrlsForCustomList = function (list_id, numRequested, callback
             }});
         })
     }})
+}
+/**
+ * Gets vocalization, credit for a bird id.
+ */
+var getVocalizationUrlsForBirdId = function (bird_id, callbacks){
+    var query = "SELECT filename, mp3_filename, credits, Birds.song_description as description, isDownloaded from Vocalizations ";
+    query += "INNER JOIN Birds on Vocalizations.bird_id = Birds._id ";
+    query += "where bird_id=?";
+
+    var test ="SELECT filename, mp3_filename from Vocalizations where bird_id=?";
+    _sqlQuery(query, [bird_id], {success:(tx,res) => {
+        var result = res.rows._array;
+        callbacks.success(result);
+    }});
+
 }
 
 //BirdImages
@@ -377,9 +392,9 @@ var purgeCustomListDB = function(list_id, purgeFunction, callbacks) {
                     purgeFunction(urlTuple.filename);
                     purgeFunction(urlTuple.mp3_filename);
                     purgeFunction(urlTuple.spectro_file);
-                    setImageMediaDownloaded(urlTuple.filename, false);
-                    setVocalizationsDownloaded(urlTuple.mp3_filename, true, false);
-                    setVocalizationsDownloaded(urlTuple.spectro_file, false, false);
+                    setImageMediaDownloaded(urlTuple.filename, false, ()=>{console.log('setImageMediaDownload: Success!')});
+                    setVocalizationsDownloaded(urlTuple.mp3_filename, true, false,()=>{console.log('setVocalizationsDownloaded: mp3_filename Success!')});
+                    setVocalizationsDownloaded(urlTuple.spectro_file, false, false, ()=>{console.log('setImageMediaDownload: spectro_file Success!')});
                 });
             },tx});
         });
@@ -739,6 +754,8 @@ const DatabaseModule = {
     deleteCustomList: deleteCustomList,
     addBirdsToCustomList: addBirdsToCustomList,
     removeBirdsFromCustomList: removeBirdsFromCustomList,
-    purgeCustomListDB: purgeCustomListDB
+    purgeCustomListDB: purgeCustomListDB,
+
+    getVocalizationUrlsForBirdId: getVocalizationUrlsForBirdId, // (Hussain) added this for getting sounds filename.
 };
 export default DatabaseModule;

@@ -1,18 +1,13 @@
 import React, { Component } from "react";
 import { createMaterialBottomTabNavigator } from 'react-navigation-material-bottom-tabs';
-import BirdList from './src/UI/BirdList';
-import MyList from './src/UI/MyList';
-import Settings from './src/UI/Settings';
-import BirdInfo from './src/UI/BirdInfo';
-import Quiz from './src/UI/Quiz';
 import { FontAwesome5, MaterialCommunityIcons} from '@expo/vector-icons';
 import {Text} from 'react-native';
-import {createAppContainer } from "react-navigation";
+import {createAppContainer, createSwitchNavigator} from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 import DatabaseManagementModule from "./src/DB/DatabaseManagementModule";
-import DatabaseModule from "./src/DB/DatabaseModule";
-import Authentication from "./src/DB/Authentication";
-import MediaHandler from "./src/DB/MediaHandler";
+// import DatabaseModule from "./src/DB/DatabaseModule";
+// import Authentication from "./src/DB/Authentication";
+// import MediaHandler from "./src/DB/MediaHandler";
 // import TestingPage from './src/UI/TestingPage';
 
 const username = "tmobile";
@@ -21,25 +16,8 @@ const password = "appH@ppy";
 //Initialize DB -> Will check if there if db is instantiated.
 //Destroys and rebuilds tables if no db or dataVersionUpdate
 DatabaseManagementModule.init(() => {
-    //Authenticates user with hard coded credentials
-    Authentication.userLogin(username, password, () => {
-        //Import API data for all projects
-        DatabaseManagementModule.importApiData([1,2,3,4,5,6], () => {
-            console.log("All Api data imported");
-            MediaHandler.init(() => { });
-        });
-    });
+
 });
-
-export default class App extends Component {
-
-  render(){
-    return (<BottomContainer/>);
-
-  }
-
-}
-
 
 /**
  * Stack navigator for BirdCard onPress in either MyList.
@@ -47,13 +25,13 @@ export default class App extends Component {
  */
 const MyListToBirdInfoNavigator = createStackNavigator({
   MyList: {
-    screen: MyList,
+    getScreen: ()=> require('./src/UI/MyList').default,
   },
   BirdInfo: {
-    screen: BirdInfo,
+    getScreen: ()=> require('./src/UI/BirdInfo').default,
   },
   Quiz: {
-    screen: Quiz,
+    getScreen: ()=> require('./src/UI/Quiz').default,
   }
 },);
 /**
@@ -62,17 +40,28 @@ const MyListToBirdInfoNavigator = createStackNavigator({
  */
 const BirdListToBirdInfoNavigator = createStackNavigator({
   BirdList: {
-    screen: BirdList,
+    getScreen: ()=> require('./src/UI/BirdList').default,
   },
   BirdInfo: {
-    screen: BirdInfo,
+    getScreen: ()=> require('./src/UI/BirdInfo').default,
   },
 });
 
 /**
  * Stack Navigator for Welcome page.
  */
-// const WelcomePageNavigator = createStackNavigator({
+// const AuthNavigator = createStackNavigator(
+//   {
+//       Login:{
+//           getScreen: ()=> require('./src/UI/Welcome').default,
+//       },
+//   },{
+//       navigationOptions:{
+//           header: null,
+//           headerMode: 'none'
+//       }
+//   }
+// );
   
 // });
 const BottomNav = createMaterialBottomTabNavigator(
@@ -103,7 +92,7 @@ const BottomNav = createMaterialBottomTabNavigator(
                   activeColor: 'red',
                   // barStyle: { backgroundColor: '#67baf6' },
                 } },
-      Settings: { screen: Settings,
+      Settings: {  getScreen: ()=> require('./src/UI/Settings').default,
                 navigationOptions:{
                   tabBarLabel: <Text style={{fontWeight: '800',}}>Settings</Text>,
                   tabBarIcon: ({tintColor})=><MaterialCommunityIcons name="settings-outline" size={20} color={tintColor} />,
@@ -124,4 +113,25 @@ const BottomNav = createMaterialBottomTabNavigator(
     }
   );
 
-  const BottomContainer = createAppContainer(BottomNav);
+
+/**
+ * using Switch Navigator eliminates the stacking of pages when going from
+ * Splash to LoginPage to MainApp pages.
+ *  */ 
+
+  const AppNavigator = createSwitchNavigator(
+    {
+        Splash:{
+            getScreen: ()=> require('./src/UI/Splash').default,
+        },
+        Auth: {
+          getScreen: ()=> require('./src/UI/Welcome').default,
+        },
+        Main: BottomNav,
+    },
+    {
+        initialRouteName: 'Splash',
+    }
+  );
+
+export default createAppContainer(AppNavigator);

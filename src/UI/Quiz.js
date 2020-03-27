@@ -1,36 +1,14 @@
 import React, {Component} from 'react';
 import { Platform, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Alert, ActivityIndicator} from 'react-native';
-import Constants from 'expo-constants';
 import {Icon} from 'react-native-elements';
-import Carousel, { Pagination } from 'react-native-snap-carousel';
 import DatabaseModule from '../DB/DatabaseModule';
-
+import Slider from '../components/Slider';
+import styles from '../styles/Quiz.style';
 
 const prefix='https://natureinstruct.org';
 
-
-
-const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
-function wp (percentage) {
-    const value = (percentage * viewportWidth) / 100;
-    return Math.round(value);
-}
-const IS_IOS = Platform.OS === 'ios';
-const slideHeight = viewportHeight * 0.36;
-const slideWidth = wp(75);
-const itemHorizontalMargin = wp(2);
-const sliderWidth = viewportWidth;
-const itemWidth = slideWidth + itemHorizontalMargin * 10;
-const colors = {
-    black: '#1a1917',
-    green: 'green',
-    red: 'red',
-    gray: '#888888',
-    background1: '#B721FF',
-    background2: '#21D4FD'
-};
-const entryBorderRadius = 8;
 const totalOptions = 4;
+
 export default class Quiz extends Component{
     state ={
         data: [],
@@ -54,7 +32,7 @@ export default class Quiz extends Component{
         header: null
     }
 
-    componentDidMount(){
+    componentWillMount(){
         let tempData = this.props.navigation.getParam('data', []);
         // console.log(tempData);
         let t = this._genRandom(tempData.length,0);
@@ -176,33 +154,11 @@ export default class Quiz extends Component{
             var chosenBird = this.state.answerImages; // if we got vocalization working then here make them {images: , voice: }
             
             return (
-                <View>
-                    <Carousel
-                        ref={(c) => { this._carousel = c; }}
-                        data={chosenBird}
-                        renderItem={this._renderItem}
-                        sliderWidth={sliderWidth}
-                        itemWidth={itemWidth}
-                        firstItem={this.state.activeSlide}
-                        hasParallaxImages={true}
-                        containerCustomStyle={styles.slider}
-                        contentContainerCustomStyle={styles.sliderContentContainer}
-                        scrollEnabled={ this.state.scrollable }
-                        onSnapToItem={(index) => this.setState({ activeSlide: index }) }
-                    />
-                    <Pagination 
-                        dotsLength={chosenBird.length}
-                        activeDotIndex={this.state.activeSlide}
-                        containerStyle={styles.paginationContainer}
-                        dotColor={'black'}
-                        dotStyle={styles.paginationDot}
-                        inactiveDotColor={colors.black}
-                        inactiveDotOpacity={0.4}
-                        inactiveDotScale={0.6}
-                        carouselRef={this._slider1Ref}
-                        tappableDots={!!this._slider1Ref}
-                    />
-            </View>
+                <Slider 
+                    data={chosenBird}
+                    renderItem={this._renderItem}
+                />
+                
             );
         }
     }
@@ -253,19 +209,19 @@ export default class Quiz extends Component{
                         (this.getCarousel())
                         :
                         (
-                        <View style={[{justifyContent: 'center', alignItems: "center"}, styles.sliderContentContainer]}>
+                        <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="red"/>
                             <Text>Loading</Text>
                         </View>
                         )}
-                        <Text style={{fontWeight:'600', paddingHorizontal: 5,}}>What is the name of this bird?</Text>
+                        <Text style={styles.questionText}>What is the name of this bird?</Text>
                         
                         <ScrollView style={styles.optionsScroll}>
                             {this.state.optionslist.map((item, index)=>{
                                 return(
-                                <TouchableOpacity disabled={this.state.isPressed} onPress={()=> this.setState({isPressed: true, selectedIndex: index})} style={{flexDirection:'row' ,padding: 10}} key={'btn-'+index}>
+                                <TouchableOpacity disabled={this.state.isPressed} onPress={()=> this.setState({isPressed: true, selectedIndex: index})} style={styles.optionsButton} key={'btn-'+index}>
                                     {this.state.isPressed && (<Icon name={this.state.answerIndex == index? 'check':'times'} type='font-awesome'  color={this.state.answerIndex == index? 'green': 'red'}/>)}
-                                    <Text key={'txt-'+index} style={{marginHorizontal:15, color: this.state.isPressed? (this.state.answerIndex==index?'green':(this.state.selectedIndex==index?'red':'black')) :'black'}}>{item.name}</Text>
+                                    <Text key={'txt-'+index} style={[styles.optionsButtonText,{color: this.state.isPressed? (this.state.answerIndex==index?'green':(this.state.selectedIndex==index?'red':'black')) :'black'}]}>{item.name}</Text>
                                 </TouchableOpacity>);
                             })}
                         </ScrollView>
@@ -291,9 +247,9 @@ export default class Quiz extends Component{
                 {/** Custom Header Starts */}
                 <View style={styles.statusBar}/>
                 <View>
-                    <View style={{flexDirection: "row", padding: 10}}>
+                    <View style={styles.header}>
 
-                        <TouchableOpacity style={{paddingHorizontal: 10, justifyContent: "center"}} onPress={()=> this.props.navigation.goBack()}>
+                        <TouchableOpacity style={styles.goBackBtn} onPress={()=> this.props.navigation.goBack()}>
                             <Icon 
                                 name='chevron-left'
                                 type='font-awesome'
@@ -302,10 +258,10 @@ export default class Quiz extends Component{
                             />
                         </TouchableOpacity>
 
-                        <Text style={styles.header}>Quiz |</Text>
-                        <Text style={[styles.header, {textAlign:"center", color: 'black', opacity: 0.6}]}>Question # {this.state.quizNumber} / {this.state.total} </Text>
+                        <Text style={styles.headerText}>Quiz |</Text>
+                        <Text style={styles.headerTitle}>Question # {this.state.quizNumber} / {this.state.total} </Text>
                     </View>
-                    <View style={{padding:10, flexDirection: 'row', justifyContent:'space-between'}}>
+                    <View style={styles.belowHeaderContainer}>
                         <Text style={styles.scoretxt}>Species: {this.state.data.length}</Text>
                         <Text style={styles.scoretxt}>Score: {this.state.score} </Text>
                     </View>
@@ -334,7 +290,7 @@ export default class Quiz extends Component{
                 {this.formQuiz()}
 
                 <TouchableOpacity disabled={!this.state.isPressed} style={[styles.nextBtn, {borderColor: this.state.isPressed? 'red': 'grey'}]} onPress={()=> this.nextHandler(this.state.total==this.state.quizNumber) }>
-        <Text style={{color: this.state.isPressed? 'red': 'grey', justifyContent:"center", textAlign: "center"}}>{this.state.total==this.state.quizNumber? "Finish": "Next Qustion"}</Text>
+        <Text style={[styles.nextBtnText, {color: this.state.isPressed? 'red': 'grey'}]}>{this.state.total==this.state.quizNumber? "Finish": "Next Qustion"}</Text>
                 </TouchableOpacity>
 
             </View>
@@ -344,133 +300,3 @@ export default class Quiz extends Component{
     }
     
 }
-
-
-const styles = StyleSheet.create({
-    container:{
-        backgroundColor:"white", 
-        marginLeft: 5, 
-        marginRight: 5,
-        flex:1
-    },
-    statusBar:{
-        height: Constants.statusBarHeight,
-    },
-    optionsScroll:{
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-    },
-    nextBtn:{
-        marginHorizontal: wp(30),
-        marginVertical: 5,
-        paddingVertical:5,
-        paddingHorizontal: 10,
-        alignContent: "center",
-        justifyContent: "center",
-        textAlignVertical: "center",
-        borderRadius: 5,
-        borderWidth: 0.5,
-        borderColor: 'red',
-    },
-    topBtn:{
-        marginHorizontal: 5,
-        paddingVertical:5,
-        paddingHorizontal: 10,
-        alignContent: "center",
-        justifyContent: "center",
-        textAlignVertical: "center",
-        borderRadius: 5,
-        borderWidth: 0.5,
-        borderColor: 'red',
-    },
-    topBtnInactive:{
-        marginHorizontal: 5,
-        paddingVertical:5,
-        paddingHorizontal: 10,
-        alignContent: "center",
-        justifyContent: "center",
-        textAlignVertical: "center",
-        borderRadius: 5,
-        borderWidth: 0.5,
-        borderColor: 'grey',
-    },
-    header:{
-        
-        paddingLeft: 15, 
-        paddingRight: 15,
-        fontWeight: "700",
-        color: "red",
-        fontSize: 20,
-        justifyContent: "center", 
-        alignSelf:"center"
-    },
-    topTextContainer:{
-        alignItems: "center",
-        // justifyContent: "space-evenly",
-        padding: 10,
-        flexDirection: 'row',
-        
-    },
-    scoretxt:{
-        fontWeight: "700",
-    },
-    helpersContainer:{
-        paddingTop: 10,
-        paddingRight: 10,
-        paddingLeft: 10,
-        flexDirection: 'row',
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    box:{
-        width: 100,
-        height: 40,
-        backgroundColor: 'grey',
-        borderRadius: 15,
-    },
-    slider: {
-        flexGrow: 0,
-        marginTop: 5, // 15
-        overflow: 'visible' // for custom animations
-    },    
-    sliderContentContainer: {
-        paddingVertical: 0, // for custom animation
-        height: slideHeight,
-    },
-    paginationContainer: {
-        paddingTop: 5,
-        paddingBottom: 20,
-    },
-    paginationDot: {
-        width: 6,
-        height: 6,
-        borderRadius: 7,
-        marginHorizontal: 4
-    },
-    slideInnerContainer: {
-        width: itemWidth,
-        height: slideHeight,
-        alignContent: "center",
-        justifyContent: "center",
-        paddingHorizontal: itemHorizontalMargin,
-        paddingBottom: 5 //18 needed for shadow
-        
-    },
-    imageContainer: {
-        marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue
-        backgroundColor: 'white',
-        borderTopLeftRadius: entryBorderRadius,
-        borderTopRightRadius: entryBorderRadius
-    },
-    imageContainerEven: {
-        backgroundColor: colors.black
-    },
-    image: {
-        resizeMode: 'contain',
-        width: '100%',
-        height: '100%',
-        borderRadius: IS_IOS ? entryBorderRadius : 0,
-        borderTopLeftRadius: entryBorderRadius,
-        borderTopRightRadius: entryBorderRadius
-    },
-});

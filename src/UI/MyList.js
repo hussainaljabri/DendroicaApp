@@ -1,52 +1,77 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar} from "react-native";
-import Constants from 'expo-constants';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar, Platform} from "react-native";
+import styles from '../styles/MyList.style';
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
+import DownloadButton from '../components/DownloadButton';
 import MediaHandler from '../DB/MediaHandler';
 import NetInfo from '@react-native-community/netinfo';
+import { FontAwesome5 } from '@expo/vector-icons';
+import images from '../constants/images';
+
 
 export default class MyList extends Component {
     state ={
         selected: -1,
         selectedReady: false,
         searchInput: '',
+        selectedList: {},
         birds: [],
         birdsReady: false,
         lists: ['Cancel'],
         listsReady: false,
-        options: ['Cancel'],
-        connected: false
+        optionsText: ['Cancel'], // to navigate and display the correct text when a Block is chosen.
+        optionsBlocks:[], // holds options blocks used when ActionSheet opens. <Text> blocks.
+        connected: true, // assumes its connected to internet first.
     }
     static navigationOptions = {
         header: null
-    }
-
-    componentDidMount(){
-        DatabaseModule.getLists({
-            success: (result)=>{
-                // console.log('Lists: '+JSON.stringify(result));
-                let temp = this.state.lists;
-                temp.push(result);
-                let opt_temp = this.state.options;
-                result.map((item, index)=>{
-                    opt_temp.push(item.name);
-                });
-                this.setState({
-                    lists: temp,
-                    options: opt_temp,
-                });
-                // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
-            }
-        });
         
-        const unsubscribe = NetInfo.addEventListener(c => {
-            this.setState({connected: c.isConnected});
+    }
+    componentDidMount(){
+        const { navigation } = this.props;
+        this.focusListener = navigation.addListener("didFocus", () => {// This hook returns `true` if the screen is focused, `false` otherwise
+          // The screen is focused
+          // Call any action
+          this.refreshLists();
+        });
+    }
+    componentWillUnmount(){
+        this.focusListener.remove();
+        this.unsubscribe();
+    }
+    componentWillMount(){
+        this.unsubscribe = NetInfo.addEventListener(c => {
+            this.setState((state)=>{
+                // do some refreshing here.
+                this.refreshLists();
+                // if the current list is not downloaded, re-initialize the page and show pull out of the list. to force a change.
+                if(this.state.selectedList.isDownloaded === "false"){
+                        return {
+                            selected: -1,
+                            selectedReady: false,
+                            searchInput: '',
+                            selectedList: {},
+                            birds: [],
+                            birdsReady: false,
+                            lists: ['Cancel'],
+                            listsReady: false,
+                            optionsText: ['Cancel'], // to navigate and display the correct text when a Block is chosen.
+                            optionsBlocks:[], // holds options blocks used when ActionSheet opens. <Text> blocks.
+                            connected: c.isConnected,
+                        }
+                }
+                return {
+                    connected: c.isConnected
+                };
+            });
             MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
                 if(birdProps) this.state.birds = birdProps;
             });
+
+            
         });
     }
 
@@ -71,6 +96,7 @@ export default class MyList extends Component {
                 title: name,
                 latin: scientific_name,
                 id: id,
+                downloaded: this.state.selectedList.isDownloaded,
             }
         );
 
@@ -87,7 +113,7 @@ export default class MyList extends Component {
                     //imgUrl={prefix+bird.filename}
                     onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
                     // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
-                    style={{marginBottom: 3}}
+                    style={styles.BirdCard}
                 />
             );
         });
@@ -125,29 +151,102 @@ export default class MyList extends Component {
         
     }
 
+    refreshLists=()=>{
+        DatabaseModule.getLists({
+            success: (result)=>{
+                // console.log('Lists: '+JSON.stringify(result));
+                let temp = ['Cancel'];
+                temp.push(result);
+                let opt_temp = ['Cancel'];
+                result.map((item, index)=>{
+                    opt_temp.push(item.name);
+                });
+                this.setState({
+                    lists: temp,
+                    optionsText: opt_temp,
+                    optionsBlocks: this.getOptionsArray(temp),
+                });
+                //console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
+            }
+        });
+        
+    }
+    /**
+     * This method will attach 'downloaded' to lists that are downloaded in the phone.
+     * So it will only show 'downloaded' when the action sheet is opened.
+     * returns a string[] Attached with <Text> array.
+     */
+    getOptionsArray=(lists)=>{
+        let temp = ["Cancel"];
+        lists[1].map((item, index)=>{
+            if(item.isDownloaded === "true"){
+                temp.push(
+                    <Text key={index} style={{width:'100%', textAlign:'center', textAlignVertical:'center', fontWeight: "600", flex:1}}>
+                        {item.name}
+                        <Text style={{
+                                    color:'green',
+                                    paddingLeft:30,
+                                    paddingRight:30,
+                                }}>  [Downloaded]</Text>
+                        
+                    </Text>
+                );   
+            }else{
+                temp.push(
+                    <Text key={index} style={{width:'100%',textAlign:'center', textAlignVertical:'center', fontWeight: "600", flex:1, backgroundColor: this.state.connected? null: 'lightgray'}}>
+                        {item.name}
+                    </Text>
+                );
+            }
+            
+        });
+        return temp;
+    }
 
+    optionsOnPress = index =>{
+        this.state.selectedList = this.state.lists[1][index-1];
+        if(index != 0){
+            if(this.state.lists[1][index-1].isDownloaded === "false" && !this.state.connected){
+                // it is not downloaded and offline mode, so display alert.
+                alert('Please, connect to internet to view this List.');
+            }else if(this.state.lists[1][index-1].isDownloaded === "true" && !this.state.connected){
+                // it is downloaded and offline mode, so fine allow it.
+                if(this.state.selected != index){    
+                    this.selectedNewList(index);
+                }
+            }else{
+                // it is connected to internet, allow clicking on options normally.
+                if(this.state.selected != index){    
+                    this.selectedNewList(index);
+                }
+            }
+        }
+    }
 
     render(){
         return (
-            <View style={{flex: 1, backgroundColor:"white"}}>
+            <View style={styles.container}>
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />
-                <View style={{flexDirection: "row",justifyContent: "space-between", padding: 10}}>
+                <View style={styles.headerContainer}>
                     <Text style={styles.header}>MyLists |</Text>
-                    <View style={{marginHorizontal: 10, justifyContent:"center", alignContent:"center", flexGrow:1}}>
-                        <Text onPress={this.showActionSheet} style={{fontSize:22, fontWeight:'500', opacity:0.7, justifyContent:'center'}}>{this.state.selectedReady? (this.state.options[this.state.selected]):("Select a List")}</Text>
+                    <View style={styles.ActionSheetContainer}>
+                        <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{this.state.selectedReady?
+                         (this.state.optionsText[this.state.selected])
+                         :
+                         ("Select a List")}
+                         </Text>
                         <ActionSheet
                             ref={o => this.ActionSheet = o}
-                            title={<Text style={{fontSize: 18, fontWeight:'500', letterSpacing:1}}>Select a List</Text>}
+                            title={<Text style={styles.actionSheetTitle}>Select a List</Text>}
                             cancelButtonIndex={0}
                             destructiveButtonIndex={0}
-                            options={this.state.options}
-                            onPress={(index) => { /* do something */ 
-                                console.log('actionsheet: '+index+ ' corresponds to :'+ this.state.lists[index]);
-                                index != 0? (this.state.selected != index? this.selectedNewList(index): {}) : {};
-                            }}
+                            options={this.state.optionsBlocks}
+                            onPress={(index)=> this.optionsOnPress(index)}
                         />
-
+                    </View>
+                    <View style={styles.DownloadButton}>
+                        <DownloadButton listIsSelected={this.state.selected} selectedList={this.state.selectedList}></DownloadButton>
                     </View>
                     {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
                         <TouchableOpacity>
@@ -159,21 +258,21 @@ export default class MyList extends Component {
                         </TouchableOpacity>
                     </View> */}
                 </View>
-                <View style={{paddingHorizontal: 5}}>
+                <View style={styles.belowHeader}>
                     <SearchBar
                         placeholder="Search..."
                         onChangeText={this.updateSearch}
                         value={this.state.searchInput}
                         placeholderTextColor="#474747"
-                        inputStyle={{fontSize: 14, color: '#474747'}} // style the TextInput
-                        inputContainerStyle={{borderRadius:10, backgroundColor: '#E8E8E8'}}
-                        containerStyle={{backgroundColor: 'white', borderTopColor: 'white', borderBottomColor: 'white', paddingLeft:0, paddingRight:0, paddingBottom:0, paddingTop:2}} // style of the container which contains the search bar.
+                        inputStyle={styles.SearchTextInput} // style the TextInput
+                        inputContainerStyle={styles.SearchTextInputContainer}
+                        containerStyle={styles.SearchBarContainer} // style of the container which contains the search bar.
                     />
-                    <View style={{flexDirection:"row", justifyContent:"space-between"}}>
-                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} disabled={!this.state.selectedReady} style={this.state.selectedReady? styles.btn: styles.disabledBtn}>
-                            <Text style={this.state.selectedReady? {fontWeight:"600", color: "red"}: {fontWeight:"600", color: "grey"}}>Quiz</Text>
+                    <View style={styles.belowSearchBar}>
+                        <TouchableOpacity onPress={()=> this.quizBtnHandler()} disabled={(!this.state.selectedReady || (this.state.birds.length<4))} style={(!this.state.selectedReady || (this.state.birds.length<4))? styles.disabledBtn: styles.btn}>
+                            <Text style={(!this.state.selectedReady || (this.state.birds.length<4))? styles.quizDisabledText : styles.quizEnabledText}>Quiz</Text>
                         </TouchableOpacity>
-                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Species: {this.state.birds.length}</Text>
+                        <Text style={styles.SpeciesCountText}>Species: {this.state.birds.length}</Text>
                     </View>
                 </View>
 
@@ -182,23 +281,23 @@ export default class MyList extends Component {
 
                     this.state.birdsReady?
                     (
-                        <ScrollView ref={(ref)=> this.scrollView = ref} style={{flex:1, paddingHorizontal: 5}} showsVerticalScrollIndicator={false} >
+                        <ScrollView ref={(ref)=> this.scrollView = ref} style={styles.FlatList} showsVerticalScrollIndicator={false} >
                         {this.getBirdCards()}
                                 
-                            <TouchableOpacity style={{backgroundColor:'#E8E8E8', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
-                                <Text style={{fontWeight: '500',color:'red', textAlign:"center"}}>Go To Top</Text>
+                            <TouchableOpacity style={styles.goToTopBtn} onPress={()=>this.goToTop()}>
+                                <Text style={styles.goToTopText}>Go To Top</Text>
                             </TouchableOpacity>
                         </ScrollView>
                     )
                     :
                     (
-                    <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
+                    <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="orange"/>
                         <Text>Birds are coming your way</Text>
                     </View>
                     )
             :
-                    (<Text style={{fontWeight:'500', top:50, textAlign: "center"}}>
+                    (<Text style={styles.ListNotSelectedText}>
                         Please, Select a List.
                     </Text>)
                 }
@@ -209,62 +308,6 @@ export default class MyList extends Component {
     }
 
 }
-
-const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        justifyContent: "center",
-        alignItems: "center",
-    },    
-    statusBar:{
-        height: Constants.statusBarHeight,
-        width: '100%',
-        // backgroundColor: 'black',
-     },
-     btn:{
-         paddingLeft: 25,
-         paddingRight: 25,
-         paddingTop: 2,
-         paddingBottom: 2,
-         marginBottom: 3,
-         marginTop: 3,
-         justifyContent: "center",
-         textAlignVertical: "center",
-         borderRadius: 5,
-         borderWidth: 0.5,
-         borderColor: 'red',
-
-     },
-     disabledBtn:{
-        paddingLeft: 25,
-        paddingRight: 25,
-        paddingTop: 2,
-        paddingBottom: 2,
-        marginBottom: 3,
-        marginTop: 3,
-        justifyContent: "center",
-        textAlignVertical: "center",
-        borderRadius: 5,
-        borderWidth: 0.5,
-        borderColor: 'grey',
-     },
-     select: {
-        width: "100%",
-        color: "black",
-        fontWeight: "700",
-        backgroundColor:"white",
-     },
-     header:{
-         
-         paddingLeft: 15, 
-         paddingRight: 15,
-         fontWeight: "700",
-         color: "red",
-         fontSize: 20,
-         justifyContent: "center", 
-         alignSelf:"center"
-        },
-});
 
 
 

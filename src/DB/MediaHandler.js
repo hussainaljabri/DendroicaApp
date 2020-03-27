@@ -113,12 +113,13 @@ var _downloadFile = (type, dbFileName, onFinishedCallback)  => {
 }
 
 var purgeCustomList = (list_id) => {
+    var _purgeFile = (dbFileName) => {
+        FileSystem.deleteAsync(_toFsPath(dbFileName));
+        // onFinishedCallback();
+    }
     DatabaseModule.purgeCustomListDB(list_id, _purgeFile);
 
-    var _purgeFile = (dbFileName, onFinishedCallback) => {
-        FileSystem.deleteAsync(_toFsPath(dbFileName));
-        onFinishedCallback();
-    }
+    
 }
 
 //Changes the urls in the bird props object according to connection state and isDownloaded
