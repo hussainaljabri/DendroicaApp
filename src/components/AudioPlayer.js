@@ -135,7 +135,7 @@ export default class AudioPlayer extends React.Component {
         </Text>
 
         <Text style = {[styles.trackInfoText, styles.smallText]}>
-          Playing Track: #{this.state.currentIndex}
+          Playing Track: #{this.state.currentIndex+1}
         </Text>
       </View>
     ) : null
