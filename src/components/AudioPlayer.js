@@ -31,6 +31,24 @@ export default class AudioPlayer extends React.Component {
     }
   }
 
+  componentWillReceiveProps(newProps){
+    //console.log(newProps);
+    if(newProps.audioSelected != this.state.currentIndex){
+      this.handleTrackJump(newProps.audioSelected)
+    }
+  }
+
+  handleTrackJump= async(audioSelected)=>{
+    let { playbackInstance} = this.state
+    if (playbackInstance) {
+      await playbackInstance.unloadAsync()
+      this.setState({
+        currentIndex: audioSelected < this.props.audioPlaylist.length? audioSelected : 0,
+      })
+      this.loadAudio()
+    }
+  }
+
   async loadAudio() {
     const {currentIndex, isPlaying, isLooping, volume} = this.state;
     const {bird_id, audioPlaylist, connected} = this.props;
@@ -117,7 +135,7 @@ export default class AudioPlayer extends React.Component {
         </Text>
 
         <Text style = {[styles.trackInfoText, styles.smallText]}>
-
+          Playing Track: #{this.state.currentIndex}
         </Text>
       </View>
     ) : null

@@ -47,6 +47,7 @@ export default class VocalizationsTab extends PureComponent {
                     audioPlaylist={this.props.audioList}
                     connected={connected}
                     bird_id={bird_id}
+                    audioSelected={this.state.audioSelected}
                     container={{
                         backgroundColor:'#e5e5e5e5'
                     }}
