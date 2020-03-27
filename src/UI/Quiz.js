@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { Platform, View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Alert, ActivityIndicator} from 'react-native';
+import {View, Text, TouchableOpacity, Image, ScrollView, Alert, ActivityIndicator} from 'react-native';
 import {Icon} from 'react-native-elements';
 import DatabaseModule from '../DB/DatabaseModule';
 import Slider from '../components/Slider';

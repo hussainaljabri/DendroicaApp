@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar, Platform} from "react-native";
+import {View, Text,TouchableOpacity, ScrollView, Alert, ActivityIndicator, StatusBar} from "react-native";
 import styles from '../styles/MyList.style';
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
@@ -8,8 +8,7 @@ import DatabaseModule from '../DB/DatabaseModule';
 import DownloadButton from '../components/DownloadButton';
 import MediaHandler from '../DB/MediaHandler';
 import NetInfo from '@react-native-community/netinfo';
-import { FontAwesome5 } from '@expo/vector-icons';
-import images from '../constants/images';
+
 
 
 export default class MyList extends Component {

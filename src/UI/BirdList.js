@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {KeyboardAvoidingView, Modal, StyleSheet, View, Text, Image, TouchableOpacity,ScrollView, FlatList , Alert, Button, TextInput, Platform, StatusBar, ActivityIndicator} from "react-native";
+import {View, Text, TouchableOpacity, FlatList , StatusBar, ActivityIndicator} from "react-native";
 import {SearchBar, Icon} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';

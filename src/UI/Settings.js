@@ -1,8 +1,6 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar, Alert} from "react-native";
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar, Alert} from "react-native";
 import Constants from 'expo-constants';
-import ActionSheet from 'react-native-actionsheet';
-import {Icon} from 'react-native-elements';
 import ListCard from '../components/ListCard';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';

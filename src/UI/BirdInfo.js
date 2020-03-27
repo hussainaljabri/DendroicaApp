@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar, ActivityIndicator, Button} from "react-native";
+import {Modal, View, Text, Image, ScrollView, TouchableHighlight, StatusBar, ActivityIndicator} from "react-native";
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
-import Constants from 'expo-constants';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import NetInfo from '@react-native-community/netinfo';
 import DatabaseModule from '../DB/DatabaseModule';
@@ -10,7 +9,6 @@ import MediaHandler from '../DB/MediaHandler';
 import Slider from '../components/Slider';
 import styles from '../styles/BirdInfo.style';
 import VocalizationsTab from "../components/VocalizationsTab";
-import { FontAwesome } from "@expo/vector-icons";
 const prefix='https://natureinstruct.org';
 import { HeaderBackButton } from 'react-navigation-stack';
 
