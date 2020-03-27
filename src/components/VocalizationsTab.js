@@ -51,6 +51,7 @@ export default class VocalizationsTab extends PureComponent {
                     container={{
                         backgroundColor:'#e5e5e5e5'
                     }}
+                    stopPlaying={this.props.hasUserLeft}
                 />
                 <View style={sectionHeaderContainer}>
                     <Icon 

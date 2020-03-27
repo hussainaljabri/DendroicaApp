@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar, ActivityIndicator} from "react-native";
+import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar, ActivityIndicator, Button} from "react-native";
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from 'expo-constants';
@@ -10,8 +10,9 @@ import MediaHandler from '../DB/MediaHandler';
 import Slider from '../components/Slider';
 import styles from '../styles/BirdInfo.style';
 import VocalizationsTab from "../components/VocalizationsTab";
+import { FontAwesome } from "@expo/vector-icons";
 const prefix='https://natureinstruct.org';
-
+import { HeaderBackButton } from 'react-navigation-stack';
 
 export default class BirdInfo extends Component {
     state={
@@ -33,9 +34,11 @@ export default class BirdInfo extends Component {
         soundsReady: false,
         page: 0,
         connected: true,// assume internet connection is on.
+        hasUserLeft: false, // to know if user has left this bird, to stop its sounds if ever left playing.
     }
 
     static navigationOptions = ({navigation})=> ({
+        headerLeft: navigation.state.params.headerLeft,
         headerTitle:()=> (
         <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitleBirdName}>{navigation.state.params.title}</Text>
@@ -44,10 +47,29 @@ export default class BirdInfo extends Component {
         headerTintColor: "#34C759", // COLOR
         
     })
+
+    handleAudioPlayer(){
+        this.setState({
+            hasUserLeft: true,
+        });
+    }
     componentWillUnmount(){
         this.unsubscribe();
+        this.hasUserLeft = true;
     }
     componentWillMount(){
+        this.hasUserLeft = false;
+        this.props.navigation.setParams({
+            headerLeft: ()=>(
+                <HeaderBackButton
+                    tintColor="#34C759"
+                    onPress={()=>{
+                        this.handleAudioPlayer(); // TO STOP sounds before leaving birds page.
+                        this.props.navigation.goBack();
+                    }}
+                />
+            )
+        });
         this.unsubscribe = NetInfo.addEventListener(c => {
             this.setState((state)=>{
                 return {
@@ -263,12 +285,13 @@ export default class BirdInfo extends Component {
     }
     getVocalPage=()=>{
         return (
-        <VocalizationsTab
-            audioList={this.state.sounds}
-            sectionHeaderContainer={styles.sectionHeaderContainer}
-            connected={this.state.connected}
-            bird_id={this.state.info._id}
-        />)
+            <VocalizationsTab
+                audioList={this.state.sounds}
+                sectionHeaderContainer={styles.sectionHeaderContainer}
+                connected={this.state.connected}
+                bird_id={this.state.info._id}
+                hasUserLeft={this.hasUserLeft} // to stop sound if user left this bird's BirdInfo.js
+            />)
     }
 
     getMapPage=()=>{
