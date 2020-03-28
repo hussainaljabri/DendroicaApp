@@ -54,13 +54,11 @@ export default class BirdInfo extends Component {
         *
         *   Returning `false` will cause the event to bubble up and react-navigation's listener will pop the screen.
         * */
-       if (!this.state.hasUserLeft) {
+       
         // do something
         this.handleAudioPlayer();
         this.props.navigation.goBack();
         return true;
-      }
-      return false;
     };
 
     handleAudioPlayer(){

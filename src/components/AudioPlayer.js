@@ -36,7 +36,7 @@ export default class AudioPlayer extends React.Component {
     if(newProps.audioSelected != this.state.currentIndex){
       this.handleTrackJump(newProps.audioSelected)
     }
-    if(newProps.stopPlaying){
+    if(newProps.stopPlaying && this.state.isPlaying){
       console.log('stopping sound');
       this.handlePlayPause()
     }
