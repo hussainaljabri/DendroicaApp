@@ -11,6 +11,7 @@ import styles from '../styles/BirdInfo.style';
 import VocalizationsTab from "../components/VocalizationsTab";
 const prefix='https://natureinstruct.org';
 import { HeaderBackButton } from 'react-navigation-stack';
+import { AndroidBackHandler } from 'react-navigation-backhandler';
 
 export default class BirdInfo extends Component {
     state={
@@ -45,6 +46,22 @@ export default class BirdInfo extends Component {
         headerTintColor: "#34C759", // COLOR
         
     })
+
+    onBackButtonPressAndroid = () =>{
+        /*
+        *   Returning `true` from `onBackButtonPressAndroid` denotes that we have handled the event,
+        *   and react-navigation's lister will not get called, thus not popping the screen.
+        *
+        *   Returning `false` will cause the event to bubble up and react-navigation's listener will pop the screen.
+        * */
+       if (!this.state.hasUserLeft) {
+        // do something
+        this.handleAudioPlayer();
+        this.props.navigation.goBack();
+        return true;
+      }
+      return false;
+    };
 
     handleAudioPlayer(){
         this.setState({
@@ -378,6 +395,7 @@ export default class BirdInfo extends Component {
         const {page} = this.state;
         return (
             <View style={styles.container}>
+                <AndroidBackHandler onBackPress={this.onBackButtonPressAndroid}/>
                 <StatusBar barStyle="dark-content" backgroundColor="black" /> 
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
                     <TouchableOpacity style={[styles.TabButtonLeft ,{backgroundColor: page == 0? '#34C759':'#DCDCDC'}]} onPress={()=> this.infoBtnHandler()}>
