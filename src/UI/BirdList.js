@@ -357,18 +357,6 @@ export default class BirdList extends Component {
                     </View>
                 )
             }
-                
-
-                {/* <ScrollView  ref={(ref)=> this.scrollView = ref} style={{flex:1, paddingHorizontal: 5}} scrollsToTop={true} showsVerticalScrollIndicator={true} onMomentumScrollBegin={this.topHide} >
-                    {this.getBirdCards()}
-
-
-                    
-                    <TouchableOpacity style={{backgroundColor:'#E8E8E8', padding:10, justifyContent:"center", alignContent:'center'}} onPress={()=>this.goToTop()}>
-                        <Text style={{fontWeight: '500',color:'orange', textAlign:"center"}}>Go To Top</Text>
-                    </TouchableOpacity>
-                    
-                </ScrollView > */}
                
             </View>
         );

@@ -67,7 +67,7 @@ export default class AudioPlayer extends React.Component {
         volume
       }
 
-      playbackInstance.setOnPlaybackStatusUpdate(this.setOnPlaybackStatusUpdate)
+      playbackInstance.setOnPlaybackStatusUpdate(this.OnPlaybackStatusUpdate)
       await playbackInstance.loadAsync(source, status, false)
       this.setState({playbackInstance})
     } catch (e) {

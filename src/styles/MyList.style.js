@@ -63,7 +63,7 @@ export default StyleSheet.create({
     headerContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        padding: 10
+        paddingBottom: 10
     },
     ActionSheetContainer: {
         marginHorizontal: 10,
