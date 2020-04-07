@@ -1,9 +1,5 @@
-
-
-
 import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, Dimensions, ScrollView, Alert, Button, TextInput} from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { StyleSheet, View, Text, Image, Dimensions, ScrollView} from "react-native";
 import {Icon} from 'react-native-elements';
 import AudioCard from "../commons/AudioCard";
 import AudioPlayer from "../components/AudioPlayer";

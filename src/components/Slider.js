@@ -20,7 +20,7 @@ const colors = {
     background2: '#21D4FD'
 };
 const entryBorderRadius = 8;
-const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
+
 /**
  * this.props.data
  * this.props.onPress
@@ -104,7 +104,6 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 7,
-        // marginHorizontal: 4
     },
     imageContainer: {
         marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue

@@ -32,7 +32,7 @@ export default class SaveAlert extends Component{
         this.setState({value : value.name, selectedListId: value._id});
       }
     passData = () =>{
-        /* @TODO: Validate data before passing */
+        /* Validate data before passing */
         if(this.state.tab == 1){
             this.props.confirm(this.state.selectedListId);
         }else{

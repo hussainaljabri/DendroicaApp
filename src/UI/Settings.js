@@ -149,13 +149,13 @@ export default class Settings extends Component {
                     <View styles={styles.buttonsContainer}>
 
                             <View style={{flexWrap:'wrap'}}>
-                                <TouchableOpacity style={[styles.btn, {}]}>
+                                <TouchableOpacity style={styles.btn}>
                                     <Text style={{fontWeight:"600", color: "purple"}}>Delete All Downloaded Content</Text>
                                 </TouchableOpacity>
                             </View>
 
                             <View style={{flexWrap:'wrap'}}>
-                                <TouchableOpacity style={[styles.btn, {}]}>
+                                <TouchableOpacity style={styles.btn}>
                                     <Text style={{fontWeight:"600", color: "purple"}}>Log Out</Text>
                                 </TouchableOpacity>
                             </View>

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Image, View, TextInput} from 'react-native';
+import {View, TextInput} from 'react-native';
 
 const InputBox = ({children, onChange, value, type}) =>(
     <View 
@@ -23,13 +23,7 @@ const InputBox = ({children, onChange, value, type}) =>(
                 underlineColorAndroid="transparent"
                 secureTextEntry={type==='pass'? true: false}
             />
-        </View>
-        {/* <View>
-            <Text style={{fontSize: 12, color: 'white', fontWeight: '600', letterSpacing:2}}>
-                {children}
-            </Text>
-        </View> */}
-        
+        </View>       
     </View>
 );
 

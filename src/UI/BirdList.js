@@ -38,9 +38,6 @@ export default class BirdList extends Component {
         searchInput: '',
         birds: [],
         dataReady: false, // id, info, uri.
-        scrolltotop: false,
-        isTopBarHidden: false,
-        barclicked: false,
 
         selectionMode: false,
         birdSelected: new Map(),
@@ -79,13 +76,9 @@ export default class BirdList extends Component {
 
 
         if(this.state.selected != 0){
-
             DatabaseModule.getDisplayInfo(
                 this.state.selected,
                 {
-                    // success: (result)=>{
-                    //     console.log('testing CANADA: '+ result);
-                    // }
                     success: (result)=>{
                         this.setState({
                             birds: result,
@@ -93,8 +86,7 @@ export default class BirdList extends Component {
                         });
                     }
                 }
-            );
-                
+            );    
         }
         
     };
@@ -127,7 +119,6 @@ export default class BirdList extends Component {
     };
     
     handlerClick=(id, name, scientific_name)=>{ 
-        // Alert.alert("Click:\n" +id+": "+name);
         if(!this.state.selectionMode){
             this.props.navigation.navigate('BirdInfo',
                 //params
@@ -146,39 +137,11 @@ export default class BirdList extends Component {
                 //remove key if selected, add key if not selected
                 this.state.birdSelected.has(id) ? selected.delete(id, !selected.get(id)) : selected.set(id, !selected.get(id));
                 this.state.birdSelected.has(id) ? count = -1: count= 1;
-                // console.log(selected);
                 return {birdSelected: selected, selectionCount: state.selectionCount+count};
             });
-            console.log(this.state.birdSelected);
-
-        }
-
-    };
-    handlerScrolltotop=()=>{
-        if(this.state.scrolltotop){
-            this.setState({isTopBarHidden: false, barclicked: false});
-        }else{
-            this.setState({isTopBarHidden: true, barclicked: false});
         }
     };
-    handleScroll=()=>{
-        this.setState({isTopBarHidden: !this.state.isTopBarHidden});
-    };
-    topShow = () =>{
-        this.setState({isTopBarHidden: false});
-    }
-    topHide = () =>{
-        this.setState({isTopBarHidden: true});
-    }
 
-    /**
-     * ------------------------------------------------------------------------------------------
-     */
-    goToTop = () => {
-        if(this.scrollView != null){
-            this.scrollView.scrollTo({x: 0, y: 0, animated: true});
-        }
-     }
     selectedNewContinent=(index)=>{
         this.setState({birds:[], selected: index, dataReady: false});
         // we should call out the new list.
@@ -193,10 +156,9 @@ export default class BirdList extends Component {
                 }
             }
         );
-
     }
+
     handlerLongClick=()=>{
-        console.log("Toggle Selection Mode");
         this.setState({
             selectionMode: !this.state.selectionMode,
             birdSelected: new Map(),
@@ -204,6 +166,7 @@ export default class BirdList extends Component {
             displayAlert: false
         });
     };
+
     getFlatList=()=>{
         return (
         <FlatList 
@@ -252,9 +215,6 @@ export default class BirdList extends Component {
                             </Text>
                         </TouchableOpacity>
                     </View>
-                    {/* <View>
-                        <Text style={{paddingLeft:25,paddingRight:25, paddingBottom:5, paddingTop:10, textAlign:"right"}}>Birds Selected: {this.state.birdSelected.length}</Text>
-                    </View> */}
                </View>
             );
 
@@ -290,7 +250,6 @@ export default class BirdList extends Component {
            }});
     }
     render(){
-        const topBarStyle = this.state.isTopBarHidden;
         return (
             <View style={styles.container}>
                 {/* SaveTo alert */}
@@ -311,38 +270,29 @@ export default class BirdList extends Component {
 
                 <View style={styles.statusBar}/>
                 <StatusBar barStyle="dark-content" />
-                {topBarStyle ? 
-                    <TouchableOpacity onPress={()=> this.topShow()} style={styles.expandButton}>
-                        <Icon size={22} type='material-community' name='menu-down' color='black'/>
-                    </TouchableOpacity>
-                :
-                    (
-                    
-                    <View style={styles.headerContainer}>
-                        <View style={styles.innerHeaderContainer}>
-                            <Text style={styles.headerText}>Explore |</Text>
-                                <View style={styles.actionSheetContainer}>
-                                    <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{continents[this.state.selected]}</Text>
-                                    <ActionSheet
-                                        ref={o => this.ActionSheet = o}
-                                        title={<Text style={styles.actionSheetTitle}>Select Region</Text>}
-                                        cancelButtonIndex={0}
-                                        destructiveButtonIndex={0}
-                                        options={continents}
-                                        onPress={(index) => { /* do something */ 
-                                            console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
-                                            index != 0? (this.state.selected != index? this.selectedNewContinent(index): {}) : {};
-                                        }}
-                                    />
+                <View style={styles.headerContainer}>
+                    <View style={styles.innerHeaderContainer}>
+                        <Text style={styles.headerText}>Explore |</Text>
+                            <View style={styles.actionSheetContainer}>
+                                <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{continents[this.state.selected]}</Text>
+                                <ActionSheet
+                                    ref={o => this.ActionSheet = o}
+                                    title={<Text style={styles.actionSheetTitle}>Select Region</Text>}
+                                    cancelButtonIndex={0}
+                                    destructiveButtonIndex={0}
+                                    options={continents}
+                                    onPress={(index) => { /* do something */ 
+                                        console.log('actionsheet: '+index+ ' corresponds to :'+ continents[index]);
+                                        index != 0? (this.state.selected != index? this.selectedNewContinent(index): {}) : {};
+                                    }}
+                                />
 
-                                </View>
-                        </View>
-                        
-                        {this.getSpeciesOrSelection()}
-                            
-                    </View>)
+                            </View>
+                    </View>
                     
-                }
+                    {this.getSpeciesOrSelection()}
+                        
+                </View>
             {this.state.dataReady? 
 
                 (
