@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import {View, Text, TouchableOpacity, FlatList , StatusBar, ActivityIndicator} from "react-native";
-import {SearchBar, Icon} from 'react-native-elements';
+import {SearchBar} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
 import SaveAlert from '../components/SaveAlert';
-import NetInfo, { isConnected } from '@react-native-community/netinfo';
+import NetInfo from '@react-native-community/netinfo';
 import styles from '../styles/BirdList.style.js';
 
 

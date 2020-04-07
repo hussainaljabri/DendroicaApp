@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {TextInput, TouchableOpacity, Alert, Animated, Image, View, Text, ActivityIndicator } from 'react-native';
+import {Animated, View, ActivityIndicator } from 'react-native';
 import { images } from '../constants/images';
 import Authentication from "../DB/Authentication";
 import DatabaseManagementModule from "../DB/DatabaseManagementModule";
@@ -7,11 +7,6 @@ import MediaHandler from "../DB/MediaHandler";
 import InputBox from '../commons/InputBox'
 import LoginButton from '../commons/LoginButton';
 import OnboardingLogo from '../commons/OnboardingLogo';
-
-
-
-
-
 
 class Welcome extends Component{
     state = {
@@ -30,9 +25,8 @@ class Welcome extends Component{
     }
 
     componentDidMount(){
-        Animated.parallel([this.positionAnim(), this.opacityAnim(), this.btnpositionAnim()]).start(); // to start both animations at same time
-        // this.opacityAnim();
-        // this.positionAnim();
+         // to start both animations at same time
+        Animated.parallel([this.positionAnim(), this.opacityAnim(), this.btnpositionAnim()]).start();
     }
     
     btnpositionAnim=()=>{

@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar, Alert} from "react-native";
-import Constants from 'expo-constants';
+import { View, Text, TouchableOpacity, ScrollView, Platform, TextInput, Switch, StatusBar, Alert} from "react-native";
 import ListCard from '../components/ListCard';
 import DatabaseModule from '../DB/DatabaseModule';
 import MediaHandler from '../DB/MediaHandler';
@@ -21,14 +20,10 @@ export default class Settings extends Component {
     componentWillMount(){
         DatabaseModule.getLists({
             success: (result)=>{
-                // console.log('Lists: '+JSON.stringify(result)); 
-//Lists: [{"_id":25088,"name":"Test List","isDownloaded":"false"},{"_id":25089,"name":"test","isDownloaded":"false"}]
-
                 this.setState({
                     listsReady: true,
                     lists: result,
                 });
-                // console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
             }
         });
     }
@@ -37,8 +32,8 @@ export default class Settings extends Component {
         console.log('toggleRate is: ' + value)
     }
     toggleMigration = (value) => {
-    this.setState({migrationSelect: value})
-    console.log('toggleMigration is: ' + value)
+        this.setState({migrationSelect: value})
+        console.log('toggleMigration is: ' + value)
     }
     showActionSheet = () => {
         this.ActionSheet.show();

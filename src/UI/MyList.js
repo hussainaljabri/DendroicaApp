@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import {View, Text,TouchableOpacity, ScrollView, Alert, ActivityIndicator, StatusBar} from "react-native";
+import {View, Text,TouchableOpacity, ScrollView, ActivityIndicator, StatusBar} from "react-native";
 import styles from '../styles/MyList.style';
-import {SearchBar, Icon} from 'react-native-elements';
+import {SearchBar} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
