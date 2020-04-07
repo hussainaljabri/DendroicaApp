@@ -16,7 +16,6 @@ export default class VocalizationsTab extends PureComponent {
     }
 
     getAudioCards = () =>{
-        //console.log(this.props.audioList);
         return this.props.audioList.map((item, index)=>{
                 return (
                     <View key={`V-${index}`} style={styles.AudioCardContainer}>

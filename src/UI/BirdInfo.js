@@ -91,8 +91,6 @@ export default class BirdInfo extends Component {
     //Only get connection info once when component is loaded. No need to rerender when connection changes
     NetInfo.fetch().then(connectionState => {
         let id = this.props.navigation.state.params.id
-        console.log('birdinfo: id :'+ id);
-
         DatabaseModule.getImageUrlsByBirdId(
             id,
             { //{"_id":78886,"bird_id":257,"filename":"/files/avian_images/78886-Empidonax_virescens_AOU_7_52.jpg","credits":"Kelly Colgan Azar","displayOrder":1}
@@ -159,12 +157,10 @@ export default class BirdInfo extends Component {
 
 
    ShowModalFunction(visible) {
-    console.log('ShowModalFunction from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
-    this.setState({ isModelVisible: visible });
+        this.setState({ isModelVisible: visible });
     };
     _handleModalButton=()=>{
-       console.log('ToggleModelVisible from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
-       this.setState({ isModelVisible: !this.state.isModelVisible});
+        this.setState({ isModelVisible: !this.state.isModelVisible});
     }
    getImageModal=(page)=>{
         if(page==='info'){
