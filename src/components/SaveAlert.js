@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Platform, TextInput, ActivityIndicator, Dimensions, StatusBar, Modal} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Platform, TextInput, ActivityIndicator, Dimensions, Modal} from 'react-native';
 import {Select, Option} from "react-native-chooser";
 import DatabaseModule from "../DB/DatabaseModule";
 

@@ -106,7 +106,6 @@ export default class BirdInfo extends Component {
                             imageCredit.push(item.image_credits);
                         }
                     });
-                    // console.log(JSON.stringify(imageCredit));
                     this.setState({
                         page: 0,
                         images: images,
@@ -116,15 +115,11 @@ export default class BirdInfo extends Component {
                     // call for info
                     DatabaseModule.getBirdById(id,{
                         success: (result)=>{
-                            //{"_id":257,"name":"Acadian Flycatcher","scientific_name":"Empidonax virescens","range_description":"CANADA - Breeding only: 9,784 square km\nCARIBBEAN - Migration only: 119,391 square km\nCENTRAL AMERICA - Wintering only: 104,297 square km; Migration only: 405,573 square km\nMEXICO - Migration only: 433,743 square km\nSOUTH AMERICA - Wintering only: 555,165 square km\nUSA - Breeding only: 2,451,982 square km; Migration only: 168,294 square km","song_description":"Song is an emphatic \"peet-seet\", \"peet-suh\", with
-                            //  accent on second syllable. Call is a sharp \"peet\"."}
-                            // console.log(JSON.stringify(result));
                             this.setState({
                                 info: result,
                                 infoReady: true,
                             });
                             DatabaseModule.getMapsUrlByBirdId(id, {
-                                //@FIXME. Render maps component differently if !connectionState.isConnected
                                 success: (result)=>{
                                     let mapImages = [];
                                     let mapCredit = [];
@@ -143,7 +138,6 @@ export default class BirdInfo extends Component {
                             });
                         }
                     });
-                    
                     // get vocalizations in Parallel.
                     DatabaseModule.getVocalizationUrlsForBirdId(id,{
                         success: (result)=>{
@@ -236,17 +230,12 @@ export default class BirdInfo extends Component {
    }
 
    _renderItem =({item, index})=>{
-    // console.log(item);
-    const even = (index + 1) % 2 === 0;
-    // console.log(even);
     return (
            <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
             <View key={'VW'+index} style={styles.imageContainer}>
                 <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
             </View>
         </TouchableOpacity>
-
-
     );}
 
     _handlePageZoom({ type, scale }) {
@@ -284,10 +273,6 @@ export default class BirdInfo extends Component {
 
                     <View>
                         <Text>Photo Credit: {this.state.imageReady? (this.state.imageCredit[this.state.activeSlide]?this.state.imageCredit[this.state.activeSlide]:'Not Found'):'Loading..'}</Text>
-                        {/* <Text>Source: {this.state.imageCredit[this.state.activeSlide].source}</Text>
-                        <Text>Date: {this.state.imageCredit[this.state.activeSlide].date}</Text>
-                        <Text>Region: {this.state.imageCredit[this.state.activeSlide].region}</Text>
-                        <Text>Bird Maturity: {this.state.imageCredit[this.state.activeSlide].maturity}</Text> */}
                     </View>
 
                 </View>
@@ -325,7 +310,7 @@ export default class BirdInfo extends Component {
                     <Text style={styles.title}> Location</Text>
 
                 </View>
-                    {this.state.info? // for debugging
+                    {this.state.info?
                         (<View style={styles.textContainer}>
                             <Text>Map photo credit: {this.state.mapImagesReady? this.state.mapCredit[this.state.activeMapSlide]:'Not Found'}</Text>
                             <Text style={styles.textContainer}>Range Description for {this.state.info.name}</Text>
@@ -408,16 +393,16 @@ export default class BirdInfo extends Component {
                 </View>
                 
                 {this.state.imageReady && this.state.infoReady? 
-                    (this.getLayout())
-                    // (console.log(this.state.data.name))
-                   
-                        : 
-                    
+                    (
+                        this.getLayout()
+                    )
+                : //else    
                     (
                     <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
                         <ActivityIndicator size="large" color="#34C759"/>
                         <Text>Loading bird information...</Text>
-                    </View>)}
+                    </View>)
+                }
             </View>
         );
     }

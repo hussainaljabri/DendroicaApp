@@ -1,6 +1,5 @@
 import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { StyleSheet, View, Text} from "react-native";
 import {Icon} from 'react-native-elements';
 import { FontAwesome5 } from '@expo/vector-icons';
 export default class ListCard extends PureComponent {

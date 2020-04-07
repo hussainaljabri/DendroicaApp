@@ -1,5 +1,5 @@
-import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
+import React from "react";
+import { StyleSheet, View, Text, Image} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';

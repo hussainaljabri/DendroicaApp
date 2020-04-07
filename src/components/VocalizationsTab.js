@@ -1,5 +1,5 @@
 import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, Dimensions, ScrollView} from "react-native";
+import { StyleSheet, View, Text, Dimensions, ScrollView} from "react-native";
 import {Icon} from 'react-native-elements';
 import AudioCard from "../commons/AudioCard";
 import AudioPlayer from "../components/AudioPlayer";
