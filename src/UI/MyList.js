@@ -1,15 +1,14 @@
 import React, { Component } from "react";
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, Button, TextInput, ActivityIndicator, StatusBar, Platform} from "react-native";
+import {View, Text,TouchableOpacity, ScrollView, ActivityIndicator, StatusBar} from "react-native";
 import styles from '../styles/MyList.style';
-import {SearchBar, Icon} from 'react-native-elements';
+import {SearchBar} from 'react-native-elements';
 import BirdCard from '../components/BirdCard';
 import ActionSheet from 'react-native-actionsheet';
 import DatabaseModule from '../DB/DatabaseModule';
 import DownloadButton from '../components/DownloadButton';
 import MediaHandler from '../DB/MediaHandler';
 import NetInfo from '@react-native-community/netinfo';
-import { FontAwesome5 } from '@expo/vector-icons';
-import images from '../constants/images';
+
 
 
 export default class MyList extends Component {
@@ -84,12 +83,7 @@ export default class MyList extends Component {
             searchInput: text,
         });
     }
-    handlerLongClick=(id, name)=>{
-        Alert.alert("LongPress: \n" +id+": "+name);
-    }
     handlerClick=(id, name, scientific_name)=>{
-        // I need id, name, scientific_name, filename, 
-        // Alert.alert("Click:\n" +id+": "+name);
         this.props.navigation.navigate('BirdInfo',
             //params
             {
@@ -99,7 +93,6 @@ export default class MyList extends Component {
                 downloaded: this.state.selectedList.isDownloaded,
             }
         );
-
     };
 
     getBirdCards = () =>{
@@ -110,9 +103,7 @@ export default class MyList extends Component {
                     birdName={bird.name} 
                     latin={bird.scientific_name}
                     imgUrl={MediaHandler.getMediaFile(bird.bird_id, bird.filename,this.state.connected)}
-                    //imgUrl={prefix+bird.filename}
                     onPress={()=>{this.handlerClick(bird.bird_id, bird.name, bird.scientific_name)}} 
-                    // onLongPress={()=>{this.handlerLongClick(bird.bird_id, bird.name, bird.scientific_name)}}
                     style={styles.BirdCard}
                 />
             );
@@ -154,7 +145,6 @@ export default class MyList extends Component {
     refreshLists=()=>{
         DatabaseModule.getLists({
             success: (result)=>{
-                // console.log('Lists: '+JSON.stringify(result));
                 let temp = ['Cancel'];
                 temp.push(result);
                 let opt_temp = ['Cancel'];
@@ -166,7 +156,6 @@ export default class MyList extends Component {
                     optionsText: opt_temp,
                     optionsBlocks: this.getOptionsArray(temp),
                 });
-                //console.log('Loaded Lists: '+ JSON.stringify(this.state.lists));
             }
         });
         
@@ -188,7 +177,6 @@ export default class MyList extends Component {
                                     paddingLeft:30,
                                     paddingRight:30,
                                 }}>  [Downloaded]</Text>
-                        
                     </Text>
                 );   
             }else{
@@ -232,9 +220,9 @@ export default class MyList extends Component {
                     <Text style={styles.header}>MyLists |</Text>
                     <View style={styles.ActionSheetContainer}>
                         <Text onPress={this.showActionSheet} style={styles.actionSheetText}>{this.state.selectedReady?
-                         (this.state.optionsText[this.state.selected])
+                            (this.state.optionsText[this.state.selected])
                          :
-                         ("Select a List")}
+                            ("Select a List")}
                          </Text>
                         <ActionSheet
                             ref={o => this.ActionSheet = o}
@@ -248,15 +236,6 @@ export default class MyList extends Component {
                     <View style={styles.DownloadButton}>
                         <DownloadButton listIsSelected={this.state.selected} selectedList={this.state.selectedList}></DownloadButton>
                     </View>
-                    {/* <View style={{justifyContent:"center", marginRight: 5, marginLeft: 5, paddingRight:5, paddingLeft: 5}}>
-                        <TouchableOpacity>
-                            <Icon 
-                                name='playlist-edit'
-                                type='material-community'
-                                color='red'
-                            />
-                        </TouchableOpacity>
-                    </View> */}
                 </View>
                 <View style={styles.belowHeader}>
                     <SearchBar
@@ -280,29 +259,27 @@ export default class MyList extends Component {
                 {this.state.selectedReady?
 
                     this.state.birdsReady?
-                    (
-                        <ScrollView ref={(ref)=> this.scrollView = ref} style={styles.FlatList} showsVerticalScrollIndicator={false} >
-                        {this.getBirdCards()}
-                                
-                            <TouchableOpacity style={styles.goToTopBtn} onPress={()=>this.goToTop()}>
-                                <Text style={styles.goToTopText}>Go To Top</Text>
-                            </TouchableOpacity>
-                        </ScrollView>
-                    )
-                    :
-                    (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="orange"/>
-                        <Text>Birds are coming your way</Text>
-                    </View>
-                    )
-            :
+                        (
+                            <ScrollView ref={(ref)=> this.scrollView = ref} style={styles.FlatList} showsVerticalScrollIndicator={false} >
+                            {this.getBirdCards()}
+                                    
+                                <TouchableOpacity style={styles.goToTopBtn} onPress={()=>this.goToTop()}>
+                                    <Text style={styles.goToTopText}>Go To Top</Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+                        )
+                    : // else
+                        (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="orange"/>
+                            <Text>Birds are coming your way</Text>
+                        </View>
+                        )
+            : //else
                     (<Text style={styles.ListNotSelectedText}>
                         Please, Select a List.
                     </Text>)
                 }
-                
-
             </View>
         );
     }

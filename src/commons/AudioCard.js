@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+
 /**
  * 
  * @param songDescription -> Song Description passed from parent.
@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
  * @param buttonExtraStyle -> extra styling for the button.
  * @param containerStyle -> containerStyle
  */
-const AudioCard = ({songDescription, songName, selected, onPress, buttonExtraStyle, containerStyle}) =>(
+const AudioCard = ({songName, selected, onPress, buttonExtraStyle, containerStyle}) =>(
     <View style={containerStyle}>
         <TouchableOpacity onPress={onPress} style={[styles.container,buttonExtraStyle]}>
             {selected?

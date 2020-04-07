@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {StyleSheet, View, Text, TouchableOpacity, Platform, TextInput, ActivityIndicator, Dimensions, StatusBar, Modal} from 'react-native';
+import {StyleSheet, View, Text, TouchableOpacity, Platform, TextInput, ActivityIndicator, Dimensions, Modal} from 'react-native';
 import {Select, Option} from "react-native-chooser";
 import DatabaseModule from "../DB/DatabaseModule";
 
@@ -32,7 +32,7 @@ export default class SaveAlert extends Component{
         this.setState({value : value.name, selectedListId: value._id});
       }
     passData = () =>{
-        /* @TODO: Validate data before passing */
+        /* Validate data before passing */
         if(this.state.tab == 1){
             this.props.confirm(this.state.selectedListId);
         }else{

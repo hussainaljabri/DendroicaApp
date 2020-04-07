@@ -1,15 +1,10 @@
-import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, TouchableHighlight, ScrollView, Alert, Button, TextInput} from "react-native";
+import React from "react";
+import { StyleSheet, View, Text, Image} from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { LinearGradient } from 'expo-linear-gradient';
 import { FontAwesome5 } from '@expo/vector-icons';
 export default class BirdCard extends React.PureComponent {
-
-    
-
     render() {
-
-    
         return (
             <TouchableOpacity onPress={this.props.onPress} onLongPress={this.props.onLongPress} style={[styles.container, this.props.style]}>
                 {this.props.selected?
@@ -31,27 +26,23 @@ export default class BirdCard extends React.PureComponent {
                     source={{uri: this.props.imgUrl}}
                     resizeMode="cover"
                     style={styles.img}
-                />
+                    />
                     <View style={{flex: 1, flexDirection:'column', justifyContent: "center"}}>
                         <Text style={styles.birdName}>{this.props.birdName}</Text>
                         <Text style={styles.latin}>{this.props.latin}</Text>
                     </View>
                 {this.props.selected?
-                (<View style={{
-                    justifyContent: "center",
-                    alignContent:'center',
-                }}>
-                    <FontAwesome5 name = 'check' size = {25} color = 'green' />
-                </View>)
+                    (<View style={{
+                        justifyContent: "center",
+                        alignContent:'center',
+                    }}>
+                        <FontAwesome5 name = 'check' size = {25} color = 'green' />
+                    </View>)
                 :
-                null}
+                    null}
             </TouchableOpacity>
         );
-
-
     }
-
-
 }
 
 
@@ -59,7 +50,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'row',
-        // borderRadius: 10,
         borderColor: 'black',
         borderWidth: 0.3,
         backgroundColor: '#F8F8F8',
@@ -67,9 +57,6 @@ const styles = StyleSheet.create({
     img: {
         width: 130,
         height: 110,
-        // borderRadius: 5,
-        // borderColor: "black",
-        // borderWidth: 1,
     },
     birdName:{
         paddingHorizontal: 10,

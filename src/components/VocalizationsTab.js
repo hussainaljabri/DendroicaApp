@@ -1,9 +1,5 @@
-
-
-
 import React, { PureComponent } from "react";
-import { StyleSheet, View, Text, Image, Dimensions, ScrollView, Alert, Button, TextInput} from "react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { StyleSheet, View, Text, Dimensions, ScrollView} from "react-native";
 import {Icon} from 'react-native-elements';
 import AudioCard from "../commons/AudioCard";
 import AudioPlayer from "../components/AudioPlayer";
@@ -20,7 +16,6 @@ export default class VocalizationsTab extends PureComponent {
     }
 
     getAudioCards = () =>{
-        //console.log(this.props.audioList);
         return this.props.audioList.map((item, index)=>{
                 return (
                     <View key={`V-${index}`} style={styles.AudioCardContainer}>
@@ -51,6 +46,7 @@ export default class VocalizationsTab extends PureComponent {
                     container={{
                         backgroundColor:'#e5e5e5e5'
                     }}
+                    stopPlaying={this.props.hasUserLeft}
                 />
                 <View style={sectionHeaderContainer}>
                     <Icon 

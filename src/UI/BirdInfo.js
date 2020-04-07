@@ -1,8 +1,7 @@
 import React, { Component } from "react";
-import {Modal, StyleSheet, View, Text, Image, ScrollView, Platform , Dimensions, TouchableHighlight, StatusBar, ActivityIndicator} from "react-native";
+import {Modal, View, Text, Image, ScrollView, TouchableHighlight, StatusBar, ActivityIndicator} from "react-native";
 import {Icon} from 'react-native-elements';
 import { TouchableOpacity } from "react-native-gesture-handler";
-import Constants from 'expo-constants';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import NetInfo from '@react-native-community/netinfo';
 import DatabaseModule from '../DB/DatabaseModule';
@@ -11,7 +10,8 @@ import Slider from '../components/Slider';
 import styles from '../styles/BirdInfo.style';
 import VocalizationsTab from "../components/VocalizationsTab";
 const prefix='https://natureinstruct.org';
-
+import { HeaderBackButton } from 'react-navigation-stack';
+import { AndroidBackHandler } from 'react-navigation-backhandler';
 
 export default class BirdInfo extends Component {
     state={
@@ -33,9 +33,11 @@ export default class BirdInfo extends Component {
         soundsReady: false,
         page: 0,
         connected: true,// assume internet connection is on.
+        hasUserLeft: false, // to know if user has left this bird, to stop its sounds if ever left playing.
     }
 
     static navigationOptions = ({navigation})=> ({
+        headerLeft: navigation.state.params.headerLeft,
         headerTitle:()=> (
         <View style={styles.headerTitleContainer}>
             <Text style={styles.headerTitleBirdName}>{navigation.state.params.title}</Text>
@@ -44,10 +46,41 @@ export default class BirdInfo extends Component {
         headerTintColor: "#34C759", // COLOR
         
     })
+
+    onBackButtonPressAndroid = () =>{
+        /*
+        *   Returning `true` from `onBackButtonPressAndroid` denotes that we have handled the event,
+        *   and react-navigation's lister will not get called, thus not popping the screen.
+        *
+        *   Returning `false` will cause the event to bubble up and react-navigation's listener will pop the screen.
+        * */
+       
+        // do something
+        this.handleAudioPlayer();
+        this.props.navigation.goBack();
+        return true;
+    };
+
+    handleAudioPlayer(){
+        this.setState({
+            hasUserLeft: true,
+        });
+    }
     componentWillUnmount(){
         this.unsubscribe();
     }
     componentWillMount(){
+        this.props.navigation.setParams({
+            headerLeft: ()=>(
+                <HeaderBackButton
+                    tintColor="#34C759"
+                    onPress={()=>{
+                        this.handleAudioPlayer(); // TO STOP sounds before leaving birds page.
+                        this.props.navigation.goBack();
+                    }}
+                />
+            )
+        });
         this.unsubscribe = NetInfo.addEventListener(c => {
             this.setState((state)=>{
                 return {
@@ -58,8 +91,6 @@ export default class BirdInfo extends Component {
     //Only get connection info once when component is loaded. No need to rerender when connection changes
     NetInfo.fetch().then(connectionState => {
         let id = this.props.navigation.state.params.id
-        console.log('birdinfo: id :'+ id);
-
         DatabaseModule.getImageUrlsByBirdId(
             id,
             { //{"_id":78886,"bird_id":257,"filename":"/files/avian_images/78886-Empidonax_virescens_AOU_7_52.jpg","credits":"Kelly Colgan Azar","displayOrder":1}
@@ -73,7 +104,6 @@ export default class BirdInfo extends Component {
                             imageCredit.push(item.image_credits);
                         }
                     });
-                    // console.log(JSON.stringify(imageCredit));
                     this.setState({
                         page: 0,
                         images: images,
@@ -83,15 +113,11 @@ export default class BirdInfo extends Component {
                     // call for info
                     DatabaseModule.getBirdById(id,{
                         success: (result)=>{
-                            //{"_id":257,"name":"Acadian Flycatcher","scientific_name":"Empidonax virescens","range_description":"CANADA - Breeding only: 9,784 square km\nCARIBBEAN - Migration only: 119,391 square km\nCENTRAL AMERICA - Wintering only: 104,297 square km; Migration only: 405,573 square km\nMEXICO - Migration only: 433,743 square km\nSOUTH AMERICA - Wintering only: 555,165 square km\nUSA - Breeding only: 2,451,982 square km; Migration only: 168,294 square km","song_description":"Song is an emphatic \"peet-seet\", \"peet-suh\", with
-                            //  accent on second syllable. Call is a sharp \"peet\"."}
-                            // console.log(JSON.stringify(result));
                             this.setState({
                                 info: result,
                                 infoReady: true,
                             });
                             DatabaseModule.getMapsUrlByBirdId(id, {
-                                //@FIXME. Render maps component differently if !connectionState.isConnected
                                 success: (result)=>{
                                     let mapImages = [];
                                     let mapCredit = [];
@@ -110,7 +136,6 @@ export default class BirdInfo extends Component {
                             });
                         }
                     });
-                    
                     // get vocalizations in Parallel.
                     DatabaseModule.getVocalizationUrlsForBirdId(id,{
                         success: (result)=>{
@@ -132,12 +157,10 @@ export default class BirdInfo extends Component {
 
 
    ShowModalFunction(visible) {
-    console.log('ShowModalFunction from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
-    this.setState({ isModelVisible: visible });
+        this.setState({ isModelVisible: visible });
     };
     _handleModalButton=()=>{
-       console.log('ToggleModelVisible from: '+this.state.isModelVisible+' to: '+!this.state.isModelVisible);
-       this.setState({ isModelVisible: !this.state.isModelVisible});
+        this.setState({ isModelVisible: !this.state.isModelVisible});
     }
    getImageModal=(page)=>{
         if(page==='info'){
@@ -203,17 +226,12 @@ export default class BirdInfo extends Component {
    }
 
    _renderItem =({item, index})=>{
-    // console.log(item);
-    const even = (index + 1) % 2 === 0;
-    // console.log(even);
     return (
            <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
             <View key={'VW'+index} style={styles.imageContainer}>
                 <Image key={'IM'+index} style={styles.image} source={{uri: item}} />
             </View>
         </TouchableOpacity>
-
-
     );}
 
     _handlePageZoom({ type, scale }) {
@@ -251,10 +269,6 @@ export default class BirdInfo extends Component {
 
                     <View>
                         <Text>Photo Credit: {this.state.imageReady? (this.state.imageCredit[this.state.activeSlide]?this.state.imageCredit[this.state.activeSlide]:'Not Found'):'Loading..'}</Text>
-                        {/* <Text>Source: {this.state.imageCredit[this.state.activeSlide].source}</Text>
-                        <Text>Date: {this.state.imageCredit[this.state.activeSlide].date}</Text>
-                        <Text>Region: {this.state.imageCredit[this.state.activeSlide].region}</Text>
-                        <Text>Bird Maturity: {this.state.imageCredit[this.state.activeSlide].maturity}</Text> */}
                     </View>
 
                 </View>
@@ -263,12 +277,13 @@ export default class BirdInfo extends Component {
     }
     getVocalPage=()=>{
         return (
-        <VocalizationsTab
-            audioList={this.state.sounds}
-            sectionHeaderContainer={styles.sectionHeaderContainer}
-            connected={this.state.connected}
-            bird_id={this.state.info._id}
-        />)
+            <VocalizationsTab
+                audioList={this.state.sounds}
+                sectionHeaderContainer={styles.sectionHeaderContainer}
+                connected={this.state.connected}
+                bird_id={this.state.info._id}
+                hasUserLeft={this.state.hasUserLeft} // to stop sound if user left this bird's BirdInfo.js
+            />)
     }
 
     getMapPage=()=>{
@@ -291,7 +306,7 @@ export default class BirdInfo extends Component {
                     <Text style={styles.title}> Location</Text>
 
                 </View>
-                    {this.state.info? // for debugging
+                    {this.state.info?
                         (<View style={styles.textContainer}>
                             <Text>Map photo credit: {this.state.mapImagesReady? this.state.mapCredit[this.state.activeMapSlide]:'Not Found'}</Text>
                             <Text style={styles.textContainer}>Range Description for {this.state.info.name}</Text>
@@ -359,6 +374,7 @@ export default class BirdInfo extends Component {
         const {page} = this.state;
         return (
             <View style={styles.container}>
+                <AndroidBackHandler onBackPress={this.onBackButtonPressAndroid}/>
                 <StatusBar barStyle="dark-content" backgroundColor="black" /> 
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
                     <TouchableOpacity style={[styles.TabButtonLeft ,{backgroundColor: page == 0? '#34C759':'#DCDCDC'}]} onPress={()=> this.infoBtnHandler()}>
@@ -373,16 +389,16 @@ export default class BirdInfo extends Component {
                 </View>
                 
                 {this.state.imageReady && this.state.infoReady? 
-                    (this.getLayout())
-                    // (console.log(this.state.data.name))
-                   
-                        : 
-                    
+                    (
+                        this.getLayout()
+                    )
+                : //else    
                     (
                     <View style={{justifyContent: 'center', alignItems: "center", top: 50}}>
                         <ActivityIndicator size="large" color="#34C759"/>
                         <Text>Loading bird information...</Text>
-                    </View>)}
+                    </View>)
+                }
             </View>
         );
     }

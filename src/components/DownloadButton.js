@@ -1,11 +1,7 @@
 import React from 'react';
 import { Icon } from 'react-native-elements';
-import { TouchableOpacity, StyleSheet, Text } from 'react-native'
-import { FontAwesome5 } from '@expo/vector-icons';
 import { View } from "react-native";
 import Dialog from "react-native-dialog";
-import { render } from 'react-dom';
-
 import MediaHandler from '../DB/MediaHandler';
 
 export default class DownloadButton extends React.Component {

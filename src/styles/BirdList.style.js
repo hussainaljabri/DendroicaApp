@@ -77,7 +77,7 @@ export default StyleSheet.create({
     innerHeaderContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        padding: 10
+        paddingBottom: 10
     },
     actionSheetTitle: {
         color: 'black',

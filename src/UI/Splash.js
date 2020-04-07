@@ -3,10 +3,7 @@ import {View} from 'react-native';
 import OnboardingLogo from '../commons/OnboardingLogo';
 
 class Splash extends Component{
-    state = {}
-
     checkAuth=()=>{
-        // this.props.navigation.navigate('Main');
         setTimeout(()=>{
             this.props.navigation.navigate('Auth');
         }, 100)

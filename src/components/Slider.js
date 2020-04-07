@@ -1,5 +1,5 @@
-import React, { PureComponent } from "react";
-import { StyleSheet, View, Dimensions, Image, TouchableOpacity, Platform, Alert, Button, TextInput} from "react-native";
+import React from "react";
+import { StyleSheet, View, Dimensions, Image, TouchableOpacity, Platform} from "react-native";
 import Carousel, { Pagination } from 'react-native-snap-carousel';
 import { images } from "../constants/images";
 const { width: viewportWidth, height: viewportHeight } = Dimensions.get('window');
@@ -20,7 +20,7 @@ const colors = {
     background2: '#21D4FD'
 };
 const entryBorderRadius = 8;
-const NotFoundImage = [require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg'), require('../../assets/image-not-found.jpg')]
+
 /**
  * this.props.data
  * this.props.onPress
@@ -31,9 +31,6 @@ export default class Slider extends React.PureComponent {
     }
     
     _renderItem =({item, index})=>{
-        // console.log(item);
-        const even = (index + 1) % 2 === 0;
-        // console.log(even);
         return (
             <TouchableOpacity key={'TH'+index} onPress={this.props.onPress} style={styles.slideInnerContainer} activeOpacity={1}>
                 <View key={'VW'+index} style={styles.imageContainer}>
@@ -104,7 +101,6 @@ const styles = StyleSheet.create({
         width: 6,
         height: 6,
         borderRadius: 7,
-        // marginHorizontal: 4
     },
     imageContainer: {
         marginBottom: IS_IOS ? 0 : -1, // Prevent a random Android rendering issue
