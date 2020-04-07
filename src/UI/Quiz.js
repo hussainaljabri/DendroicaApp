@@ -34,15 +34,11 @@ export default class Quiz extends Component{
 
     componentWillMount(){
         let tempData = this.props.navigation.getParam('data', []);
-        // console.log(tempData);
-        let t = this._genRandom(tempData.length,0);
-        // console.log('test: num:'+t + " , data[num]:"+JSON.stringify(tempData[t]));
         this.setState({
             data: tempData,
             dataReady: true,
             total: tempData.length,
         });
-        // console.log('data: '+ tempData[1].name + ' imageUrl:'+ tempData[1].image[0]);
 
         this._generateOptions(tempData);
     }
@@ -75,7 +71,7 @@ export default class Quiz extends Component{
                             //images
 
                             images.push(prefix+item.image_filename);
-                            // console.log("images pushed:"+prefix+item.image_filename);
+
                         });
 
                         this.setState({
@@ -97,7 +93,6 @@ export default class Quiz extends Component{
 
             if(!isAnswerResult && alreadyChosenResult == undefined){
                 temp.push(data[rand]);
-                console.log('Added index: '+ rand + " value: "+ data[rand].name);
             }
             if(temp.length == totalOptions ){
                 break;
@@ -106,16 +101,14 @@ export default class Quiz extends Component{
         
         // shuffle the array.
         temp = this._shuffleArray(temp);
-        console.log('temp length:------- ['+temp.length+']');
         // find answer new index in optionlist
         let newAnswerIndex = temp.indexOf(data[RandomAnswerIndex]);
-        console.log('Answer index: '+ newAnswerIndex + ' value: '+ temp[newAnswerIndex].name);
         this.setState({
             optionslist: temp,
             optionsReady: true,
             answerIndex: newAnswerIndex,
         });
-        console.log('optlist: '+ temp + ' answerIndex: '+ newAnswerIndex);
+
 
     }
 
@@ -132,21 +125,16 @@ export default class Quiz extends Component{
                 topBtnStatus: [false, true],
             });
         }else{
-            console.log('toggleTopBtn');
+
         }
     }
     _renderItem =({item, index})=>{
-        // console.log(item);
-        const even = (index + 1) % 2 === 0;
-        // console.log(even);
         return (
                <TouchableOpacity key={'TH'+index} onPress={this._handleModalButton} style={styles.slideInnerContainer} activeOpacity={1}>
                 <View key={'VW'+index} style={styles.imageContainer}>
                     <Image key={'IM'+index} style={styles.image} source={{uri: prefix+item.image_filename}} />
                 </View>
                 </TouchableOpacity>
-    
-    
             );
     }
     getCarousel=()=>{
@@ -166,9 +154,8 @@ export default class Quiz extends Component{
     /**
      * @TODO Validation
      */
-    
+
     nextHandler=(lastQuest)=>{
-        console.log('selectedIndex: '+ this.state.selectedIndex);
         if(this.state.isPressed){
             if(!(lastQuest)){
                 let tempData = this.state.data; //seenBirds;
@@ -202,7 +189,6 @@ export default class Quiz extends Component{
 
     formQuiz=()=>{
         if(this.state.dataReady){
-            console.log('Render Quiz');
             if(this.state.topBtnStatus[0] && !this.state.topBtnStatus[1]){
                 return(
                     <View>
