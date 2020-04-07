@@ -164,8 +164,9 @@ export default class Quiz extends Component{
     }
 
     /**
-     * @TODO Validation and Next Question button handler.
+     * @TODO Validation
      */
+    
     nextHandler=(lastQuest)=>{
         console.log('selectedIndex: '+ this.state.selectedIndex);
         if(this.state.isPressed){
