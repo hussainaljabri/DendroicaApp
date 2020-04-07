@@ -52,6 +52,7 @@ export default class MyList extends Component {
                             selected: -1,
                             selectedReady: false,
                             searchInput: '',
+                            searchedBirds: [],
                             selectedList: {},
                             birds: [],
                             birdsReady: false,
@@ -79,8 +80,22 @@ export default class MyList extends Component {
         this.ActionSheet.show();
     };
     updateSearch=(text)=>{
+        // Search algo.
+        const newData = this.state.birds.filter(bird =>{
+            const birdData = `${bird.name.toUpperCase()} ${bird.name.split(' ')[0].toUpperCase()} ${bird.scientific_name.toUpperCase()} ${bird.scientific_name.split(' ')[0].toUpperCase()} ${bird.scientific_name.split(' ')[1].toUpperCase()}`;
+            const textData = text.toUpperCase();
+            /**
+             * indexOf to compare both the text and return true if the text is found inside birdData.
+             * If true is returned, then "filter" will keep that data otherwise ignores it.
+             * Having a -1 there is to make sure the returned index is above -1 to return true. indexOf will return -1 if not found.
+             * Array.prototype.indexOf():
+             * The indexOf() method returns the first index at which a given element can be found in the array, or -1 if it is not present.
+             */
+            return birdData.indexOf(textData) > -1;
+        });
         this.setState({
             searchInput: text,
+            searchedBirds: newData,
         });
     }
     handlerClick=(id, name, scientific_name)=>{
@@ -96,7 +111,15 @@ export default class MyList extends Component {
     };
 
     getBirdCards = () =>{
-        return this.state.birds.map((bird) =>{
+
+        
+        let temp=[];
+        if(this.state.searchInput){
+            temp = this.state.searchedBirds;
+        }else{
+            temp = this.state.birds;
+        }
+        return temp.map((bird) =>{
             return (
                 <BirdCard 
                     key={bird.bird_id} 
