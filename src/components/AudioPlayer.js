@@ -5,6 +5,12 @@ import { Audio } from 'expo-av';
 import MediaHandler from '../DB/MediaHandler';
 
 export default class AudioPlayer extends React.Component {
+  constructor(props){
+    super(props);
+
+    this._isMounted = false;
+  }
+
   state = {
     isPlaying: false,
     playbackInstance: null,
@@ -14,6 +20,7 @@ export default class AudioPlayer extends React.Component {
     isLooping: false
   }
   async componentDidMount() {
+    this._isMounted = true;
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
@@ -31,6 +38,9 @@ export default class AudioPlayer extends React.Component {
     }
   }
 
+  componentWillUnmount(){
+    this._isMounted = false;
+  }
   componentWillReceiveProps(newProps){
     //console.log(newProps);
     if(newProps.audioSelected != this.state.currentIndex){
@@ -69,7 +79,7 @@ export default class AudioPlayer extends React.Component {
 
       playbackInstance.setOnPlaybackStatusUpdate(this.OnPlaybackStatusUpdate)
       await playbackInstance.loadAsync(source, status, false)
-      this.setState({playbackInstance})
+      this._isMounted && this.setState({playbackInstance})
     } catch (e) {
       console.log(e)
     }
@@ -85,7 +95,7 @@ export default class AudioPlayer extends React.Component {
     const { isPlaying, playbackInstance } = this.state
     isPlaying ? await playbackInstance.pauseAsync() : await playbackInstance.playAsync()
 
-    this.setState({
+    this._isMounted && this.setState({
       isPlaying: !isPlaying
     })
   }
