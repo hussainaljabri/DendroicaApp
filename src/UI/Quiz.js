@@ -151,10 +151,6 @@ export default class Quiz extends Component{
         }
     }
 
-    /**
-     * @TODO Validation
-     */
-
     nextHandler=(lastQuest)=>{
         if(this.state.isPressed){
             if(!(lastQuest)){

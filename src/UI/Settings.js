@@ -29,11 +29,9 @@ export default class Settings extends Component {
     }
     toggleRate = (value) => {
         this.setState({rateSelect: value})
-        console.log('toggleRate is: ' + value)
     }
     toggleMigration = (value) => {
         this.setState({migrationSelect: value})
-        console.log('toggleMigration is: ' + value)
     }
     showActionSheet = () => {
         this.ActionSheet.show();

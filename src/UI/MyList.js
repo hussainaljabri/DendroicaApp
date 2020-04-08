@@ -16,6 +16,7 @@ export default class MyList extends Component {
         selected: -1,
         selectedReady: false,
         searchInput: '',
+        searchedBirds:[],
         selectedList: {},
         birds: [],
         birdsReady: false,
@@ -79,7 +80,7 @@ export default class MyList extends Component {
     showActionSheet = () => {
         this.ActionSheet.show();
     };
-    updateSearch=(text)=>{
+    searchHandler=(text)=>{
         // Search algo.
         const newData = this.state.birds.filter(bird =>{
             const birdData = `${bird.name.toUpperCase()} ${bird.name.split(' ')[0].toUpperCase()} ${bird.scientific_name.toUpperCase()} ${bird.scientific_name.split(' ')[0].toUpperCase()} ${bird.scientific_name.split(' ')[1].toUpperCase()}`;
@@ -263,7 +264,7 @@ export default class MyList extends Component {
                 <View style={styles.belowHeader}>
                     <SearchBar
                         placeholder="Search..."
-                        onChangeText={this.updateSearch}
+                        onChangeText={this.searchHandler}
                         value={this.state.searchInput}
                         placeholderTextColor="#474747"
                         inputStyle={styles.SearchTextInput} // style the TextInput

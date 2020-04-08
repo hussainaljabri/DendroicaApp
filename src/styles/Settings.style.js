@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
 import common from './common.style.js';
 export default StyleSheet.create({
     statusBar:{

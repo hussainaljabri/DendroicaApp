@@ -50,18 +50,14 @@ export default class BirdList extends Component {
         searchedBirds: [], 
     }
 
-
-
     static navigationOptions = {
         header: null   
     }
-      
-
-
 
     componentWillUnmount(){
         this.unsubscribe();
     }
+    
     componentWillMount(){
     //Subscribe to network state updates
         this.unsubscribe = NetInfo.addEventListener(c => {
@@ -73,8 +69,9 @@ export default class BirdList extends Component {
                 this.props.navigation.navigate('MyList');
             }
         });
-
-
+        
+    };
+    componentDidMount(){
         if(this.state.selected != 0){
             DatabaseModule.getDisplayInfo(
                 this.state.selected,
@@ -88,8 +85,7 @@ export default class BirdList extends Component {
                 }
             );    
         }
-        
-    };
+    }
 
     showActionSheet = () => {
         if(this.state.selectionMode){

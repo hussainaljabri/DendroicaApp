@@ -33,20 +33,20 @@ export default class VocalizationsTab extends PureComponent {
         );
     }
     render() {
-        const {sectionHeaderContainer, connected, bird_id} = this.props;
+        const {sectionHeaderContainer, connected, bird_id, hasUserLeft, audioList} = this.props;
     
         return (
             
             <ScrollView style={{flex: 1}}>
                 <AudioPlayer
-                    audioPlaylist={this.props.audioList}
+                    audioPlaylist={audioList}
                     connected={connected}
                     bird_id={bird_id}
                     audioSelected={this.state.audioSelected}
                     container={{
                         backgroundColor:'#e5e5e5e5'
                     }}
-                    stopPlaying={this.props.hasUserLeft}
+                    stopPlaying={hasUserLeft}
                 />
                 <View style={sectionHeaderContainer}>
                     <Icon 

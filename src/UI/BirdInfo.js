@@ -234,18 +234,6 @@ export default class BirdInfo extends Component {
         </TouchableOpacity>
     );}
 
-    _handlePageZoom({ type, scale }) {
-        if (scale !== 1) {
-          this.setState({ scrollable: false });
-        } else if (scale === 1) {
-          this.setState({ scrollable: true });
-        }
-      }
-
-      _handleDoubleClick() {
-        this.setState({ scrollable: !this.state.scrollable });
-      }
-
     getInfoPage=()=>{
         return (
             <ScrollView >
