@@ -17,7 +17,7 @@ export default class Settings extends Component {
         header: null   
     }
 
-    componentWillMount(){
+    componentDidMount(){
         DatabaseModule.getLists({
             success: (result)=>{
                 this.setState({
