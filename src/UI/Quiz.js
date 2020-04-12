@@ -4,6 +4,8 @@ import {Icon} from 'react-native-elements';
 import DatabaseModule from '../DB/DatabaseModule';
 import Slider from '../components/Slider';
 import styles from '../styles/Quiz.style';
+import NetInfo from '@react-native-community/netinfo';
+import MediaHandler from '../DB/MediaHandler';
 
 const prefix='https://natureinstruct.org';
 
@@ -27,6 +29,7 @@ export default class Quiz extends Component{
         isPressed: false,
         selectedIndex: undefined,
         total: undefined,
+        connected: true,
     }
     static navigationOptions = {
         header: null
@@ -42,7 +45,21 @@ export default class Quiz extends Component{
 
         this._generateOptions(tempData);
     }
-
+    componentWillUnmount(){
+        this.unsubscribe();
+    }
+    componentDidMount(){
+        //Subscribe to network state updates
+        this.unsubscribe = NetInfo.addEventListener(c => {
+            this.setState({connected: c.isConnected});
+            MediaHandler.connectionStateChange(c.isConnected, this.state.birds, (birdProps) => {
+                if(birdProps) this.state.birds = [...birdProps];
+            });
+            if(!c.isConnected){
+                this.props.navigation.navigate('MyList');
+            }
+        });
+    }
     _shuffleArray=(array)=>{
         let i = array.length - 1;
         for (; i > 0; i--) {
@@ -145,6 +162,7 @@ export default class Quiz extends Component{
                 <Slider 
                     data={chosenBird}
                     renderItem={this._renderItem}
+                    connected={this.state.connected}
                 />
                 
             );
@@ -226,7 +244,7 @@ export default class Quiz extends Component{
     render() {
 
         return (
-            <View style={styles.container}>
+            <ScrollView style={styles.container}>
                 {/** Custom Header Starts */}
                 <View style={styles.statusBar}/>
                 <View>
@@ -276,7 +294,7 @@ export default class Quiz extends Component{
         <Text style={[styles.nextBtnText, {color: this.state.isPressed? 'red': 'grey'}]}>{this.state.total==this.state.quizNumber? "Finish": "Next Qustion"}</Text>
                 </TouchableOpacity>
 
-            </View>
+            </ScrollView>
         );
 
 

@@ -363,7 +363,7 @@ export default class BirdInfo extends Component {
         return (
             <View style={styles.container}>
                 <AndroidBackHandler onBackPress={this.onBackButtonPressAndroid}/>
-                <StatusBar barStyle="dark-content" backgroundColor="black" /> 
+                <StatusBar barStyle="light-content"/> 
                 <View style={{ justifyContent:'center', flexDirection:'row', paddingHorizontal: 15}}>
                     <TouchableOpacity style={[styles.TabButtonLeft ,{backgroundColor: page == 0? '#34C759':'#DCDCDC'}]} onPress={()=> this.infoBtnHandler()}>
                         <Text style={[styles.TabText, {opacity:page==0? 1:0.4, color: page==0? 'white': 'black'}]}>Information</Text>

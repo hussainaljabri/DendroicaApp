@@ -265,7 +265,7 @@ export default class BirdList extends Component {
                 )}
 
                 <View style={styles.statusBar}/>
-                <StatusBar barStyle="dark-content" />
+                <StatusBar barStyle="light-content" />
                 <View style={styles.headerContainer}>
                     <View style={styles.innerHeaderContainer}>
                         <Text style={styles.headerText}>Explore |</Text>

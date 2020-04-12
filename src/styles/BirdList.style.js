@@ -9,7 +9,7 @@ export default StyleSheet.create({
         flex: 1
     },
     statusBar: {
-        height: Constants.statusBarHeight,
+        height: Constants.statusBarHeight-10,
         width: '100%',
     },
     btn: {

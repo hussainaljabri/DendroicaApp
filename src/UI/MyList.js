@@ -216,22 +216,26 @@ export default class MyList extends Component {
     }
 
     optionsOnPress = index =>{
-        this.state.selectedList = this.state.lists[1][index-1];
         if(index != 0){
             if(this.state.lists[1][index-1].isDownloaded === "false" && !this.state.connected){
                 // it is not downloaded and offline mode, so display alert.
+                this.state.selectedList = this.state.lists[1][index-1];
                 alert('Please, connect to internet to view this List.');
             }else if(this.state.lists[1][index-1].isDownloaded === "true" && !this.state.connected){
                 // it is downloaded and offline mode, so fine allow it.
-                if(this.state.selected != index){    
+                if(this.state.selected != index){ 
+                    this.state.selectedList = this.state.lists[1][index-1];   
                     this.selectedNewList(index);
                 }
             }else{
                 // it is connected to internet, allow clicking on options normally.
                 if(this.state.selected != index){    
+                    this.state.selectedList = this.state.lists[1][index-1];
                     this.selectedNewList(index);
                 }
             }
+        }else{
+            this.state.selectedList = this.state.lists[1][this.state.selected-1];
         }
     }
 
@@ -239,7 +243,7 @@ export default class MyList extends Component {
         return (
             <View style={styles.container}>
                 <View style={styles.statusBar}/>
-                <StatusBar barStyle="dark-content" />
+                <StatusBar barStyle="light-content" />
                 <View style={styles.headerContainer}>
                     <Text style={styles.header}>MyLists |</Text>
                     <View style={styles.ActionSheetContainer}>

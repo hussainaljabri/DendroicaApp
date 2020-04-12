@@ -83,7 +83,7 @@ export default class Settings extends Component {
         return (
             <ScrollView style={styles.MainContainer}>
                 <View style={styles.statusBar}/>
-                <StatusBar barStyle="dark-content" />
+                <StatusBar barStyle="light-content" />
                 <View style={styles.header}>
                     <Text style={styles.headerText}>Settings |</Text>
                 </View>

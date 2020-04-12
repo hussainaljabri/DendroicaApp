@@ -18,8 +18,7 @@ const entryBorderRadius = 8;
 
 export default StyleSheet.create({
     statusBar: {
-        height: Constants.statusBarHeight,
-        backgroundColor: 'black',
+        height: Constants.statusBarHeight-10,
         width: '100%',
     },
 

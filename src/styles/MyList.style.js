@@ -12,7 +12,7 @@ export default StyleSheet.create({
         justifyContent:"space-between"
     },
     statusBar: {
-        height: Constants.statusBarHeight,
+        height: Constants.statusBarHeight-10,
         width: '100%',
         // backgroundColor: 'black',
     },
