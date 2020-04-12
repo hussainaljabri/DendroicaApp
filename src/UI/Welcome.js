@@ -18,13 +18,11 @@ class Welcome extends Component{
         isLoading: false,
     }
 
-    componentWillMount(){
-        Authentication.getNewToken({
-            success:()=> this.props.navigation.navigate('Main')
-        });
-    }
-
     componentDidMount(){
+        Authentication.getNewToken({
+            success:()=> this.props.navigation.navigate('Main'),
+            error: ()=>{}
+        });
          // to start both animations at same time
         Animated.parallel([this.positionAnim(), this.opacityAnim(), this.btnpositionAnim()]).start();
     }
@@ -55,7 +53,6 @@ class Welcome extends Component{
 
     onLoginPress = () =>{
         const {username, password} = this.state;
-        console.log('username: ', username, ' password', password);
         if(!(username==='') || !(password==='')){
             try{
                 //turn on the Login ActivityIndicator

@@ -56,7 +56,7 @@ export default StyleSheet.create({
         textAlign: "center"
     },
     statusBar: {
-        height: Constants.statusBarHeight,
+        height: Constants.statusBarHeight-10,
     },
     optionsScroll: {
         paddingHorizontal: 15,

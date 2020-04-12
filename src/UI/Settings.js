@@ -17,7 +17,7 @@ export default class Settings extends Component {
         header: null   
     }
 
-    componentWillMount(){
+    componentDidMount(){
         DatabaseModule.getLists({
             success: (result)=>{
                 this.setState({
@@ -29,11 +29,9 @@ export default class Settings extends Component {
     }
     toggleRate = (value) => {
         this.setState({rateSelect: value})
-        console.log('toggleRate is: ' + value)
     }
     toggleMigration = (value) => {
         this.setState({migrationSelect: value})
-        console.log('toggleMigration is: ' + value)
     }
     showActionSheet = () => {
         this.ActionSheet.show();
@@ -85,7 +83,7 @@ export default class Settings extends Component {
         return (
             <ScrollView style={styles.MainContainer}>
                 <View style={styles.statusBar}/>
-                <StatusBar barStyle="dark-content" />
+                <StatusBar barStyle="light-content" />
                 <View style={styles.header}>
                     <Text style={styles.headerText}>Settings |</Text>
                 </View>
