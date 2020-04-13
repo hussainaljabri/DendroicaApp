@@ -30,19 +30,22 @@ var userLogin = function(username, password, onFinishedCallback) {
 var getNewToken = function(callbacks){
     DatabaseModule.getCredentials({
         success: (credentials)=>{
-            fetch('https://www.natureinstruct.org/api/authenticate?username=' + credentials.username + '&password=' + credentials.password)
-            .then((response) => response.json())
-            .then((responseJson) => {
-                if (responseJson.errorCode) {
-                    console.error(responseJson.errorMsg);
-                    return;
-                }
-                userAuthToken = responseJson.token;
-                callbacks.success();
-            })
-            .catch((error) => {
-                console.error(error)
-            });
+            if(credentials){
+                fetch('https://www.natureinstruct.org/api/authenticate?username=' + credentials.username + '&password=' + credentials.password)
+                .then((response) => response.json())
+                .then((responseJson) => {
+                    if (responseJson.errorCode) {
+                        console.error(responseJson.errorMsg);
+                        return;
+                    }
+                    userAuthToken = responseJson.token;
+                    callbacks.success();
+                })
+                .catch((error) => {
+                    console.error(error);
+                    callbacks.error();
+                });
+            }
         },
         error: (err) =>{
             callbacks.error();
