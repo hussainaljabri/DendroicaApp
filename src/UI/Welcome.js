@@ -53,7 +53,7 @@ class Welcome extends Component{
 
     onLoginPress = () =>{
         const {username, password} = this.state;
-        if(!(username==='') || !(password==='')){
+        if(!(username==='') && !(password==='')){
             try{
                 //turn on the Login ActivityIndicator
                 this.setState({isLoading: true});
